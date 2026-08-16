@@ -27,10 +27,11 @@ Celdas muestran actividad + funcionario responsable
 **8.Estadisticas:** Rango de fechas para recursos → categorías reservadas + cantidad + gráfico de barras
 Rango de fechas para actividades → semanas + cantidad de actividades + gráfico de barras
 
-═══════════════════════════════════════════
-CAPA MODELO (entidades / dominio)
-═══════════════════════════════════════════
+## Arquitectura por capas
 
+### Capa Modelo (entidades / dominio)
+
+```
 Usuario (abstracta)
  ├─ id: String
  ├─ clave: String
@@ -38,11 +39,11 @@ Usuario (abstracta)
  ├─ cambiarClave(claveActual, claveNueva)
  └─ validar()
 
-  ├── Administrador extends Usuario
-  └── Funcionario extends Usuario
-       ├─ nombre: String
-       ├─ telefono: String
-       └─ (relación 1..N con Reserva)
+ ├── Administrador extends Usuario
+ └── Funcionario extends Usuario
+      ├─ nombre: String
+      ├─ telefono: String
+      └─ (relación 1..N con Reserva)
 
 CategoriaRecurso
  ├─ id: String (autogenerado, ej. CAT-000001)
@@ -65,11 +66,11 @@ Reserva
  ├─ estado: EstadoReserva {ACTIVA, CANCELADA}
  ├─ recursosAsignados: List<Recurso>
  └─ cancelar()
+```
 
-═══════════════════════════════════════════
-CAPA PERSISTENCIA / DAO (acceso a XML)
-═══════════════════════════════════════════
+### Capa Persistencia / DAO (acceso a XML)
 
+```
 DAOGenerico<T> (interfaz)
  ├─ guardar(T objeto)
  ├─ buscarPorId(String id)
@@ -77,7 +78,7 @@ DAOGenerico<T> (interfaz)
  ├─ modificar(T objeto)
  └─ eliminar(String id)
 
- ├── UsuarioDAO / FuncionarioDAO
+ ├── FuncionarioDAO
  ├── CategoriaRecursoDAO
  ├── RecursoDAO
  └── ReservaDAO
@@ -85,78 +86,5 @@ DAOGenerico<T> (interfaz)
 XMLManager (utilitaria)
  ├─ leerXML(String archivo): Document
  ├─ escribirXML(Document doc, String archivo)
- └─ (usa JAXB o DOM para (de)serializar cada entidad)
-
-═══════════════════════════════════════════
-CAPA SERVICIOS / LÓGICA DE NEGOCIO
-═══════════════════════════════════════════
-
-FuncionarioService
- ├─ buscarPorIdONombre(...)
- ├─ crear/modificar/eliminar(Funcionario f)
- └─ (usa FuncionarioDAO)
-
-CategoriaService
- ├─ buscarPorDescripcion(...)
- └─ CRUD (usa CategoriaRecursoDAO)
-
-RecursoService
- ├─ filtrarPorCategoria(CategoriaRecurso c)
- └─ CRUD (usa RecursoDAO)
-
-ReservaService
- ├─ crearReserva(Reserva r): ResultadoReserva
- │    → verifica disponibilidad por categoría
- │    → asigna primer recurso libre de cada categoría
- ├─ cancelarReserva(String idReserva)
- ├─ listarReservasFuncionario(Funcionario f)
- └─ verificarDisponibilidad(categoria, fecha, horaInicio, horaFin)
-
-CalendarizacionService
- ├─ obtenerMatrizRecursos(fecha, categoria)
- └─ obtenerMatrizActividades(semanaReferencia)
-
-EstadisticasService
- ├─ estadisticasRecursos(desde, hasta): List<CategoriaCantidad>
- └─ estadisticasActividades(desde, hasta): List<SemanaCantidad>
-
-IAService (para extracción de datos con LLM)
- └─ extraerDatosReserva(String fraseNaturalLenguaje): Reserva (parcial)
-
-ReporteService
- └─ generarPDF(List<?> datos, String tipoReporte): File
-
-═══════════════════════════════════════════
-CAPA CONTROLADOR (MVC)
-═══════════════════════════════════════════
-
-LoginController        → usa AutenticacionService
-FuncionarioController  → usa FuncionarioService
-CategoriaController    → usa CategoriaService
-RecursoController      → usa RecursoService
-ReservaController      → usa ReservaService, IAService
-CalendarizacionController → usa CalendarizacionService
-EstadisticasController → usa EstadisticasService
-
-═══════════════════════════════════════════
-CAPA VISTA (Swing/JavaFX)
-═══════════════════════════════════════════
-
-VentanaLogin
-VentanaPrincipal (con Tabs: Reservas, Funcionarios, Categorias,
-                  Recursos, Calendarizacion, Actividades, Estadisticas)
-PanelReservas
-PanelFuncionarios     (solo admin)
-PanelCategorias       (solo admin)
-PanelRecursos         (solo admin)
-PanelCalendarizacion
-PanelActividades
-PanelEstadisticas
-
-
-
-
-
-
-
-
+ └─ usa JAXB o DOM para (de)serializar cada entidad
+```
