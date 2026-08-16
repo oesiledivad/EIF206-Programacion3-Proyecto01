@@ -7,10 +7,15 @@
 - Interfaz grafica, formato de archivos: XML, arquitectura por capaz, la interfaz debe ajustarse al (MVC), dos tipos de usuario: administrador y funcionario cada uno  con id, clave y rol.
 ## Funcionalidades:
 Todas deben incluir la opcion de *generar reporte PDF*.
+
 **1.Log In:** Los usuarios podran ingresar al sistema usando su id y clave. Pueden cambiar su clave en cualquier momento.
+
 **2.Reservas:** Un funcionario podra ver sus reservas, crear o cancelar reservas futuras. Solo lo puede hacer el funcionario.
+
 **3.Lista de Funcionarios:** Busqueda de funcionarios por id o nombre, inclusion, consulta, modificacion y borrado de funcionarios. De cada funcionario se requiere: informacion como usuario, nombre y telefono. Al agregar su clave y id quedaran, luego el usuario puede cambiarla. Para cambiarla solo lo puede hacer un administrador.
+
 **4.Lista de categorias de recursos:** Buscar categorias por descripcion, inclusion, consulta, modificacion y borrado. Se requiere id y descripcion.
+
 **5.Lista de Recursos:** Filtrar por categoria
 
 
