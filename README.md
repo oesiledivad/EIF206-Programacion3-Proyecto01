@@ -16,7 +16,142 @@ Todas deben incluir la opcion de *generar reporte PDF*.
 
 **4.Lista de categorias de recursos:** Buscar categorias por descripcion, inclusion, consulta, modificacion y borrado. Se requiere id y descripcion.
 
-**5.Lista de Recursos:** Filtrar por categoria
+**5.Lista de Recursos:** Filtrar por categoria, CRUD completo, cada recurso: id/número de activo, categoría (FK), descripción
+
+**6.Calendarizacion de Recursos:** Selecciona fecha + categoría → matriz (filas = horas, columnas = recursos de esa categoría)
+Celdas muestran si está reservado (actividad + funcionario o administrador)
+
+**7.Programacion de actividades:** Para una semana → matriz (filas = horas, columnas = días de la semana)
+Celdas muestran actividad + funcionario responsable
+
+**8.Estadisticas:** Rango de fechas para recursos → categorías reservadas + cantidad + gráfico de barras
+Rango de fechas para actividades → semanas + cantidad de actividades + gráfico de barras
+
+═══════════════════════════════════════════
+CAPA MODELO (entidades / dominio)
+═══════════════════════════════════════════
+
+Usuario (abstracta)
+ ├─ id: String
+ ├─ clave: String
+ ├─ rol: RolEnum {ADMIN, FUNCIONARIO}
+ ├─ cambiarClave(claveActual, claveNueva)
+ └─ validar()
+
+  ├── Administrador extends Usuario
+  └── Funcionario extends Usuario
+       ├─ nombre: String
+       ├─ telefono: String
+       └─ (relación 1..N con Reserva)
+
+CategoriaRecurso
+ ├─ id: String (autogenerado, ej. CAT-000001)
+ ├─ descripcion: String
+ └─ getters/setters + validar()
+
+Recurso
+ ├─ id: String (número de activo)
+ ├─ categoria: CategoriaRecurso
+ ├─ descripcion: String
+ └─ validar()
+
+Reserva
+ ├─ id: String (ej. RES-000001)
+ ├─ funcionario: Funcionario
+ ├─ actividad: String
+ ├─ fecha: LocalDate
+ ├─ horaInicio: LocalTime
+ ├─ horaFin: LocalTime
+ ├─ estado: EstadoReserva {ACTIVA, CANCELADA}
+ ├─ recursosAsignados: List<Recurso>
+ └─ cancelar()
+
+═══════════════════════════════════════════
+CAPA PERSISTENCIA / DAO (acceso a XML)
+═══════════════════════════════════════════
+
+DAOGenerico<T> (interfaz)
+ ├─ guardar(T objeto)
+ ├─ buscarPorId(String id)
+ ├─ listarTodos(): List<T>
+ ├─ modificar(T objeto)
+ └─ eliminar(String id)
+
+ ├── UsuarioDAO / FuncionarioDAO
+ ├── CategoriaRecursoDAO
+ ├── RecursoDAO
+ └── ReservaDAO
+
+XMLManager (utilitaria)
+ ├─ leerXML(String archivo): Document
+ ├─ escribirXML(Document doc, String archivo)
+ └─ (usa JAXB o DOM para (de)serializar cada entidad)
+
+═══════════════════════════════════════════
+CAPA SERVICIOS / LÓGICA DE NEGOCIO
+═══════════════════════════════════════════
+
+FuncionarioService
+ ├─ buscarPorIdONombre(...)
+ ├─ crear/modificar/eliminar(Funcionario f)
+ └─ (usa FuncionarioDAO)
+
+CategoriaService
+ ├─ buscarPorDescripcion(...)
+ └─ CRUD (usa CategoriaRecursoDAO)
+
+RecursoService
+ ├─ filtrarPorCategoria(CategoriaRecurso c)
+ └─ CRUD (usa RecursoDAO)
+
+ReservaService
+ ├─ crearReserva(Reserva r): ResultadoReserva
+ │    → verifica disponibilidad por categoría
+ │    → asigna primer recurso libre de cada categoría
+ ├─ cancelarReserva(String idReserva)
+ ├─ listarReservasFuncionario(Funcionario f)
+ └─ verificarDisponibilidad(categoria, fecha, horaInicio, horaFin)
+
+CalendarizacionService
+ ├─ obtenerMatrizRecursos(fecha, categoria)
+ └─ obtenerMatrizActividades(semanaReferencia)
+
+EstadisticasService
+ ├─ estadisticasRecursos(desde, hasta): List<CategoriaCantidad>
+ └─ estadisticasActividades(desde, hasta): List<SemanaCantidad>
+
+IAService (para extracción de datos con LLM)
+ └─ extraerDatosReserva(String fraseNaturalLenguaje): Reserva (parcial)
+
+ReporteService
+ └─ generarPDF(List<?> datos, String tipoReporte): File
+
+═══════════════════════════════════════════
+CAPA CONTROLADOR (MVC)
+═══════════════════════════════════════════
+
+LoginController        → usa AutenticacionService
+FuncionarioController  → usa FuncionarioService
+CategoriaController    → usa CategoriaService
+RecursoController      → usa RecursoService
+ReservaController      → usa ReservaService, IAService
+CalendarizacionController → usa CalendarizacionService
+EstadisticasController → usa EstadisticasService
+
+═══════════════════════════════════════════
+CAPA VISTA (Swing/JavaFX)
+═══════════════════════════════════════════
+
+VentanaLogin
+VentanaPrincipal (con Tabs: Reservas, Funcionarios, Categorias,
+                  Recursos, Calendarizacion, Actividades, Estadisticas)
+PanelReservas
+PanelFuncionarios     (solo admin)
+PanelCategorias       (solo admin)
+PanelRecursos         (solo admin)
+PanelCalendarizacion
+PanelActividades
+PanelEstadisticas
 
 
 
