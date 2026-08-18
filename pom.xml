@@ -10,7 +10,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <junit.version>5.12.1</junit.version>  </properties>
+    <junit.version>5.12.1</junit.version>
+  </properties>
 
   <dependencies>
     <dependency>
@@ -38,6 +39,16 @@
     <artifactId>ikonli-javafx</artifactId>
     <version>12.3.1</version>
   </dependency>
+    <dependency>
+      <groupId>org.kordamp.ikonli</groupId>
+      <artifactId>ikonli-fontawesome-pack</artifactId>
+      <version>12.3.1</version>
+    </dependency>
+    <dependency>
+      <groupId>io.github.mkpaz</groupId>
+      <artifactId>atlantafx-base</artifactId>
+      <version>2.0.0</version>
+    </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>

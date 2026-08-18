@@ -3,7 +3,10 @@ module EIF.Programacion.Proyecto {
     requires javafx.controls;
     requires javafx.fxml;
     requires javafx.graphics;
+    requires atlantafx.base;
 
-    opens una.proyecto to javafx.fxml, javafx.graphics;
-    exports una.proyecto;
+    opens una.proyecto.app to javafx.fxml, javafx.graphics;
+    opens una.proyecto.controller to javafx.fxml;
+
+    exports una.proyecto.app;
 }
