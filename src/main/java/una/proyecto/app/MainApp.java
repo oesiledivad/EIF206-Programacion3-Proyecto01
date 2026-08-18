@@ -12,18 +12,14 @@ public class MainApp extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-
     @Override
     public void start(Stage primaryStage) throws Exception {
         FXMLLoader loader = new FXMLLoader(
                 getClass().getResource("/una/proyecto/ui/login-view.fxml")
         );
-
         Parent root = loader.load();
-
         Scene scene = new Scene(root);
         //Application.setUserAgentStylesheet(new Prime().getUserAgentStylesheet());
-
         primaryStage.setScene(scene);
         primaryStage.setTitle("Sistema de Reserva");
         primaryStage.setResizable(false);
