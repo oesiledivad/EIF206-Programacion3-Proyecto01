@@ -1,7 +1,5 @@
 package una.proyecto.app;
 
-import atlantafx.base.theme.NordLight;
-import atlantafx.base.theme.PrimerLight;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -18,11 +16,10 @@ public class MainApp extends Application {
         FXMLLoader loader = new FXMLLoader(
                 getClass().getResource("/una/proyecto/ui/login-view.fxml")
         );
-
         Parent root = loader.load();
 
         Scene scene = new Scene(root);
-        //Application.setUserAgentStylesheet(new Prime().getUserAgentStylesheet());
+        scene.getStylesheets().add(getClass().getResource("/una/proyecto/css/style.css").toExternalForm());
 
         primaryStage.setScene(scene);
         primaryStage.setTitle("Sistema de Reserva");

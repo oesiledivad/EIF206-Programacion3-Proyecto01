@@ -3,6 +3,7 @@ package una.proyecto.controller;
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -19,12 +20,27 @@ public class LoginController {
     public Button btnLogin;
     @FXML
     public Button btnSalir;
+    @FXML
+    public Button btnDarkMode;
 
     @FXML
     public void initialize() {
         lblLogin.setVisible(false);
         btnLogin.setOnAction(event -> handleLoginButton());
         btnSalir.setOnAction(event -> handleExitButton());
+        btnDarkMode.setOnAction(event -> toggleDarkMode());
+    }
+
+    private void toggleDarkMode() {
+        Parent root = btnDarkMode.getScene().getRoot();
+
+        if (root.getStyleClass().contains("dark-mode")) {
+            root.getStyleClass().remove("dark-mode");
+            btnDarkMode.setText("Modo oscuro");
+        } else {
+            root.getStyleClass().add("dark-mode");
+            btnDarkMode.setText("Modo claro");
+        }
     }
 
     private void handleLoginButton( ) {
