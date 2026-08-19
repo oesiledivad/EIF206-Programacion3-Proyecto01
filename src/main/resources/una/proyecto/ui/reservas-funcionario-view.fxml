@@ -16,29 +16,28 @@
 <?import javafx.scene.shape.Line?>
 <?import javafx.scene.text.Font?>
 
-
 <Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="708.0" prefWidth="849.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <BorderPane layoutX="3.0" layoutY="-5.0" prefHeight="594.0" prefWidth="798.0">
          <left>
-            <VBox prefHeight="594.0" prefWidth="118.0" BorderPane.alignment="CENTER">
+            <VBox prefHeight="550.0" prefWidth="118.0" BorderPane.alignment="CENTER">
                <children>
-                  <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="29.0" text="☰">
+                  <Button fx:id="btnpanellateral" mnemonicParsing="false" prefHeight="26.0" prefWidth="29.0" text="☰">
                      <VBox.margin>
                         <Insets top="10.0" />
                      </VBox.margin>
                   </Button>
-                  <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="119.0" text="Calenderizacion">
+                  <Button fx:id="btncalenderizacion" mnemonicParsing="false" prefHeight="26.0" prefWidth="119.0" text="Calenderizacion">
                      <VBox.margin>
                         <Insets bottom="40.0" top="100.0" />
                      </VBox.margin>
                   </Button>
-                  <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="117.0" text="Actividades">
+                  <Button fx:id="btnactividades" mnemonicParsing="false" prefHeight="26.0" prefWidth="117.0" text="Actividades">
                      <VBox.margin>
                         <Insets bottom="30.0" />
                      </VBox.margin>
                   </Button>
-                  <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="119.0" text="Estadisticas">
+                  <Button fx:id="btnestadisticas" mnemonicParsing="false" prefHeight="26.0" prefWidth="119.0" text="Estadisticas">
                      <VBox.margin>
                         <Insets />
                      </VBox.margin>
@@ -108,7 +107,7 @@
                                     <Label layoutX="14.0" layoutY="5.0" prefHeight="17.0" prefWidth="80.0" text="Hora inicio" />
                                  </children>
                               </Pane>
-                              <ChoiceBox fx:id="choiceboxhotainicio" prefWidth="150.0">
+                              <ChoiceBox fx:id="choiceboxhorainicio" prefWidth="150.0">
                                  <HBox.margin>
                                     <Insets top="20.0" />
                                  </HBox.margin>
@@ -138,7 +137,7 @@
                   <Pane prefHeight="42.0" prefWidth="633.0">
                      <children>
                         <Button fx:id="btnlimpiar" layoutX="520.0" layoutY="2.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="146.0" text="Limpiar " />
-                        <Button fx:id="btncancelarreserva" layoutX="305.0" layoutY="2.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="183.0" text="Cancelar Reserva de seleecion" />
+                        <Button fx:id="btncancelarreserva" layoutX="305.0" layoutY="2.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="183.0" text="Cancelar Reserva de seleccion" />
                         <Button fx:id="btnreserva" layoutX="125.0" layoutY="2.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="142.0" text="Reservar" />
                      </children>
                   </Pane>
@@ -154,7 +153,7 @@
             </VBox>
          </center>
       </BorderPane>
-      <TableView layoutX="241.0" layoutY="476.0" prefHeight="194.0" prefWidth="549.0">
+      <TableView fx:id="tableviewmisreservas" layoutX="241.0" layoutY="476.0" prefHeight="194.0" prefWidth="549.0">
         <columns>
           <TableColumn prefWidth="87.99998474121094" text="ID" />
           <TableColumn prefWidth="95.20001220703125" text="Actividad" />
