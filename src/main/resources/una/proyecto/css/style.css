@@ -1,3 +1,1488 @@
-.border-pane {
-    #-fx-background-color: #F54927,
+/*
+   Versión 1.0
+*/
+
+.root {
+    /*  TIPOGRAFÍA  */
+    -fx-font-family: "Segoe UI", "Inter", "Roboto", -fx-system-font, sans-serif;
+    -fx-font-size: 14px;
+
+    /*  COLORES BASE  */
+    -fx-bg-primary: #f8fafc;
+    -fx-bg-secondary: #ffffff;
+    -fx-bg-tertiary: #f1f5f9;
+    -fx-bg-quaternary: #e2e8f0;
+
+    -fx-text-primary: #0f172a;
+    -fx-text-secondary: #475569;
+    -fx-text-muted: #94a3b8;
+    -fx-text-inverse: #ffffff;
+
+    -fx-accent-primary: #2563eb;
+    -fx-accent-hover: #1d4ed8;
+    -fx-accent-light: #dbeafe;
+    -fx-accent-dark: #1e3a8a;
+
+    -fx-border-primary: #e2e8f0;
+    -fx-border-focus: #2563eb;
+
+    -fx-success: #16a34a;
+    -fx-success-light: #dcfce7;
+    -fx-warning: #d97706;
+    -fx-warning-light: #fef3c7;
+    -fx-danger: #dc2626;
+    -fx-danger-light: #fee2e2;
+    -fx-info: #2563eb;
+    -fx-info-light: #dbeafe;
+
+    -fx-input-bg: #ffffff;
+    -fx-input-border: #d1d5db;
+
+    /*  SOMBRAS  */
+    -fx-shadow-color: rgba(15, 23, 42, 0.06);
+    -fx-shadow-elevated: rgba(15, 23, 42, 0.12);
+
+    /*  ESPACIADO  */
+    -fx-padding-sm: 6px;
+    -fx-padding-md: 10px;
+    -fx-padding-lg: 14px;
+    -fx-padding-xl: 20px;
+
+    /*  RADIO  */
+    -fx-radius-sm: 4px;
+    -fx-radius-md: 8px;
+    -fx-radius-lg: 12px;
+    -fx-radius-xl: 16px;
 }
+
+/*
+   MODO OSCURO
+    */
+
+.root.dark-mode {
+    -fx-bg-primary: #0f172a;
+    -fx-bg-secondary: #1e293b;
+    -fx-bg-tertiary: #334155;
+    -fx-bg-quaternary: #475569;
+
+    -fx-text-primary: #f1f5f9;
+    -fx-text-secondary: #cbd5e1;
+    -fx-text-muted: #94a3b8;
+    -fx-text-inverse: #0f172a;
+
+    -fx-accent-primary: #3b82f6;
+    -fx-accent-hover: #60a5fa;
+    -fx-accent-light: #1e3a8a;
+    -fx-accent-dark: #1e40af;
+
+    -fx-border-primary: #475569;
+    -fx-border-focus: #3b82f6;
+
+    -fx-success: #22c55e;
+    -fx-success-light: #14532d;
+    -fx-warning: #f59e0b;
+    -fx-warning-light: #451a03;
+    -fx-danger: #ef4444;
+    -fx-danger-light: #7f1d1d;
+    -fx-info: #3b82f6;
+    -fx-info-light: #1e3a8a;
+
+    -fx-input-bg: #1e293b;
+    -fx-input-border: #475569;
+
+    -fx-shadow-color: rgba(0, 0, 0, 0.35);
+    -fx-shadow-elevated: rgba(0, 0, 0, 0.45);
+}
+
+/*
+   CONTENEDORES
+    */
+
+.background-primary { -fx-background-color: -fx-bg-primary; }
+.background-secondary { -fx-background-color: -fx-bg-secondary; }
+.background-tertiary { -fx-background-color: -fx-bg-tertiary; }
+
+.card {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-background-radius: 12px;
+    -fx-border-color: -fx-border-primary;
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, -fx-shadow-color, 8, 0.05, 0, 2);
+}
+
+.card-elevated {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-background-radius: 12px;
+    -fx-effect: dropshadow(gaussian, -fx-shadow-elevated, 16, 0.08, 0, 4);
+}
+
+.card-hover {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-background-radius: 12px;
+    -fx-border-color: -fx-border-primary;
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, -fx-shadow-color, 8, 0.05, 0, 2);
+}
+
+.card-hover:hover {
+    -fx-effect: dropshadow(gaussian, -fx-shadow-elevated, 16, 0.08, 0, 4);
+    -fx-border-color: -fx-border-focus;
+}
+
+/*
+   TEXTOS
+    */
+
+/*
+   LABELS
+    */
+
+.label {
+    -fx-text-fill: -fx-text-primary;
+}
+
+Label.text-primary {
+    -fx-text-fill: -fx-text-primary;
+}
+
+Label.text-secondary {
+    -fx-text-fill: -fx-text-secondary;
+}
+
+Label.text-muted {
+    -fx-text-fill: -fx-text-muted;
+}
+
+Label.text-inverse {
+    -fx-text-fill: -fx-text-inverse;
+}
+
+Label.text-success {
+    -fx-text-fill: -fx-success;
+}
+
+Label.text-danger {
+    -fx-text-fill: -fx-danger;
+}
+
+Label.text-warning {
+    -fx-text-fill: -fx-warning;
+}
+
+Label.text-accent {
+    -fx-text-fill: -fx-accent-primary;
+}
+
+
+/*
+   TEXT NODES
+    */
+
+Text.text-primary {
+    -fx-fill: -fx-text-primary;
+}
+
+Text.text-secondary {
+    -fx-fill: -fx-text-secondary;
+}
+
+Text.text-muted {
+    -fx-fill: -fx-text-muted;
+}
+
+Text.text-inverse {
+    -fx-fill: -fx-text-inverse;
+}
+
+Text.text-success {
+    -fx-fill: -fx-success;
+}
+
+Text.text-danger {
+    -fx-fill: -fx-danger;
+}
+
+Text.text-warning {
+    -fx-fill: -fx-warning;
+}
+
+Text.text-accent {
+    -fx-fill: -fx-accent-primary;
+}
+
+
+/*
+   TÍTULOS
+    */
+
+/* Label */
+Label.title {
+    -fx-font-size: 28px;
+    -fx-font-weight: 700;
+    -fx-text-fill: -fx-text-primary;
+}
+
+Label.subtitle {
+    -fx-font-size: 16px;
+    -fx-font-weight: 400;
+    -fx-text-fill: -fx-text-secondary;
+}
+
+Label.section-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -fx-text-primary;
+}
+
+Label.heading-3 {
+    -fx-font-size: 18px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -fx-text-primary;
+}
+
+
+/* Text */
+Text.title {
+    -fx-font-size: 28px;
+    -fx-font-weight: 700;
+    -fx-fill: -fx-text-primary;
+}
+
+Text.subtitle {
+    -fx-font-size: 16px;
+    -fx-font-weight: 400;
+    -fx-fill: -fx-text-secondary;
+}
+
+Text.section-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: 600;
+    -fx-fill: -fx-text-primary;
+}
+
+Text.heading-3 {
+    -fx-font-size: 18px;
+    -fx-font-weight: 600;
+    -fx-fill: -fx-text-primary;
+}
+
+
+/*
+   TEXTO GENERAL
+    */
+
+.text-small {
+    -fx-font-size: 12px;
+    -fx-text-fill: -fx-text-secondary;
+}
+
+.text-xs {
+    -fx-font-size: 11px;
+    -fx-text-fill: -fx-text-muted;
+}
+
+.text-body {
+    -fx-font-size: 14px;
+    -fx-text-fill: -fx-text-primary;
+}
+
+
+/*
+   BOTONES
+    */
+
+.button {
+    -fx-font-family: "Segoe UI", "Inter", sans-serif;
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+
+    -fx-padding: 8px 20px;
+    -fx-cursor: hand;
+
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.button:focused {
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+/*  PRIMARIO  */
+.btn-primary {
+    -fx-background-color: -fx-accent-primary;
+    -fx-text-fill: white;
+    -fx-border-color: transparent;
+}
+
+.btn-primary:hover {
+    -fx-background-color: -fx-accent-hover;
+    -fx-effect: dropshadow(gaussian, rgba(37, 99, 235, 0.3), 12, 0.15, 0, 4);
+}
+
+.btn-primary:pressed {
+    -fx-background-color: derive(-fx-accent-primary, -15%);
+    -fx-effect: none;
+}
+
+.btn-primary:disabled {
+    -fx-opacity: 0.5;
+    -fx-cursor: default;
+}
+
+/*  SECUNDARIO  */
+.btn-secondary {
+    -fx-background-color: transparent;
+    -fx-text-fill: -fx-text-primary;
+    -fx-border-color: -fx-border-primary;
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 8px;
+}
+
+.btn-secondary:hover {
+    -fx-background-color: -fx-bg-tertiary;
+    -fx-border-color: -fx-text-secondary;
+}
+
+.btn-secondary:pressed {
+    -fx-background-color: -fx-bg-quaternary;
+}
+
+/*  GHOST  */
+.btn-ghost {
+    -fx-background-color: transparent;
+    -fx-text-fill: -fx-text-secondary;
+    -fx-border-color: transparent;
+}
+
+.btn-ghost:hover {
+    -fx-background-color: -fx-bg-tertiary;
+    -fx-text-fill: -fx-text-primary;
+}
+
+.btn-ghost:pressed {
+    -fx-background-color: -fx-bg-quaternary;
+}
+
+/*  PELIGRO  */
+.btn-danger {
+    -fx-background-color: -fx-danger;
+    -fx-text-fill: white;
+    -fx-border-color: transparent;
+}
+
+.btn-danger:hover {
+    -fx-background-color: derive(-fx-danger, -15%);
+    -fx-effect: dropshadow(gaussian, rgba(220, 38, 38, 0.3), 12, 0.15, 0, 4);
+}
+
+.btn-danger:pressed {
+    -fx-background-color: derive(-fx-danger, -25%);
+    -fx-effect: none;
+}
+
+/*  ÉXITO  */
+.btn-success {
+    -fx-background-color: -fx-success;
+    -fx-text-fill: white;
+    -fx-border-color: transparent;
+}
+
+.btn-success:hover {
+    -fx-background-color: derive(-fx-success, -15%);
+    -fx-effect: dropshadow(gaussian, rgba(22, 163, 74, 0.3), 12, 0.15, 0, 4);
+}
+
+/*  ADVERTENCIA  */
+.btn-warning {
+    -fx-background-color: -fx-warning;
+    -fx-text-fill: white;
+    -fx-border-color: transparent;
+}
+
+.btn-warning:hover {
+    -fx-background-color: derive(-fx-warning, -15%);
+    -fx-effect: dropshadow(gaussian, rgba(217, 119, 6, 0.3), 12, 0.15, 0, 4);
+}
+
+/*  TAMAÑOS  */
+.btn-small {
+    -fx-font-size: 12px;
+    -fx-padding: 5px 14px;
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
+}
+
+.btn-large {
+    -fx-font-size: 16px;
+    -fx-padding: 12px 28px;
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
+}
+
+.btn-icon {
+    -fx-padding: 8px 12px;
+    -fx-min-width: 40px;
+    -fx-min-height: 40px;
+}
+
+.btn-icon .ikonli-font-icon {
+    -fx-font-size: 20px;
+}
+
+/*  BOTÓN TIPO LINK  */
+.btn-link {
+    -fx-background-color: transparent;
+    -fx-text-fill: -fx-accent-primary;
+    -fx-border-color: transparent;
+    -fx-padding: 4px 8px;
+}
+
+.btn-link:hover {
+    -fx-text-fill: -fx-accent-hover;
+    -fx-underline: true;
+}
+
+/*
+   INPUTS
+    */
+
+.text-field, .password-field, .text-area {
+    -fx-background-color: -fx-input-bg;
+    -fx-text-fill: -fx-text-primary;
+    -fx-prompt-text-fill: -fx-text-muted;
+
+    -fx-border-color: -fx-input-border;
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 8px;
+
+    -fx-background-radius: 8px;
+
+    -fx-padding: 10px 14px;
+
+    -fx-font-size: 14px;
+    -fx-font-family: "Segoe UI", "Inter", sans-serif;
+}
+
+.text-field:hover, .password-field:hover, .text-area:hover {
+    -fx-border-color: -fx-text-muted;
+}
+
+.text-field:focused, .password-field:focused, .text-area:focused {
+    -fx-border-color: -fx-border-focus;
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(gaussian, rgba(37, 99, 235, 0.15), 8, 0.1, 0, 2);
+}
+
+.text-field:disabled, .password-field:disabled, .text-area:disabled {
+    -fx-opacity: 0.6;
+    -fx-cursor: default;
+}
+
+.text-area {
+    -fx-padding: 8px;
+}
+
+.text-area .content {
+    -fx-background-color: -fx-input-bg;
+    -fx-background-radius: 8px;
+}
+
+.text-area:focused .content {
+    -fx-background-color: -fx-input-bg;
+}
+
+/*
+   COMBO BOX
+    */
+
+.combo-box {
+    -fx-background-color: -fx-input-bg;
+    -fx-text-fill: -fx-text-primary;
+    -fx-border-color: -fx-input-border;
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-font-size: 14px;
+    -fx-padding: 6px 12px;
+}
+
+.combo-box:hover {
+    -fx-border-color: -fx-text-muted;
+}
+
+.combo-box:focused {
+    -fx-border-color: -fx-border-focus;
+    -fx-border-width: 2px;
+}
+
+.combo-box .arrow-button {
+    -fx-background-color: transparent;
+}
+
+.combo-box .arrow {
+    -fx-background-color: -fx-text-muted;
+}
+
+.combo-box .list-cell {
+    -fx-background-color: -fx-input-bg;
+    -fx-text-fill: -fx-text-primary;
+    -fx-padding: 8px 12px;
+}
+
+.combo-box .list-view {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-border-color: -fx-border-primary;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
+
+.combo-box-popup .list-view {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-border-color: -fx-border-primary;
+    -fx-border-radius: 8px;
+}
+
+.combo-box .list-cell:hover {
+    -fx-background-color: -fx-bg-tertiary;
+}
+
+.combo-box .list-cell:selected {
+    -fx-background-color: -fx-accent-light;
+    -fx-text-fill: -fx-accent-primary;
+}
+
+
+
+
+
+/*
+   CHOICE BOX
+   */
+
+.choice-box {
+    -fx-background-color: -fx-input-bg;
+    -fx-text-fill: -fx-text-primary;
+
+    -fx-border-color: -fx-input-border;
+    -fx-border-width: 1.5px;
+
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+
+    -fx-font-size: 14px;
+    -fx-padding: 6px 12px;
+}
+
+
+/*
+   HOVER / FOCUS
+   */
+
+.choice-box:hover {
+    -fx-border-color: -fx-text-muted;
+}
+
+.choice-box:focused {
+    -fx-border-color: -fx-border-focus;
+    -fx-border-width: 2px;
+}
+
+
+/*
+   FLECHA
+   */
+
+.choice-box .arrow-button {
+    -fx-background-color: transparent;
+}
+
+.choice-box .arrow {
+    -fx-background-color: -fx-text-muted;
+}
+
+
+/*
+   CELDA SELECCIONADA
+   */
+
+.choice-box .label {
+    -fx-background-color: transparent;
+    -fx-text-fill: -fx-text-primary;
+}
+
+
+/*
+   POPUP
+   */
+
+.choice-box-popup .menu-item {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-text-fill: -fx-text-primary;
+
+    -fx-padding: 8px 12px;
+}
+
+.choice-box-popup .menu-item:hover {
+    -fx-background-color: -fx-bg-tertiary;
+}
+
+.choice-box-popup .menu-item:focused {
+    -fx-background-color: -fx-accent-light;
+}
+
+.choice-box-popup .menu-item .label {
+    -fx-text-fill: -fx-text-primary;
+}
+
+/*
+   CHECKBOX
+    */
+
+.check-box {
+    -fx-text-fill: -fx-text-primary;
+    -fx-font-size: 14px;
+    -fx-padding: 4px 0;
+}
+
+.check-box .box {
+    -fx-background-color: -fx-input-bg;
+    -fx-border-color: -fx-input-border;
+    -fx-border-width: 2px;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 1px;
+    -fx-min-width: 18px;
+    -fx-min-height: 18px;
+    -fx-max-width: 18px;
+    -fx-max-height: 18px;
+}
+
+.check-box:hover .box {
+    -fx-border-color: -fx-text-muted;
+}
+
+.check-box:selected .box {
+    -fx-background-color: -fx-accent-primary;
+    -fx-border-color: -fx-accent-primary;
+}
+
+.check-box:selected .mark {
+    -fx-background-color: white;
+}
+
+.check-box:disabled {
+    -fx-opacity: 0.5;
+}
+
+.check-box .text {
+    -fx-fill: -fx-text-primary;
+}
+
+
+/*
+   DATE PICKER
+    */
+
+.date-picker {
+    -fx-background-color: -fx-input-bg;
+    -fx-border-color: -fx-input-border;
+    -fx-border-width: 1.5px;
+
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+
+    -fx-font-size: 14px;
+}
+
+
+/*
+   CAMPO DE TEXTO
+   */
+
+.date-picker .text-field {
+    -fx-background-color: transparent;
+    -fx-text-fill: -fx-text-primary;
+
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+
+    -fx-background-radius: 8px 0px 0px 8px;
+
+    -fx-padding: 6px 12px;
+}
+
+.date-picker .text-field:focused {
+    -fx-border-color: transparent;
+}
+
+
+/*
+   BOTÓN DEL CALENDARIO
+    */
+
+.date-picker .arrow-button {
+    -fx-background-color: transparent;
+
+    -fx-background-radius: 0px 8px 8px 0px;
+}
+
+.date-picker .arrow-button:hover {
+    -fx-background-color: -fx-bg-tertiary;
+}
+
+.date-picker .arrow {
+    -fx-background-color: -fx-text-muted;
+}
+
+
+/*
+   HOVER / FOCUS
+  */
+
+.date-picker:hover {
+    -fx-border-color: -fx-text-muted;
+}
+
+.date-picker:focused {
+    -fx-border-color: -fx-border-focus;
+    -fx-border-width: 2px;
+}
+
+
+/*
+   CALENDARIO / POPUP
+   */
+
+.date-picker-popup {
+    -fx-background-color: -fx-bg-secondary;
+
+    -fx-border-color: -fx-border-primary;
+    -fx-border-width: 1px;
+
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
+
+
+/*
+   CABECERA DEL CALENDARIO
+   */
+
+.date-picker-popup .month-year-pane {
+    -fx-background-color: -fx-bg-secondary;
+
+    -fx-padding: 10px;
+}
+
+.date-picker-popup .month-year-pane .label {
+    -fx-text-fill: -fx-text-primary;
+    -fx-font-weight: 600;
+}
+
+
+/*
+   BOTONES ANTERIOR / SIGUIENTE
+    */
+
+.date-picker-popup .spinner .button {
+    -fx-background-color: transparent;
+    -fx-text-fill: -fx-text-secondary;
+
+    -fx-border-color: transparent;
+}
+
+.date-picker-popup .spinner .button:hover {
+    -fx-background-color: -fx-bg-tertiary;
+}
+
+.date-picker-popup .spinner .button .left-arrow,
+.date-picker-popup .spinner .button .right-arrow {
+    -fx-background-color: -fx-text-muted;
+}
+
+
+/*
+   DÍAS DE LA SEMANA
+   */
+
+.date-picker-popup .day-name-cell {
+    -fx-background-color: -fx-bg-tertiary;
+    -fx-text-fill: -fx-text-secondary;
+
+    -fx-font-weight: 600;
+}
+
+
+/*
+   DÍAS
+   */
+
+.date-picker-popup .day-cell {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-text-fill: -fx-text-primary;
+
+    -fx-border-color: transparent;
+}
+
+.date-picker-popup .day-cell:hover {
+    -fx-background-color: -fx-bg-tertiary;
+}
+
+.date-picker-popup .day-cell:focused {
+    -fx-background-color: -fx-accent-light;
+}
+
+
+/*
+   DÍA SELECCIONADO
+   */
+
+.date-picker-popup .day-cell:selected {
+    -fx-background-color: -fx-accent-primary;
+    -fx-text-fill: white;
+}
+
+
+/*
+   DÍAS DEL MES ANTERIOR / SIGUIENTE
+   */
+
+.date-picker-popup .previous-month,
+.date-picker-popup .next-month {
+    -fx-text-fill: -fx-text-muted;
+}
+
+
+/*
+   DÍA ACTUAL
+   */
+
+.date-picker-popup .today {
+    -fx-border-color: -fx-accent-primary;
+    -fx-border-width: 1px;
+}
+
+/*
+   RADIO BUTTON
+    */
+
+.radio-button {
+    -fx-text-fill: -fx-text-primary;
+    -fx-font-size: 14px;
+    -fx-padding: 4px 0;
+}
+
+.radio-button .radio {
+    -fx-background-color: -fx-input-bg;
+    -fx-border-color: -fx-input-border;
+    -fx-border-width: 2px;
+    -fx-border-radius: 50%;
+    -fx-background-radius: 50%;
+    -fx-min-width: 18px;
+    -fx-min-height: 18px;
+    -fx-max-width: 18px;
+    -fx-max-height: 18px;
+}
+
+.radio-button:hover .radio {
+    -fx-border-color: -fx-text-muted;
+}
+
+.radio-button:selected .radio {
+    -fx-border-color: -fx-accent-primary;
+    -fx-background-color: -fx-accent-primary;
+}
+
+.radio-button:selected .dot {
+    -fx-background-color: white;
+    -fx-background-radius: 50%;
+}
+
+.radio-button:disabled {
+    -fx-opacity: 0.5;
+}
+
+.radio-button .text {
+    -fx-fill: -fx-text-primary;
+}
+
+/*
+   TOGGLE BUTTON
+    */
+
+.toggle-button {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-text-fill: -fx-text-secondary;
+    -fx-border-color: -fx-border-primary;
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: 8px 16px;
+    -fx-font-size: 14px;
+    -fx-font-weight: 500;
+    -fx-cursor: hand;
+}
+
+.toggle-button:hover {
+    -fx-background-color: -fx-bg-tertiary;
+}
+
+.toggle-button:selected {
+    -fx-background-color: -fx-accent-light;
+    -fx-text-fill: -fx-accent-primary;
+    -fx-border-color: -fx-accent-primary;
+}
+
+.toggle-button:selected:hover {
+    -fx-background-color: derive(-fx-accent-light, -5%);
+}
+
+/*
+   SLIDER
+    */
+
+.slider .track {
+    -fx-background-color: -fx-bg-quaternary;
+    -fx-background-radius: 4px;
+    -fx-pref-height: 6px;
+}
+
+.slider .thumb {
+    -fx-background-color: -fx-accent-primary;
+    -fx-background-radius: 50%;
+    -fx-pref-width: 18px;
+    -fx-pref-height: 18px;
+    -fx-effect: dropshadow(gaussian, rgba(37, 99, 235, 0.2), 8, 0.1, 0, 2);
+}
+
+.slider .thumb:hover {
+    -fx-effect: dropshadow(gaussian, rgba(37, 99, 235, 0.3), 12, 0.15, 0, 4);
+}
+
+.slider .thumb:pressed {
+    -fx-effect: dropshadow(gaussian, rgba(37, 99, 235, 0.4), 16, 0.2, 0, 4);
+}
+
+.slider .fill {
+    -fx-background-color: -fx-accent-primary;
+    -fx-background-radius: 4px;
+}
+
+/*
+   PROGRESS BAR
+    */
+
+.progress-bar {
+    -fx-background-color: -fx-bg-quaternary;
+    -fx-background-radius: 8px;
+    -fx-pref-height: 8px;
+}
+
+.progress-bar .bar {
+    -fx-background-color: -fx-accent-primary;
+    -fx-background-radius: 8px;
+}
+
+.progress-bar .track {
+    -fx-background-color: -fx-bg-quaternary;
+    -fx-background-radius: 8px;
+}
+
+.progress-indicator {
+    -fx-progress-color: -fx-accent-primary;
+}
+
+.progress-indicator .arc {
+    -fx-stroke: -fx-accent-primary;
+}
+
+.progress-indicator .text {
+    -fx-fill: -fx-text-primary;
+}
+
+/*
+   MENU & MENU BAR
+    */
+
+.menu-bar {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-border-color: transparent transparent -fx-border-primary transparent;
+    -fx-border-width: 1px;
+    -fx-padding: 4px 8px;
+}
+
+.menu-bar .menu {
+    -fx-text-fill: -fx-text-primary;
+    -fx-padding: 6px 12px;
+    -fx-font-size: 14px;
+}
+
+.menu-bar .menu:hover {
+    -fx-background-color: -fx-bg-tertiary;
+}
+
+.menu-bar .menu:showing {
+    -fx-background-color: -fx-bg-tertiary;
+}
+
+.menu-item {
+    -fx-text-fill: -fx-text-primary;
+    -fx-padding: 6px 20px;
+    -fx-font-size: 14px;
+}
+
+.menu-item:hover {
+    -fx-background-color: -fx-bg-tertiary;
+}
+
+.menu-item:focused {
+    -fx-background-color: -fx-bg-tertiary;
+}
+
+.menu-item .label {
+    -fx-text-fill: -fx-text-primary;
+}
+
+.context-menu {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-border-color: -fx-border-primary;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-effect: dropshadow(gaussian, -fx-shadow-color, 12, 0.08, 0, 4);
+}
+
+/*
+   SEPARADORES
+    */
+
+.separator .line {
+    -fx-border-color: -fx-border-primary;
+    -fx-border-width: 1px;
+}
+
+/*
+   SCROLLBAR
+    */
+
+.scroll-bar {
+    -fx-background-color: transparent;
+    -fx-pref-width: 8px;
+    -fx-pref-height: 8px;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: -fx-bg-quaternary;
+    -fx-background-radius: 10px;
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: -fx-text-muted;
+}
+
+.scroll-bar .track {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow {
+    -fx-background-color: transparent;
+}
+
+/* ScrollBar vertical */
+.scroll-bar:vertical .thumb {
+    -fx-background-insets: 2px 4px 2px 4px;
+}
+
+/* ScrollBar horizontal */
+.scroll-bar:horizontal .thumb {
+    -fx-background-insets: 4px 2px 4px 2px;
+}
+
+/*
+   TABLAS
+    */
+
+.table-view {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-border-color: -fx-border-primary;
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-padding: 0;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: -fx-bg-tertiary;
+    -fx-background-radius: 12px 12px 0 0;
+    -fx-padding: 0;
+}
+
+.table-view .column-header {
+    -fx-background-color: transparent;
+    -fx-padding: 10px 14px;
+    -fx-border-color: transparent transparent -fx-border-primary transparent;
+    -fx-border-width: 1px;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: -fx-text-secondary;
+    -fx-font-weight: 600;
+    -fx-font-size: 12px;
+    -fx-text-transform: uppercase;
+    -fx-letter-spacing: 0.3px;
+}
+
+.table-view .filler {
+    -fx-background-color: -fx-bg-tertiary;
+}
+
+.table-row-cell {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-border-color: transparent transparent -fx-border-primary transparent;
+    -fx-border-width: 1px;
+    -fx-padding: 2px 0;
+}
+
+.table-row-cell .text {
+    -fx-fill: -fx-text-primary;
+}
+
+.table-row-cell:hover {
+    -fx-background-color: -fx-bg-tertiary;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: -fx-accent-light;
+}
+
+.table-row-cell:selected .text {
+    -fx-fill: -fx-accent-primary;
+}
+
+.table-view .table-cell {
+    -fx-padding: 10px 14px;
+    -fx-text-fill: -fx-text-primary;
+    -fx-font-size: 13px;
+}
+
+/*
+   TAB PANE
+    */
+
+.tab-pane {
+    -fx-background-color: transparent;
+    -fx-tab-min-height: 42px;
+    -fx-tab-max-height: 42px;
+}
+
+.tab-pane .tab-header-area {
+    -fx-background-color: transparent;
+    -fx-padding: 0 0 4px 0;
+}
+
+.tab-pane .tab-header-background {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent -fx-border-primary transparent;
+    -fx-border-width: 1px;
+}
+
+.tab {
+    -fx-background-color: transparent;
+    -fx-padding: 8px 20px;
+    -fx-font-size: 14px;
+    -fx-font-weight: 500;
+    -fx-text-fill: -fx-text-secondary;
+    -fx-border-color: transparent transparent transparent transparent;
+    -fx-border-width: 3px;
+    -fx-background-radius: 0;
+}
+
+.tab:hover {
+    -fx-text-fill: -fx-text-primary;
+}
+
+.tab:selected {
+    -fx-text-fill: -fx-accent-primary;
+    -fx-border-color: -fx-accent-primary;
+}
+
+.tab .tab-label {
+    -fx-text-fill: -fx-text-secondary;
+}
+
+.tab:selected .tab-label {
+    -fx-text-fill: -fx-accent-primary;
+}
+
+.tab-pane .tab-content-area {
+    -fx-background-color: transparent;
+    -fx-padding: 16px 0 0 0;
+}
+
+/*
+   TOOLTIP
+    */
+
+.tooltip {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-text-fill: -fx-text-primary;
+    -fx-border-color: -fx-border-primary;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-font-size: 13px;
+    -fx-padding: 8px 14px;
+    -fx-effect: dropshadow(gaussian, -fx-shadow-elevated, 12, 0.1, 0, 4);
+}
+
+/*
+   ESTADOS Y ETIQUETAS DE ESTADO
+    */
+
+.status-success {
+    -fx-text-fill: -fx-success;
+    -fx-background-color: -fx-success-light;
+    -fx-background-radius: 4px;
+    -fx-padding: 2px 10px;
+}
+
+.status-warning {
+    -fx-text-fill: -fx-warning;
+    -fx-background-color: -fx-warning-light;
+    -fx-background-radius: 4px;
+    -fx-padding: 2px 10px;
+}
+
+.status-danger {
+    -fx-text-fill: -fx-danger;
+    -fx-background-color: -fx-danger-light;
+    -fx-background-radius: 4px;
+    -fx-padding: 2px 10px;
+}
+
+.status-info {
+    -fx-text-fill: -fx-info;
+    -fx-background-color: -fx-info-light;
+    -fx-background-radius: 4px;
+    -fx-padding: 2px 10px;
+}
+
+/*
+   LINKS
+    */
+
+.hyperlink {
+    -fx-text-fill: -fx-accent-primary;
+    -fx-border-color: transparent;
+    -fx-padding: 4px 8px;
+    -fx-font-size: 14px;
+}
+
+.hyperlink:hover {
+    -fx-text-fill: -fx-accent-hover;
+    -fx-underline: true;
+}
+
+.hyperlink:visited {
+    -fx-text-fill: -fx-accent-primary;
+}
+
+/*
+   ICONOS
+    */
+
+.icon-primary { -fx-fill: -fx-accent-primary; }
+.icon-secondary { -fx-fill: -fx-text-secondary; }
+.icon-muted { -fx-fill: -fx-text-muted; }
+.icon-danger { -fx-fill: -fx-danger; }
+.icon-success { -fx-fill: -fx-success; }
+.icon-warning { -fx-fill: -fx-warning; }
+.icon-inverse { -fx-fill: -fx-text-inverse; }
+
+/*
+   BADGE / CHIP
+    */
+
+.badge {
+    -fx-background-color: -fx-accent-light;
+    -fx-text-fill: -fx-accent-primary;
+    -fx-background-radius: 20px;
+    -fx-padding: 2px 12px;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+}
+
+.badge-success {
+    -fx-background-color: -fx-success-light;
+    -fx-text-fill: -fx-success;
+}
+
+.badge-danger {
+    -fx-background-color: -fx-danger-light;
+    -fx-text-fill: -fx-danger;
+}
+
+.badge-warning {
+    -fx-background-color: -fx-warning-light;
+    -fx-text-fill: -fx-warning;
+}
+
+.badge-secondary {
+    -fx-background-color: -fx-bg-tertiary;
+    -fx-text-fill: -fx-text-secondary;
+}
+
+/*
+   DIALOG Y ALERT
+    */
+
+.dialog-pane {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-text-fill: -fx-text-primary;
+}
+
+.dialog-pane .header-panel {
+    -fx-background-color: -fx-bg-primary;
+    -fx-border-color: transparent transparent -fx-border-primary transparent;
+    -fx-border-width: 1px;
+}
+
+.dialog-pane .header-panel .label {
+    -fx-text-fill: -fx-text-primary;
+    -fx-font-size: 18px;
+    -fx-font-weight: 600;
+}
+
+.dialog-pane .content.label {
+    -fx-text-fill: -fx-text-primary;
+    -fx-font-size: 14px;
+}
+
+.dialog-pane .button-bar .button {
+    -fx-font-weight: 600;
+}
+
+/*
+   PAGINATION
+    */
+
+.pagination {
+    -fx-background-color: transparent;
+}
+
+.pagination .page {
+    -fx-background-color: transparent;
+    -fx-text-fill: -fx-text-secondary;
+    -fx-border-color: -fx-border-primary;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 4px 10px;
+    -fx-font-size: 13px;
+    -fx-cursor: hand;
+}
+
+.pagination .page:hover {
+    -fx-background-color: -fx-bg-tertiary;
+}
+
+.pagination .page:selected {
+    -fx-background-color: -fx-accent-primary;
+    -fx-text-fill: white;
+    -fx-border-color: -fx-accent-primary;
+}
+
+/*
+   ACCORDION
+    */
+
+.accordion .titled-pane {
+    -fx-background-color: transparent;
+}
+
+.accordion .titled-pane > .title {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-border-color: -fx-border-primary;
+    -fx-border-width: 0 0 1px 0;
+    -fx-padding: 12px 16px;
+}
+
+.accordion .titled-pane > .title .text {
+    -fx-fill: -fx-text-primary;
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+}
+
+.accordion .titled-pane > .title:hover {
+    -fx-background-color: -fx-bg-tertiary;
+}
+
+.accordion .titled-pane > .content {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-padding: 16px;
+}
+
+/*
+   ANIMACIONES Y TRANSICIONES
+    */
+
+/* */
+.shimmer {
+    -fx-background-color: linear-gradient(
+            to right,
+            -fx-bg-tertiary 0%,
+            -fx-bg-secondary 50%,
+            -fx-bg-tertiary 100%
+    );
+    -fx-background-size: 200% 100%;
+    -fx-animation: shimmer 1.5s ease-in-out infinite;
+}
+
+
+/*
+   UTILIDADES
+    */
+
+/* Espaciado */
+.m-0 { -fx-margin: 0; }
+.m-1 { -fx-margin: 4px; }
+.m-2 { -fx-margin: 8px; }
+.m-3 { -fx-margin: 12px; }
+.m-4 { -fx-margin: 16px; }
+
+.p-0 { -fx-padding: 0; }
+.p-1 { -fx-padding: 4px; }
+.p-2 { -fx-padding: 8px; }
+.p-3 { -fx-padding: 12px; }
+.p-4 { -fx-padding: 16px; }
+.p-5 { -fx-padding: 24px; }
+
+/* Bordes redondeados */
+.rounded-none { -fx-background-radius: 0; }
+.rounded-sm { -fx-background-radius: 4px; }
+.rounded-md { -fx-background-radius: 8px; }
+.rounded-lg { -fx-background-radius: 12px; }
+.rounded-xl { -fx-background-radius: 16px; }
+.rounded-full { -fx-background-radius: 9999px; }
+
+/* Sombras */
+.shadow-sm { -fx-effect: dropshadow(gaussian, -fx-shadow-color, 4, 0.05, 0, 2); }
+.shadow-md { -fx-effect: dropshadow(gaussian, -fx-shadow-color, 8, 0.06, 0, 3); }
+.shadow-lg { -fx-effect: dropshadow(gaussian, -fx-shadow-elevated, 16, 0.08, 0, 4); }
+.shadow-xl { -fx-effect: dropshadow(gaussian, -fx-shadow-elevated, 24, 0.1, 0, 6); }
+
+/* Flex/Grid helpers */
+.gap-1 { -fx-spacing: 4px; }
+.gap-2 { -fx-spacing: 8px; }
+.gap-3 { -fx-spacing: 12px; }
+.gap-4 { -fx-spacing: 16px; }
+.gap-5 { -fx-spacing: 24px; }
