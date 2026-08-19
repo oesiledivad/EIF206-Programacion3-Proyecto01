@@ -71,7 +71,7 @@
         <columns>
           <TableColumn fx:id="colID" prefWidth="139.99999618530273" text="ID" />
           <TableColumn fx:id="colNombre" prefWidth="216.6667022705078" text="Nombre" />
-            <TableColumn fx:id="colCorreo" prefWidth="181.99990844726562" text="Telefono" />
+            <TableColumn fx:id="colTelefono" prefWidth="181.99990844726562" text="Telefono" />
         </columns>
       </TableView>
       <Separator layoutX="6.0" layoutY="121.0" prefHeight="35.0" prefWidth="555.0" />
