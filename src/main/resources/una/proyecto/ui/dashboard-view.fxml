@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane fx:id="dashboardRoot" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="una.proyecto.controller.DashboardController">
+   <children>
+      <VBox layoutX="20.0" layoutY="20.0" prefHeight="200.0" prefWidth="467.0" spacing="24.0">
+         <children>
+            <VBox prefHeight="138.0" prefWidth="340.0">
+               <children>
+                  <Label text="Dashboard" />
+                  <Label fx:id="lblWelcome" text="Bienvenido de vuelta" />
+               </children>
+            </VBox>
+            <HBox prefHeight="48.0" prefWidth="538.0" spacing="20.0">
+               <children>
+                  <VBox prefHeight="43.0" prefWidth="115.0" spacing="4.0" HBox.hgrow="ALWAYS">
+                     <children>
+                        <Label fx:id="lblTotalReservas" text="Total Reservas" />
+                        <Label text="0" />
+                     </children>
+                  </VBox>
+                  <VBox prefHeight="200.0" prefWidth="100.0" HBox.hgrow="ALWAYS">
+                     <children>
+                        <Label fx:id="lblRecursosDisponibles" prefHeight="26.0" prefWidth="127.0" text="Recursos Disponibles" />
+                        <Label text="0" />
+                     </children>
+                  </VBox>
+                  <VBox prefHeight="200.0" prefWidth="100.0" HBox.hgrow="ALWAYS">
+                     <children>
+                        <Label fx:id="lblActividadesHoy" text="Actividades hoy" />
+                        <Label text="0" />
+                     </children>
+                  </VBox>
+                  <VBox prefHeight="200.0" prefWidth="100.0" HBox.hgrow="ALWAYS">
+                     <children>
+                        <Label fx:id="lblUsuariosActivos" text="Usuarios Activos" />
+                        <Label text="0" />
+                     </children>
+                  </VBox>
+               </children>
+            </HBox>
+            <HBox prefHeight="100.0" prefWidth="200.0" spacing="20.0">
+               <children>
+                  <VBox prefHeight="200.0" prefWidth="100.0" spacing="16.0" HBox.hgrow="ALWAYS">
+                     <children>
+                        <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" spacing="12.0">
+                           <children>
+                              <Label text="Reservas Recientes" />
+                              <Region prefHeight="200.0" prefWidth="200.0" HBox.hgrow="ALWAYS" />
+                           </children>
+                        </HBox>
+                        <TableView fx:id="tblReservasRecientes" prefHeight="200.0" prefWidth="200.0">
+                          <columns>
+                            <TableColumn prefWidth="75.0" text="Actividad" />
+                            <TableColumn prefWidth="75.0" text="Fecha" />
+                              <TableColumn prefWidth="75.0" text="Hora" />
+                              <TableColumn prefWidth="75.0" text="Estado" />
+                          </columns>
+                        </TableView>
+                     </children>
+                  </VBox>
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>
