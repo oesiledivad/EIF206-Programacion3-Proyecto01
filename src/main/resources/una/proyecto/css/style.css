@@ -53,10 +53,6 @@
     -fx-radius-md: 8px;
     -fx-radius-lg: 12px;
     -fx-radius-xl: 16px;
-
-    /*  TRANSICIONES  */
-    -fx-transition-duration: 0.25s;
-    -fx-transition-timing: ease-in-out;
 }
 
 /*
@@ -108,27 +104,26 @@
 
 .card {
     -fx-background-color: -fx-bg-secondary;
-    -fx-background-radius: -fx-radius-lg;
+    -fx-background-radius: 12px;
     -fx-border-color: -fx-border-primary;
-    -fx-border-radius: -fx-radius-lg;
+    -fx-border-radius: 12px;
     -fx-border-width: 1px;
     -fx-effect: dropshadow(gaussian, -fx-shadow-color, 8, 0.05, 0, 2);
 }
 
 .card-elevated {
     -fx-background-color: -fx-bg-secondary;
-    -fx-background-radius: -fx-radius-lg;
+    -fx-background-radius: 12px;
     -fx-effect: dropshadow(gaussian, -fx-shadow-elevated, 16, 0.08, 0, 4);
 }
 
 .card-hover {
     -fx-background-color: -fx-bg-secondary;
-    -fx-background-radius: -fx-radius-lg;
+    -fx-background-radius: 12px;
     -fx-border-color: -fx-border-primary;
-    -fx-border-radius: -fx-radius-lg;
+    -fx-border-radius: 12px;
     -fx-border-width: 1px;
     -fx-effect: dropshadow(gaussian, -fx-shadow-color, 8, 0.05, 0, 2);
-    -fx-transition: all -fx-transition-duration -fx-transition-timing;
 }
 
 .card-hover:hover {
@@ -303,17 +298,14 @@ Text.heading-3 {
     -fx-font-size: 14px;
     -fx-font-weight: 600;
 
-    -fx-background-radius: -fx-radius-md;
-    -fx-border-radius: -fx-radius-md;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
 
     -fx-padding: 8px 20px;
-
     -fx-cursor: hand;
 
     -fx-focus-color: transparent;
     -fx-faint-focus-color: transparent;
-
-    -fx-transition: all -fx-transition-duration -fx-transition-timing;
 }
 
 .button:focused {
@@ -349,7 +341,7 @@ Text.heading-3 {
     -fx-text-fill: -fx-text-primary;
     -fx-border-color: -fx-border-primary;
     -fx-border-width: 1.5px;
-    -fx-border-radius: -fx-radius-md;
+    -fx-border-radius: 8px;
 }
 
 .btn-secondary:hover {
@@ -422,15 +414,15 @@ Text.heading-3 {
 .btn-small {
     -fx-font-size: 12px;
     -fx-padding: 5px 14px;
-    -fx-background-radius: -fx-radius-sm;
-    -fx-border-radius: -fx-radius-sm;
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
 }
 
 .btn-large {
     -fx-font-size: 16px;
     -fx-padding: 12px 28px;
-    -fx-background-radius: -fx-radius-lg;
-    -fx-border-radius: -fx-radius-lg;
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
 }
 
 .btn-icon {
@@ -467,16 +459,14 @@ Text.heading-3 {
 
     -fx-border-color: -fx-input-border;
     -fx-border-width: 1.5px;
-    -fx-border-radius: -fx-radius-md;
+    -fx-border-radius: 8px;
 
-    -fx-background-radius: -fx-radius-md;
+    -fx-background-radius: 8px;
 
     -fx-padding: 10px 14px;
 
     -fx-font-size: 14px;
     -fx-font-family: "Segoe UI", "Inter", sans-serif;
-
-    -fx-transition: all -fx-transition-duration -fx-transition-timing;
 }
 
 .text-field:hover, .password-field:hover, .text-area:hover {
@@ -500,7 +490,7 @@ Text.heading-3 {
 
 .text-area .content {
     -fx-background-color: -fx-input-bg;
-    -fx-background-radius: -fx-radius-md;
+    -fx-background-radius: 8px;
 }
 
 .text-area:focused .content {
@@ -516,11 +506,10 @@ Text.heading-3 {
     -fx-text-fill: -fx-text-primary;
     -fx-border-color: -fx-input-border;
     -fx-border-width: 1.5px;
-    -fx-border-radius: -fx-radius-md;
-    -fx-background-radius: -fx-radius-md;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
     -fx-font-size: 14px;
     -fx-padding: 6px 12px;
-    -fx-transition: all -fx-transition-duration -fx-transition-timing;
 }
 
 .combo-box:hover {
@@ -549,14 +538,14 @@ Text.heading-3 {
 .combo-box .list-view {
     -fx-background-color: -fx-bg-secondary;
     -fx-border-color: -fx-border-primary;
-    -fx-border-radius: -fx-radius-md;
-    -fx-background-radius: -fx-radius-md;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
 }
 
 .combo-box-popup .list-view {
     -fx-background-color: -fx-bg-secondary;
     -fx-border-color: -fx-border-primary;
-    -fx-border-radius: -fx-radius-md;
+    -fx-border-radius: 8px;
 }
 
 .combo-box .list-cell:hover {
@@ -566,6 +555,89 @@ Text.heading-3 {
 .combo-box .list-cell:selected {
     -fx-background-color: -fx-accent-light;
     -fx-text-fill: -fx-accent-primary;
+}
+
+
+
+
+
+/*
+   CHOICE BOX
+   */
+
+.choice-box {
+    -fx-background-color: -fx-input-bg;
+    -fx-text-fill: -fx-text-primary;
+
+    -fx-border-color: -fx-input-border;
+    -fx-border-width: 1.5px;
+
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+
+    -fx-font-size: 14px;
+    -fx-padding: 6px 12px;
+}
+
+
+/*
+   HOVER / FOCUS
+   */
+
+.choice-box:hover {
+    -fx-border-color: -fx-text-muted;
+}
+
+.choice-box:focused {
+    -fx-border-color: -fx-border-focus;
+    -fx-border-width: 2px;
+}
+
+
+/*
+   FLECHA
+   */
+
+.choice-box .arrow-button {
+    -fx-background-color: transparent;
+}
+
+.choice-box .arrow {
+    -fx-background-color: -fx-text-muted;
+}
+
+
+/*
+   CELDA SELECCIONADA
+   */
+
+.choice-box .label {
+    -fx-background-color: transparent;
+    -fx-text-fill: -fx-text-primary;
+}
+
+
+/*
+   POPUP
+   */
+
+.choice-box-popup .menu-item {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-text-fill: -fx-text-primary;
+
+    -fx-padding: 8px 12px;
+}
+
+.choice-box-popup .menu-item:hover {
+    -fx-background-color: -fx-bg-tertiary;
+}
+
+.choice-box-popup .menu-item:focused {
+    -fx-background-color: -fx-accent-light;
+}
+
+.choice-box-popup .menu-item .label {
+    -fx-text-fill: -fx-text-primary;
 }
 
 /*
@@ -582,8 +654,8 @@ Text.heading-3 {
     -fx-background-color: -fx-input-bg;
     -fx-border-color: -fx-input-border;
     -fx-border-width: 2px;
-    -fx-border-radius: -fx-radius-sm;
-    -fx-background-radius: -fx-radius-sm;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
     -fx-padding: 1px;
     -fx-min-width: 18px;
     -fx-min-height: 18px;
@@ -610,6 +682,190 @@ Text.heading-3 {
 
 .check-box .text {
     -fx-fill: -fx-text-primary;
+}
+
+
+/*
+   DATE PICKER
+    */
+
+.date-picker {
+    -fx-background-color: -fx-input-bg;
+    -fx-border-color: -fx-input-border;
+    -fx-border-width: 1.5px;
+
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+
+    -fx-font-size: 14px;
+}
+
+
+/*
+   CAMPO DE TEXTO
+   */
+
+.date-picker .text-field {
+    -fx-background-color: transparent;
+    -fx-text-fill: -fx-text-primary;
+
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+
+    -fx-background-radius: 8px 0px 0px 8px;
+
+    -fx-padding: 6px 12px;
+}
+
+.date-picker .text-field:focused {
+    -fx-border-color: transparent;
+}
+
+
+/*
+   BOTÓN DEL CALENDARIO
+    */
+
+.date-picker .arrow-button {
+    -fx-background-color: transparent;
+
+    -fx-background-radius: 0px 8px 8px 0px;
+}
+
+.date-picker .arrow-button:hover {
+    -fx-background-color: -fx-bg-tertiary;
+}
+
+.date-picker .arrow {
+    -fx-background-color: -fx-text-muted;
+}
+
+
+/*
+   HOVER / FOCUS
+  */
+
+.date-picker:hover {
+    -fx-border-color: -fx-text-muted;
+}
+
+.date-picker:focused {
+    -fx-border-color: -fx-border-focus;
+    -fx-border-width: 2px;
+}
+
+
+/*
+   CALENDARIO / POPUP
+   */
+
+.date-picker-popup {
+    -fx-background-color: -fx-bg-secondary;
+
+    -fx-border-color: -fx-border-primary;
+    -fx-border-width: 1px;
+
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
+
+
+/*
+   CABECERA DEL CALENDARIO
+   */
+
+.date-picker-popup .month-year-pane {
+    -fx-background-color: -fx-bg-secondary;
+
+    -fx-padding: 10px;
+}
+
+.date-picker-popup .month-year-pane .label {
+    -fx-text-fill: -fx-text-primary;
+    -fx-font-weight: 600;
+}
+
+
+/*
+   BOTONES ANTERIOR / SIGUIENTE
+    */
+
+.date-picker-popup .spinner .button {
+    -fx-background-color: transparent;
+    -fx-text-fill: -fx-text-secondary;
+
+    -fx-border-color: transparent;
+}
+
+.date-picker-popup .spinner .button:hover {
+    -fx-background-color: -fx-bg-tertiary;
+}
+
+.date-picker-popup .spinner .button .left-arrow,
+.date-picker-popup .spinner .button .right-arrow {
+    -fx-background-color: -fx-text-muted;
+}
+
+
+/*
+   DÍAS DE LA SEMANA
+   */
+
+.date-picker-popup .day-name-cell {
+    -fx-background-color: -fx-bg-tertiary;
+    -fx-text-fill: -fx-text-secondary;
+
+    -fx-font-weight: 600;
+}
+
+
+/*
+   DÍAS
+   */
+
+.date-picker-popup .day-cell {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-text-fill: -fx-text-primary;
+
+    -fx-border-color: transparent;
+}
+
+.date-picker-popup .day-cell:hover {
+    -fx-background-color: -fx-bg-tertiary;
+}
+
+.date-picker-popup .day-cell:focused {
+    -fx-background-color: -fx-accent-light;
+}
+
+
+/*
+   DÍA SELECCIONADO
+   */
+
+.date-picker-popup .day-cell:selected {
+    -fx-background-color: -fx-accent-primary;
+    -fx-text-fill: white;
+}
+
+
+/*
+   DÍAS DEL MES ANTERIOR / SIGUIENTE
+   */
+
+.date-picker-popup .previous-month,
+.date-picker-popup .next-month {
+    -fx-text-fill: -fx-text-muted;
+}
+
+
+/*
+   DÍA ACTUAL
+   */
+
+.date-picker-popup .today {
+    -fx-border-color: -fx-accent-primary;
+    -fx-border-width: 1px;
 }
 
 /*
@@ -665,13 +921,12 @@ Text.heading-3 {
     -fx-text-fill: -fx-text-secondary;
     -fx-border-color: -fx-border-primary;
     -fx-border-width: 1.5px;
-    -fx-border-radius: -fx-radius-md;
-    -fx-background-radius: -fx-radius-md;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
     -fx-padding: 8px 16px;
     -fx-font-size: 14px;
     -fx-font-weight: 500;
     -fx-cursor: hand;
-    -fx-transition: all -fx-transition-duration -fx-transition-timing;
 }
 
 .toggle-button:hover {
@@ -725,18 +980,18 @@ Text.heading-3 {
 
 .progress-bar {
     -fx-background-color: -fx-bg-quaternary;
-    -fx-background-radius: -fx-radius-md;
+    -fx-background-radius: 8px;
     -fx-pref-height: 8px;
 }
 
 .progress-bar .bar {
     -fx-background-color: -fx-accent-primary;
-    -fx-background-radius: -fx-radius-md;
+    -fx-background-radius: 8px;
 }
 
 .progress-bar .track {
     -fx-background-color: -fx-bg-quaternary;
-    -fx-background-radius: -fx-radius-md;
+    -fx-background-radius: 8px;
 }
 
 .progress-indicator {
@@ -797,8 +1052,8 @@ Text.heading-3 {
 .context-menu {
     -fx-background-color: -fx-bg-secondary;
     -fx-border-color: -fx-border-primary;
-    -fx-border-radius: -fx-radius-md;
-    -fx-background-radius: -fx-radius-md;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
     -fx-effect: dropshadow(gaussian, -fx-shadow-color, 12, 0.08, 0, 4);
 }
 
@@ -824,7 +1079,6 @@ Text.heading-3 {
 .scroll-bar .thumb {
     -fx-background-color: -fx-bg-quaternary;
     -fx-background-radius: 10px;
-    -fx-transition: all -fx-transition-duration -fx-transition-timing;
 }
 
 .scroll-bar .thumb:hover {
@@ -863,14 +1117,14 @@ Text.heading-3 {
 .table-view {
     -fx-background-color: -fx-bg-secondary;
     -fx-border-color: -fx-border-primary;
-    -fx-border-radius: -fx-radius-lg;
-    -fx-background-radius: -fx-radius-lg;
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
     -fx-padding: 0;
 }
 
 .table-view .column-header-background {
     -fx-background-color: -fx-bg-tertiary;
-    -fx-background-radius: -fx-radius-lg -fx-radius-lg 0 0;
+    -fx-background-radius: 12px 12px 0 0;
     -fx-padding: 0;
 }
 
@@ -952,7 +1206,6 @@ Text.heading-3 {
     -fx-border-color: transparent transparent transparent transparent;
     -fx-border-width: 3px;
     -fx-background-radius: 0;
-    -fx-transition: all -fx-transition-duration -fx-transition-timing;
 }
 
 .tab:hover {
@@ -985,8 +1238,8 @@ Text.heading-3 {
     -fx-background-color: -fx-bg-secondary;
     -fx-text-fill: -fx-text-primary;
     -fx-border-color: -fx-border-primary;
-    -fx-border-radius: -fx-radius-md;
-    -fx-background-radius: -fx-radius-md;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
     -fx-font-size: 13px;
     -fx-padding: 8px 14px;
     -fx-effect: dropshadow(gaussian, -fx-shadow-elevated, 12, 0.1, 0, 4);
@@ -999,28 +1252,28 @@ Text.heading-3 {
 .status-success {
     -fx-text-fill: -fx-success;
     -fx-background-color: -fx-success-light;
-    -fx-background-radius: -fx-radius-sm;
+    -fx-background-radius: 4px;
     -fx-padding: 2px 10px;
 }
 
 .status-warning {
     -fx-text-fill: -fx-warning;
     -fx-background-color: -fx-warning-light;
-    -fx-background-radius: -fx-radius-sm;
+    -fx-background-radius: 4px;
     -fx-padding: 2px 10px;
 }
 
 .status-danger {
     -fx-text-fill: -fx-danger;
     -fx-background-color: -fx-danger-light;
-    -fx-background-radius: -fx-radius-sm;
+    -fx-background-radius: 4px;
     -fx-padding: 2px 10px;
 }
 
 .status-info {
     -fx-text-fill: -fx-info;
     -fx-background-color: -fx-info-light;
-    -fx-background-radius: -fx-radius-sm;
+    -fx-background-radius: 4px;
     -fx-padding: 2px 10px;
 }
 
@@ -1131,8 +1384,8 @@ Text.heading-3 {
     -fx-background-color: transparent;
     -fx-text-fill: -fx-text-secondary;
     -fx-border-color: -fx-border-primary;
-    -fx-border-radius: -fx-radius-sm;
-    -fx-background-radius: -fx-radius-sm;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
     -fx-padding: 4px 10px;
     -fx-font-size: 13px;
     -fx-cursor: hand;
@@ -1182,11 +1435,6 @@ Text.heading-3 {
    ANIMACIONES Y TRANSICIONES
     */
 
-/* Hover suave */
-.button, .check-box, .radio-button, .combo-box, .text-field, .tab {
-    -fx-transition: all 0.2s ease-in-out;
-}
-
 /* */
 .shimmer {
     -fx-background-color: linear-gradient(
@@ -1220,10 +1468,10 @@ Text.heading-3 {
 
 /* Bordes redondeados */
 .rounded-none { -fx-background-radius: 0; }
-.rounded-sm { -fx-background-radius: -fx-radius-sm; }
-.rounded-md { -fx-background-radius: -fx-radius-md; }
-.rounded-lg { -fx-background-radius: -fx-radius-lg; }
-.rounded-xl { -fx-background-radius: -fx-radius-xl; }
+.rounded-sm { -fx-background-radius: 4px; }
+.rounded-md { -fx-background-radius: 8px; }
+.rounded-lg { -fx-background-radius: 12px; }
+.rounded-xl { -fx-background-radius: 16px; }
 .rounded-full { -fx-background-radius: 9999px; }
 
 /* Sombras */
@@ -1238,7 +1486,3 @@ Text.heading-3 {
 .gap-3 { -fx-spacing: 12px; }
 .gap-4 { -fx-spacing: 16px; }
 .gap-5 { -fx-spacing: 24px; }
-
-Text.text-primary {
-    -fx-fill: -fx-text-primary;
-}
