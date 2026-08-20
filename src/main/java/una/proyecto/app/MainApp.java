@@ -14,7 +14,7 @@ public class MainApp extends Application {
     public void start(Stage primaryStage) throws Exception {
         primaryStage.setResizable(false);
         Navigation.navigateTo(primaryStage,
-                "/una/proyecto/ui/categorias-administrador-view.fxml",
+                "/una/proyecto/ui/login-view.fxml",
                 "Sistema de Reserva");
     }
 }
