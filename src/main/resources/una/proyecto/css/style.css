@@ -463,7 +463,7 @@ Text.heading-3 {
 
     -fx-background-radius: 8px;
 
-    -fx-padding: 10px 14px;
+    -fx-padding: 5px 7px;
 
     -fx-font-size: 14px;
     -fx-font-family: "Segoe UI", "Inter", sans-serif;
@@ -1486,3 +1486,176 @@ Text.heading-3 {
 .gap-3 { -fx-spacing: 12px; }
 .gap-4 { -fx-spacing: 16px; }
 .gap-5 { -fx-spacing: 24px; }
+
+
+/*
+   SIDEBAR Y NAVEGACIÓN
+*/
+
+/*  CONTENEDOR PRINCIPAL DEL SIDEBAR  */
+.sidebar {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-border-color: transparent -fx-border-primary transparent transparent;
+    -fx-border-width: 1px;
+    -fx-pref-width: 260px;
+    -fx-min-width: 260px;
+    -fx-max-width: 260px;
+    -fx-padding: 0;
+}
+
+/*  HEADER DEL SIDEBAR  */
+.sidebar-header {
+    -fx-padding: 24px 20px 20px 20px;
+    -fx-spacing: 2px;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.sidebar-header .logo-text {
+    -fx-font-size: 20px;
+    -fx-font-weight: 700;
+    -fx-text-fill: -fx-accent-primary;
+}
+
+.sidebar-header .logo-subtext {
+    -fx-font-size: 12px;
+    -fx-text-fill: -fx-text-muted;
+}
+
+/*  CONTENEDOR DEL MENÚ  */
+.sidebar-menu {
+    -fx-spacing: 2px;
+    -fx-padding: 16px 12px;
+    -fx-alignment: TOP_CENTER;
+}
+
+/*  ITEMS DEL MENÚ (ToggleButtons)  */
+.menu-item {
+    -fx-background-color: transparent;
+    -fx-text-fill: -fx-text-secondary;
+    -fx-font-size: 14px;
+    -fx-font-weight: 500;
+    -fx-padding: 10px 16px;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-cursor: hand;
+    -fx-alignment: CENTER_LEFT;
+    -fx-graphic-text-gap: 12px;
+}
+
+.menu-item:hover {
+    -fx-background-color: -fx-bg-tertiary;
+    -fx-text-fill: -fx-text-primary;
+}
+
+.menu-item:selected {
+    -fx-background-color: -fx-accent-light;
+    -fx-text-fill: -fx-accent-primary;
+}
+
+.menu-item:selected .text {
+    -fx-fill: -fx-accent-primary;
+}
+
+/*  FOOTER DEL SIDEBAR  */
+.sidebar-footer {
+    -fx-padding: 16px 20px;
+    -fx-border-color: -fx-border-primary transparent transparent transparent;
+    -fx-border-width: 1px;
+    -fx-spacing: 8px;
+    -fx-alignment: CENTER_LEFT;
+}
+
+
+.separator-admin {
+    -fx-padding: 4px 0;
+}
+
+.separator-admin .line {
+    -fx-border-color: -fx-border-primary;
+    -fx-border-width: 1px;
+}
+
+/*  AVATAR  */
+.avatar-circle {
+    -fx-fill: -fx-accent-light;
+    -fx-stroke: -fx-accent-primary;
+    -fx-stroke-width: 2px;
+}
+
+/*  NOMBRE DE USUARIO  */
+.user-name {
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -fx-text-primary;
+}
+
+.user-role {
+    -fx-font-size: 12px;
+    -fx-text-fill: -fx-text-muted;
+}
+
+/*  BOTÓN CERRAR SESIÓN  */
+.logout-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: -fx-text-secondary;
+    -fx-font-size: 13px;
+    -fx-font-weight: 500;
+    -fx-padding: 8px 12px;
+    -fx-background-radius: 6px;
+    -fx-border-color: transparent;
+    -fx-alignment: CENTER_LEFT;
+    -fx-graphic-text-gap: 8px;
+}
+
+.logout-button:hover {
+    -fx-background-color: -fx-danger-light;
+    -fx-text-fill: -fx-danger;
+}
+
+.logout-button:pressed {
+    -fx-background-color: derive(-fx-danger-light, -10%);
+}
+
+/*  CONTENEDOR DE VISTAS  */
+.view-container {
+    -fx-background-color: -fx-bg-primary;
+    -fx-padding: 24px;
+}
+
+/*
+   DARK MODE - SIDEBAR
+*/
+
+.root.dark-mode .sidebar {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-border-color: transparent -fx-border-primary transparent transparent;
+}
+
+.root.dark-mode .menu-item:hover {
+    -fx-background-color: -fx-bg-tertiary;
+}
+
+.root.dark-mode .menu-item:selected {
+    -fx-background-color: -fx-accent-light;
+    -fx-text-fill: -fx-accent-primary;
+}
+
+.root.dark-mode .sidebar-footer {
+    -fx-border-color: -fx-border-primary transparent transparent transparent;
+}
+
+.root.dark-mode .logout-button:hover {
+    -fx-background-color: -fx-danger-light;
+    -fx-text-fill: -fx-danger;
+}
+
+.root.dark-mode .view-container {
+    -fx-background-color: -fx-bg-primary;
+}
+
+.root.dark-mode .avatar-circle {
+    -fx-fill: -fx-accent-light;
+    -fx-stroke: -fx-accent-primary;
+}
