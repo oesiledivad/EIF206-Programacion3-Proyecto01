@@ -213,7 +213,7 @@ public class MainViewController {
 
     @FXML
     public void goToCategorias(ActionEvent actionEvent) {
-        loadView("categorias-view");
+        loadView("categorias-administrador-view");
     }
 
     @FXML
