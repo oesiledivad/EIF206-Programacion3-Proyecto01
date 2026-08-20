@@ -13,8 +13,8 @@ public class ReservasController {
     @FXML private Button btnreserva;
     @FXML private Button btncancelarreserva;
     @FXML private Button btnlimpiar;
-    @FXML private TextField txtfieldfrase;
-    @FXML private TextField txtfieldactividad;
+    @FXML private TextArea txtareafrase;
+    @FXML private TextArea txtareaactividad;
     @FXML private DatePicker datapickerfecha;
     @FXML private ChoiceBox choiceboxhorainicio;
     @FXML private ChoiceBox choiceboxhorafin;
@@ -26,7 +26,7 @@ public class ReservasController {
     private void handlePanelLateralButton(){}
     private void handleActividadesButton(){}
     private void handleReservaButton(){
-        String actividad= txtfieldactividad.getText();
+        String actividad= txtareaactividad.getText();
         LocalDate  date= datapickerfecha.getValue();
         int dia=0; int mes=0; int annio=0;
         if(date!=null){
@@ -43,8 +43,8 @@ public class ReservasController {
         ///aca se usa un listener se selecciona como la reserva de list view y se quita x reserva
     }
     private void handleLimpiarButton(){
-    txtfieldfrase.clear();
-    txtfieldactividad.clear();
+    txtareafrase.clear();
+    txtareaactividad.clear();
     listviewcategorias.getItems().clear();
     choiceboxhorainicio.getSelectionModel().clearSelection();
     choiceboxhorafin.getSelectionModel().clearSelection();

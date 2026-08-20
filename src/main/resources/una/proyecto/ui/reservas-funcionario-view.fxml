@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.String?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ChoiceBox?>
@@ -8,7 +9,7 @@
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
@@ -16,39 +17,16 @@
 <?import javafx.scene.shape.Line?>
 <?import javafx.scene.text.Font?>
 
-<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="708.0" prefWidth="849.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1">
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="785.0" prefWidth="903.0" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <BorderPane layoutX="3.0" layoutY="-5.0" prefHeight="594.0" prefWidth="798.0">
          <left>
-            <VBox prefHeight="550.0" prefWidth="118.0" BorderPane.alignment="CENTER">
-               <children>
-                  <Button fx:id="btnpanellateral" mnemonicParsing="false" prefHeight="26.0" prefWidth="29.0" text="☰">
-                     <VBox.margin>
-                        <Insets top="10.0" />
-                     </VBox.margin>
-                  </Button>
-                  <Button fx:id="btncalenderizacion" mnemonicParsing="false" prefHeight="26.0" prefWidth="119.0" text="Calenderizacion">
-                     <VBox.margin>
-                        <Insets bottom="40.0" top="100.0" />
-                     </VBox.margin>
-                  </Button>
-                  <Button fx:id="btnactividades" mnemonicParsing="false" prefHeight="26.0" prefWidth="117.0" text="Actividades">
-                     <VBox.margin>
-                        <Insets bottom="30.0" />
-                     </VBox.margin>
-                  </Button>
-                  <Button fx:id="btnestadisticas" mnemonicParsing="false" prefHeight="26.0" prefWidth="119.0" text="Estadisticas">
-                     <VBox.margin>
-                        <Insets />
-                     </VBox.margin>
-                  </Button>
-               </children>
-            </VBox>
+            <VBox prefHeight="594.0" prefWidth="0.0" BorderPane.alignment="CENTER" />
          </left>
          <center>
-            <VBox prefHeight="567.0" prefWidth="701.0" BorderPane.alignment="CENTER">
+            <VBox prefHeight="554.0" prefWidth="763.0" BorderPane.alignment="CENTER">
                <children>
-                  <VBox prefHeight="370.0" prefWidth="650.0">
+                  <VBox prefHeight="482.0" prefWidth="784.0">
                      <children>
                         <Label prefHeight="35.0" prefWidth="334.0" text="Nueva Reserva" textAlignment="CENTER" textOverrun="WORD_ELLIPSIS">
                            <font>
@@ -58,94 +36,140 @@
                               <Insets />
                            </VBox.margin>
                         </Label>
-                        <Label prefHeight="48.0" prefWidth="95.0" text="Frase">
+                        <Label prefHeight="23.0" prefWidth="108.0" styleClass="btn-secondary" text="Frase">
+                           <VBox.margin>
+                              <Insets left="30.0" top="20.0" />
+                           </VBox.margin>
+                           <padding>
+                              <Insets left="25.0" />
+                           </padding>
+                        </Label>
+                        <TextArea fx:id="txtareafrase" prefHeight="6.0" prefWidth="641.0">
+                           <VBox.margin>
+                              <Insets bottom="10.0" left="80.0" right="30.0" top="10.0" />
+                           </VBox.margin>
+                        </TextArea>
+                        <Label prefHeight="23.0" prefWidth="108.0" styleClass="btn-secondary" text="Actividad">
                            <VBox.margin>
                               <Insets left="30.0" />
                            </VBox.margin>
                            <padding>
-                              <Insets top="30.0" />
+                              <Insets left="20.0" right="10.0" />
                            </padding>
                         </Label>
-                        <TextField fx:id="txtfieldfrase" prefHeight="33.0" prefWidth="570.0">
+                        <TextArea fx:id="txtareaactividad" prefHeight="25.0" prefWidth="668.0">
                            <VBox.margin>
-                              <Insets left="100.0" />
+                              <Insets bottom="40.0" left="80.0" right="30.0" top="10.0" />
                            </VBox.margin>
-                           <padding>
-                              <Insets bottom="20.0" left="10.0" top="10.0" />
-                           </padding>
-                        </TextField>
-                        <Label prefHeight="18.0" prefWidth="80.0" text="Actividad">
-                           <VBox.margin>
-                              <Insets left="30.0" />
-                           </VBox.margin>
-                        </Label>
-                        <TextField fx:id="txtfielactividad" prefHeight="27.0" prefWidth="570.0">
-                           <VBox.margin>
-                              <Insets left="100.0" />
-                           </VBox.margin>
-                           <padding>
-                              <Insets bottom="20.0" left="10.0" top="10.0" />
-                           </padding>
-                        </TextField>
+                        </TextArea>
                         <HBox prefHeight="94.0" prefWidth="650.0">
                            <children>
                               <Pane prefHeight="146.0" prefWidth="104.0">
                                  <children>
-                                    <Label layoutX="32.0" layoutY="4.0" prefHeight="20.0" prefWidth="83.0" text="Fecha" />
                                     <Label layoutX="24.0" layoutY="93.0" prefHeight="17.0" prefWidth="249.0" />
-                                    <Label layoutX="34.0" layoutY="65.0" prefHeight="17.0" prefWidth="641.0" text="Categorias" />
-                                    <Line endX="423.59991455078125" endY="7.62939453125E-6" layoutX="223.0" layoutY="74.0" startX="-121.1999740600586" startY="7.62939453125E-6" />
+                                    <Label layoutX="36.0" layoutY="65.0" prefHeight="21.0" prefWidth="712.0" styleClass="btn-secondary" text="Categorias" />
+                                    <Line endX="522.7999877929688" endY="-7.62939453125E-6" layoutX="223.0" layoutY="86.0" startX="-108.60000610351562" startY="1.52587890625E-5" />
+                                    <Label layoutX="36.0" layoutY="-13.0" prefHeight="23.0" prefWidth="96.0" styleClass="btn-secondary" text="Fecha">
+                                       <padding>
+                                          <Insets left="25.0" />
+                                       </padding>
+                                    </Label>
                                  </children>
                               </Pane>
-                              <DatePicker fx:id="datapickerfecha">
+                              <DatePicker fx:id="datapickerfecha" prefHeight="42.0" prefWidth="121.0">
                                  <HBox.margin>
                                     <Insets left="35.0" top="20.0" />
                                  </HBox.margin>
                               </DatePicker>
-                              <Pane prefHeight="96.0" prefWidth="135.0">
+                              <Pane prefHeight="115.0" prefWidth="94.0">
                                  <children>
-                                    <Label layoutX="14.0" layoutY="5.0" prefHeight="17.0" prefWidth="80.0" text="Hora inicio" />
+                                    <Label layoutX="4.0" layoutY="-13.0" prefHeight="23.0" prefWidth="88.0" text="Hora inicio">
+                                       <styleClass>
+                                          <String fx:value="day-cell" />
+                                          <String fx:value="btn-secondary" />
+                                       </styleClass>
+                                       <padding>
+                                          <Insets left="10.0" />
+                                       </padding></Label>
                                  </children>
                               </Pane>
-                              <ChoiceBox fx:id="choiceboxhorainicio" prefWidth="150.0">
+                              <ChoiceBox fx:id="choiceboxhorainicio" prefHeight="42.0" prefWidth="121.0">
                                  <HBox.margin>
-                                    <Insets top="20.0" />
+                                    <Insets left="20.0" top="20.0" />
                                  </HBox.margin>
                               </ChoiceBox>
-                              <Pane prefHeight="96.0" prefWidth="146.0">
+                              <Pane prefHeight="107.0" prefWidth="114.0">
                                  <children>
-                                    <Label layoutX="12.0" layoutY="5.0" prefHeight="17.0" prefWidth="82.0" text="Hora fin" />
+                                    <Label layoutX="30.0" layoutY="-12.0" prefHeight="23.0" prefWidth="90.0" text="Hora fin">
+                                       <styleClass>
+                                          <String fx:value="arrow-button" />
+                                          <String fx:value="btn-secondary" />
+                                       </styleClass>
+                                       <padding>
+                                          <Insets left="20.0" />
+                                       </padding></Label>
                                  </children>
                               </Pane>
-                              <ChoiceBox fx:id="choiceboxhorafin" prefHeight="26.0" prefWidth="130.0">
+                              <ChoiceBox fx:id="choiceboxhorafin" prefHeight="42.0" prefWidth="121.0">
                                  <HBox.margin>
-                                    <Insets bottom="20.0" right="20.0" top="20.0" />
+                                    <Insets bottom="30.0" left="20.0" right="30.0" top="20.0" />
                                  </HBox.margin>
                               </ChoiceBox>
                            </children>
                         </HBox>
-                        <ListView fx:id="listviewcategorias" prefHeight="72.0" prefWidth="550.0">
+                        <ListView fx:id="listviewcategorias" prefHeight="72.0" prefWidth="654.0" styleClass="text-area">
                            <VBox.margin>
-                              <Insets left="100.0" />
+                              <Insets bottom="30.0" left="80.0" right="30.0" top="10.0" />
                            </VBox.margin>
+                           <padding>
+                              <Insets bottom="20.0" left="20.0" />
+                           </padding>
                         </ListView>
                      </children>
                      <VBox.margin>
-                        <Insets bottom="20.0" left="20.0" right="10.0" top="20.0" />
+                        <Insets left="20.0" top="20.0" />
                      </VBox.margin>
                   </VBox>
-                  <Pane prefHeight="42.0" prefWidth="633.0">
+                  <Pane prefHeight="21.0" prefWidth="798.0">
                      <children>
-                        <Button fx:id="btnlimpiar" layoutX="520.0" layoutY="2.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="146.0" text="Limpiar " />
-                        <Button fx:id="btncancelarreserva" layoutX="305.0" layoutY="2.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="183.0" text="Cancelar Reserva de seleccion" />
-                        <Button fx:id="btnreserva" layoutX="125.0" layoutY="2.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="142.0" text="Reservar" />
+                        <HBox layoutY="-23.0" prefHeight="50.0" prefWidth="804.0">
+                           <children>
+                              <Button fx:id="btnreserva" mnemonicParsing="false" prefHeight="36.0" prefWidth="129.0" text="Reservar">
+                                 <HBox.margin>
+                                    <Insets left="90.0" top="10.0" />
+                                 </HBox.margin>
+                                 <styleClass>
+                                    <String fx:value="btn-primary" />
+                                    <String fx:value="toggle-button" />
+                                 </styleClass>
+                              </Button>
+                              <Button fx:id="btncancelarreserva" mnemonicParsing="false" prefHeight="36.0" prefWidth="236.0" styleClass="toggle-button" text="Cancelar Reserva de seleccion">
+                                 <HBox.margin>
+                                    <Insets left="90.0" top="10.0" />
+                                 </HBox.margin>
+                              </Button>
+                              <Button fx:id="btnlimpiar" mnemonicParsing="false" prefHeight="38.0" prefWidth="120.0" styleClass="toggle-button" text="Limpiar ">
+                                 <HBox.margin>
+                                    <Insets left="100.0" right="10.0" top="10.0" />
+                                 </HBox.margin>
+                              </Button>
+                           </children>
+                           <padding>
+                              <Insets bottom="10.0" left="8.0" />
+                           </padding>
+                        </HBox>
                      </children>
                   </Pane>
-                  <Label prefHeight="18.0" prefWidth="199.0" text="Mis reservas ">
-                     <padding>
-                        <Insets left="50.0" />
-                     </padding>
+                  <Label prefHeight="17.0" prefWidth="711.0" styleClass="btn-secondary" text="Mis reservas">
+                     <VBox.margin>
+                        <Insets left="57.0" top="10.0" />
+                     </VBox.margin>
                   </Label>
+                  <Line endX="1904.5858154296875" endY="-4.449747562408447" startX="1279.492919921875" startY="-3.035533905029297">
+                     <VBox.margin>
+                        <Insets left="135.0" />
+                     </VBox.margin>
+                  </Line>
                </children>
                <BorderPane.margin>
                   <Insets />
@@ -153,11 +177,11 @@
             </VBox>
          </center>
       </BorderPane>
-      <TableView fx:id="tableviewmisreservas" layoutX="241.0" layoutY="476.0" prefHeight="194.0" prefWidth="549.0">
+      <TableView fx:id="tableviewmisreservas" layoutX="101.0" layoutY="562.0" prefHeight="149.0" prefWidth="669.0" styleClass="text-area">
         <columns>
           <TableColumn prefWidth="87.99998474121094" text="ID" />
-          <TableColumn prefWidth="95.20001220703125" text="Actividad" />
-            <TableColumn prefWidth="75.0" text="Fecha" />
+          <TableColumn prefWidth="121.60003662109375" text="Actividad" />
+            <TableColumn prefWidth="109.5999755859375" text="Fecha" />
             <TableColumn prefWidth="75.0" text="Horario" />
             <TableColumn prefWidth="75.0" text="Recursos" />
             <TableColumn prefWidth="75.0" text="Estado" />

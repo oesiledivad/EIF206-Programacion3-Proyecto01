@@ -13,54 +13,25 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="523.0" prefWidth="792.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="una.proyecto.controller.CalendarizacionController">
+<AnchorPane prefHeight="513.0" prefWidth="798.0" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="una.proyecto.controller.CalendarizacionController">
    <children>
-      <Separator layoutX="112.0" layoutY="87.0" prefHeight="3.0" prefWidth="658.0" />
-      <Label layoutX="103.0" layoutY="14.0" prefHeight="80.0" prefWidth="236.0" text="Filtros">
+      <Separator layoutX="40.0" layoutY="87.0" prefHeight="3.0" prefWidth="710.0" />
+      <Label layoutX="35.0" layoutY="14.0" prefHeight="80.0" prefWidth="236.0" text="Filtros">
          <font>
             <Font size="32.0" />
          </font>
       </Label>
-      <Label layoutX="112.0" layoutY="119.0" prefHeight="18.0" prefWidth="52.0" text="Fecha" />
-      <DatePicker layoutX="153.0" layoutY="111.0" prefHeight="34.0" prefWidth="136.0" />
-      <ChoiceBox fx:id="choiceboxcategoria" layoutX="411.0" layoutY="110.0" prefHeight="34.0" prefWidth="114.0" />
-      <Button fx:id="btncargar" layoutX="558.0" layoutY="110.0" mnemonicParsing="false" prefHeight="34.0" prefWidth="90.0" text="Cargar" />
-      <Button fx:id="btnimprimir" layoutX="658.0" layoutY="110.0" mnemonicParsing="false" prefHeight="34.0" prefWidth="89.0" text="Imprimir " />
-      <Label layoutX="339.0" layoutY="119.0" text="Categoria" />
-      <Separator layoutX="112.0" layoutY="156.0" prefHeight="3.0" prefWidth="658.0" />
-      <VBox layoutY="2.0" prefHeight="507.0" prefWidth="100.0">
-         <children>
-            <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="29.0" text="☰" />
-            <Button fx:id="btnfuncionarios" mnemonicParsing="false" prefHeight="26.0" prefWidth="101.0" text="Funcionarios">
-               <VBox.margin>
-                  <Insets top="100.0" />
-               </VBox.margin>
-            </Button>
-            <Button fx:id="btncategorias" mnemonicParsing="false" prefHeight="26.0" prefWidth="98.0" text="Categorias ">
-               <VBox.margin>
-                  <Insets bottom="10.0" top="20.0" />
-               </VBox.margin>
-            </Button>
-            <Button fx:id="btnrecursos" mnemonicParsing="false" prefHeight="26.0" prefWidth="102.0" text="Recursos">
-               <VBox.margin>
-                  <Insets bottom="10.0" top="20.0" />
-               </VBox.margin>
-            </Button>
-            <Button fx:id="btnactividades" mnemonicParsing="false" prefHeight="26.0" prefWidth="102.0" text="Actividades">
-               <VBox.margin>
-                  <Insets top="20.0" />
-               </VBox.margin>
-            </Button>
-            <Button fx:id="btnestadisticas" mnemonicParsing="false" prefHeight="26.0" prefWidth="99.0" text="Estadisticas">
-               <VBox.margin>
-                  <Insets top="20.0" />
-               </VBox.margin>
-            </Button>
-         </children>
-      </VBox>
+      <Label layoutX="48.0" layoutY="119.0" prefHeight="22.0" prefWidth="63.0" styleClass="btn-secondary" text="Fecha" />
+      <DatePicker layoutX="122.0" layoutY="107.0" prefHeight="42.0" prefWidth="136.0" />
+      <ChoiceBox fx:id="choiceboxcategoria" layoutX="357.0" layoutY="107.0" prefHeight="42.0" prefWidth="136.0" />
+      <Button fx:id="btncargar" layoutX="514.0" layoutY="105.0" mnemonicParsing="false" prefHeight="42.0" prefWidth="104.0" styleClass="toggle-button" text="Cargar" />
+      <Button fx:id="btnimprimir" layoutX="641.0" layoutY="107.0" mnemonicParsing="false" prefHeight="42.0" prefWidth="104.0" styleClass="toggle-button" text="Imprimir " />
+      <Label layoutX="280.0" layoutY="119.0" styleClass="btn-secondary" text="Categoria" />
+      <Separator layoutX="40.0" layoutY="156.0" prefHeight="3.0" prefWidth="710.0" />
+      <VBox layoutX="32.0" layoutY="2.0" prefHeight="507.0" prefWidth="0.0" />
     <AnchorPane layoutX="122.0" layoutY="206.0" minHeight="0.0" minWidth="0.0" prefHeight="291.0" prefWidth="638.0">
          <children>
-            <TableView layoutX="-21.0" layoutY="4.0" prefHeight="283.0" prefWidth="658.0">
+            <TableView layoutX="-81.0" layoutY="4.0" prefHeight="283.0" prefWidth="710.0" styleClass="list-view">
               <columns>
                 <TableColumn fx:id="tableviewcalenderizacion" prefWidth="93.60000610351562" text="Horas" />
                 <TableColumn prefWidth="166.39996337890625" text="C2" />
@@ -72,11 +43,10 @@
             </TableView>
          </children>
       </AnchorPane>
-      <TitledPane animated="false" layoutX="101.0" layoutY="178.0" prefHeight="34.0" prefWidth="122.0" text="Calenderizacion">
+      <TitledPane animated="false" layoutX="41.0" layoutY="175.0" prefHeight="34.0" prefWidth="122.0" styleClass="btn-secondary" text="Calenderizacion">
          <padding>
             <Insets bottom="2.0" right="2.0" top="5.0" />
          </padding>
       </TitledPane>
-      <Separator layoutX="100.0" layoutY="5.0" orientation="VERTICAL" prefHeight="492.0" prefWidth="6.0" />
    </children>
 </AnchorPane>
