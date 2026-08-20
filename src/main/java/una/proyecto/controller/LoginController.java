@@ -5,6 +5,8 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import una.proyecto.utils.Navigation;
@@ -13,7 +15,8 @@ import java.io.IOException;
 import java.util.Optional;
 
 public class LoginController {
-
+    @FXML
+    public VBox testVBoxLogin;
     @FXML
     private TextField txtUserId;
 
@@ -39,6 +42,11 @@ public class LoginController {
         btnLogin.setOnAction(event -> handleLogin());
         btnSalir.setOnAction(event -> handleExitButton());
         btnDarkMode.setOnAction(event -> toggleDarkMode());
+        testVBoxLogin.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER) {
+                handleLogin();
+            }
+        });
 
         Platform.runLater(() -> txtUserId.requestFocus());
     }

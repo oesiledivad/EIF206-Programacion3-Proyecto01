@@ -17,7 +17,7 @@
          <children>
             <VBox alignment="TOP_CENTER" layoutX="2.0" layoutY="14.0" prefHeight="379.0" prefWidth="225.0" spacing="14.0">
                <children>
-                  <Text strokeType="OUTSIDE" strokeWidth="0.0" styleClass="title" text="Sistema de Reservas">
+                  <Text strokeType="OUTSIDE" strokeWidth="0.0" styleClass="section-title" text="Sistema de Reservas">
                      <font>
                         <Font size="24.0" />
                      </font>
@@ -31,17 +31,17 @@
       <AnchorPane prefHeight="400.0" prefWidth="340.0" BorderPane.alignment="CENTER">
          <children>
             <FontIcon iconLiteral="fa-lock" iconSize="50" layoutX="144.0" layoutY="87.0" styleClass="icon-primary" text="" wrappingWidth="30.714285850524902" />
-            <VBox alignment="TOP_CENTER" layoutX="114.0" layoutY="156.0" prefHeight="126.0" prefWidth="154.0" spacing="25.0">
+            <VBox fx:id="testVBoxLogin" alignment="TOP_CENTER" layoutX="114.0" layoutY="156.0" prefHeight="126.0" prefWidth="154.0" spacing="25.0">
                <children>
-                  <TextField fx:id="txtUserId" styleClass="text-field" />
+                  <TextField fx:id="txtUserId" promptText="Usuario" styleClass="text-field" />
                   <PasswordField fx:id="txtPassword" styleClass="password-field" />
                </children>
             </VBox>
             <VBox alignment="TOP_CENTER" layoutX="17.0" layoutY="274.0" prefHeight="103.0" prefWidth="254.0" spacing="10.0">
                <children>
                   <Label fx:id="lblError" text="Label" />
-                  <Button fx:id="btnLogin" mnemonicParsing="false" prefHeight="25.0" prefWidth="256.0" styleClass="btn-primary" text="Iniciar Sesion" />
-                  <Button fx:id="btnSalir" mnemonicParsing="false" prefHeight="0.0" prefWidth="254.0" styleClass="btn-secondary" text="Salir" />
+                  <Button fx:id="btnLogin" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="25.0" prefWidth="256.0" styleClass="btn-primary" text="Iniciar Sesion" />
+                  <Button fx:id="btnSalir" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="0.0" prefWidth="254.0" styleClass="btn-secondary" text="Salir" />
                </children>
             </VBox>
             <Button fx:id="btnDarkMode" layoutX="268.0" layoutY="14.0" mnemonicParsing="false" prefHeight="42.0" prefWidth="42.0" styleClass="btn-primary" />
