@@ -3,6 +3,8 @@ package una.proyecto.controller;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
+import java.time.LocalDate;
+
 public class ReservasController {
     @FXML private Button btnestadisticas;
     @FXML private Button btncalendarizacion;
@@ -23,10 +25,29 @@ public class ReservasController {
     private void handleCalendarizacionButton(){}
     private void handlePanelLateralButton(){}
     private void handleActividadesButton(){}
-    private void handleReservaButton(){}
-    private void handleCancelarReservaButton(){}
-    private void handleLimpiarButton(){}
+    private void handleReservaButton(){
+        String actividad= txtfieldactividad.getText();
+        LocalDate  date= datapickerfecha.getValue();
+        int dia=0; int mes=0; int annio=0;
+        if(date!=null){
+             dia = date.getDayOfMonth();
+            mes = date.getMonthValue();
+             annio=date.getYear();
+        }
+        //guardamos los textfiel en variables y se crea una instancia de reserva
+    }
+    private void handleCancelarReservaButton(){
 
 
+
+        ///aca se usa un listener se selecciona como la reserva de list view y se quita x reserva
+    }
+    private void handleLimpiarButton(){
+    txtfieldfrase.clear();
+    txtfieldactividad.clear();
+    listviewcategorias.getItems().clear();
+    choiceboxhorainicio.getSelectionModel().clearSelection();
+    choiceboxhorafin.getSelectionModel().clearSelection();
+    }
 
 }

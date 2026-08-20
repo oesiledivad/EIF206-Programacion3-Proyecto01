@@ -24,7 +24,7 @@
       <Label layoutX="112.0" layoutY="119.0" prefHeight="18.0" prefWidth="52.0" text="Fecha" />
       <DatePicker layoutX="153.0" layoutY="111.0" prefHeight="34.0" prefWidth="136.0" />
       <ChoiceBox fx:id="choiceboxcategoria" layoutX="411.0" layoutY="110.0" prefHeight="34.0" prefWidth="114.0" />
-      <Button fx:id="btncargar" layoutX="563.0" layoutY="111.0" mnemonicParsing="false" prefHeight="34.0" prefWidth="90.0" text="Cargar" />
+      <Button fx:id="btncargar" layoutX="558.0" layoutY="110.0" mnemonicParsing="false" prefHeight="34.0" prefWidth="90.0" text="Cargar" />
       <Button fx:id="btnimprimir" layoutX="658.0" layoutY="110.0" mnemonicParsing="false" prefHeight="34.0" prefWidth="89.0" text="Imprimir " />
       <Label layoutX="339.0" layoutY="119.0" text="Categoria" />
       <Separator layoutX="112.0" layoutY="156.0" prefHeight="3.0" prefWidth="658.0" />
