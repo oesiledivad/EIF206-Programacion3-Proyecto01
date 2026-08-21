@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<HBox fx:id="titleBar" alignment="CENTER" prefHeight="35.0" spacing="8.0" styleClass="custom-title-bar" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="una.proyecto.controller.TitleBarController">
+    <children>
+        <Region HBox.hgrow="ALWAYS" />
+
+        <Label fx:id="lblWindowTitle" alignment="CENTER" styleClass="window-title-text" text="Sistema de Reservas" />
+
+        <Region HBox.hgrow="ALWAYS" />
+
+        <HBox alignment="CENTER_RIGHT" spacing="8.0">
+            <children>
+                <Button fx:id="btnMinimize" mnemonicParsing="false" styleClass="window-btn">
+                    <graphic><FontIcon iconLiteral="fa-minus" iconSize="12" styleClass="icon-window" /></graphic>
+                </Button>
+
+                <Button fx:id="btnMaximize" mnemonicParsing="false" styleClass="window-btn">
+                    <graphic><FontIcon fx:id="maximizeIcon" iconLiteral="fa-window-maximize" iconSize="12" styleClass="icon-window" /></graphic>
+                </Button>
+
+                <Button fx:id="btnClose" mnemonicParsing="false" styleClass="window-btn, close-btn">
+                    <graphic><FontIcon iconLiteral="fa-close" iconSize="12" styleClass="icon-window" /></graphic>
+                </Button>
+            </children>
+        </HBox>
+    </children>
+</HBox>

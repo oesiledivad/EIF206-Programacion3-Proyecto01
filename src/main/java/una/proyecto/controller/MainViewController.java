@@ -64,6 +64,8 @@ public class MainViewController {
     public Separator sepAdmin;
     @FXML
     public VBox sidebarMenu;
+    @FXML
+    private TitleBarController titleBarController;
 
 
     // Usuario actual (se setea desde el login)
@@ -92,6 +94,8 @@ public class MainViewController {
 
         // Configurar visibilidad según rol (admin/employee)
         configureMenuByRole();
+        Navigation.setTitleBarController(titleBarController);
+
     }
 
     /**
@@ -214,7 +218,7 @@ public class MainViewController {
 
     @FXML
     public void goToCategorias(ActionEvent actionEvent) {
-        loadView("categorias-administrador-view");
+        loadView("categorias-administrador-view", "Sistema de Reservas - Categorias");
     }
 
     @FXML

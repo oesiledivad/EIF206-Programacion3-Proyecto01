@@ -1336,6 +1336,7 @@ Text.heading-3 {
 .icon-success { -fx-fill: -fx-success; }
 .icon-warning { -fx-fill: -fx-warning; }
 .icon-inverse { -fx-fill: -fx-text-inverse; }
+.icon-window { -fx-fill: -fx-text-primary; }
 
 /*
    BADGE / CHIP
@@ -1614,7 +1615,7 @@ Text.heading-3 {
 
 /*  NOMBRE DE USUARIO  */
 .user-name {
-    -fx-font-size: 14px;
+    -fx-font-size: 12px;
     -fx-font-weight: 600;
     -fx-text-fill: -fx-text-primary;
 }
@@ -1811,4 +1812,46 @@ Text.heading-3 {
     -fx-font-size: 12px;
 }
 
+.custom-title-bar {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-padding: 0 10px;
+    -fx-border-color: -fx-border-primary;
+    -fx-border-width: 0 0 1px 0;
+}
 
+.window-title-text {
+    -fx-text-fill: -fx-text-secondary;
+    -fx-font-size: 12px;
+    -fx-padding: 0 10px;
+}
+
+.window-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: -fx-text-primary;
+    -fx-min-width: 35px;
+    -fx-min-height: 25px;
+    -fx-background-radius: 4px;
+    -fx-cursor: hand;
+}
+
+.window-btn:hover {
+    -fx-background-color: -fx-bg-tertiary;
+}
+
+.window-btn:pressed {
+    -fx-background-color: -fx-bg-tertiary;
+    -fx-scale-x: 0.92;
+    -fx-scale-y: 0.92;
+}
+
+.close-btn:hover {
+    -fx-background-color: #ef4444 !important;
+    -fx-text-fill: white !important;
+}
+
+.close-btn:pressed {
+    -fx-background-color: #dc2626 !important;
+    -fx-text-fill: white !important;
+    -fx-scale-x: 0.92;
+    -fx-scale-y: 0.92;
+}

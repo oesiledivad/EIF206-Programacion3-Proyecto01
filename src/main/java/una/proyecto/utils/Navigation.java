@@ -5,18 +5,33 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import una.proyecto.controller.TitleBarController;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.function.Consumer;
 
-public class Navigation {
+public final class Navigation {
 
     private static final String CSS_PATH = "/una/proyecto/css/style.css";
+    private static TitleBarController titleBarController;
 
-    // CAMBIAR ESCENA
+    private Navigation() {
+    }
+
+
+    public static void setTitleBarController(TitleBarController controller) {
+        titleBarController = controller;
+    }
+
+    // NAVEGACIÓN
 
     /**
      * Cambia la escena actual por otra vista FXML.
+     *
+     * @param stage     Stage donde se mostrará la vista.
+     * @param fxmlPath  Ruta del archivo FXML.
+     * @param title     Título de la ventana.
      */
     public static void navigateTo(
             Stage stage,
@@ -24,47 +39,51 @@ public class Navigation {
             String title
     ) throws IOException {
 
-        FXMLLoader loader = new FXMLLoader(Navigation.class.getResource(fxmlPath));
+        ViewLoaderResult result = loadViewWithController(fxmlPath);
 
-        Parent root = loader.load();
-        Scene scene = createScene(root);
-
-        stage.setScene(scene);
-        stage.setTitle(title);
-        stage.sizeToScene();
-        stage.centerOnScreen();
-        ThemeManager.applyTheme(scene);
-        stage.show();
+        showView(
+                stage,
+                result.getRoot(),
+                title
+        );
+        updateWindowTitle(title);
     }
 
     /**
      * Cambia la escena y retorna el controlador de la vista.
+     *
+     * @param stage     Stage donde se mostrará la vista.
+     * @param fxmlPath  Ruta del archivo FXML.
+     * @param title     Título de la ventana.
+     * @param <T>       Tipo del controlador.
+     * @return          Controlador de la vista.
      */
+    @SuppressWarnings("unchecked")
     public static <T> T navigateToWithController(
             Stage stage,
             String fxmlPath,
             String title
     ) throws IOException {
 
-        FXMLLoader loader = new FXMLLoader(Navigation.class.getResource(fxmlPath));
+        ViewLoaderResult result = loadViewWithController(fxmlPath);
 
-        Parent root = loader.load();
-        Scene scene = createScene(root);
+        showView(
+                stage,
+                result.getRoot(),
+                title
+        );
 
-        stage.setScene(scene);
-        stage.setTitle(title);
-        stage.sizeToScene();
-        stage.centerOnScreen();
-        ThemeManager.applyTheme(scene);
-        stage.show();
-
-        return loader.getController();
+        return (T) result.getController();
     }
 
-    // CAMBIAR ESCENA (desde cualquier Node)
+    // NAVEGACIÓN DESDE NODE
 
     /**
      * Cambia la escena obteniendo el Stage desde un Node.
+     *
+     * @param node      Nodo desde el cual se obtiene el Stage.
+     * @param fxmlPath  Ruta del archivo FXML.
+     * @param title     Título de la ventana.
      */
     public static void navigateFromNode(
             Node node,
@@ -72,13 +91,24 @@ public class Navigation {
             String title
     ) throws IOException {
 
-        Stage stage = (Stage) node.getScene().getWindow();
-        navigateTo(stage, fxmlPath, title);
+        Stage stage = getStage(node);
+
+        navigateTo(
+                stage,
+                fxmlPath,
+                title
+        );
     }
 
     /**
      * Cambia la escena y retorna el controlador,
      * obteniendo el Stage desde un Node.
+     *
+     * @param node      Nodo desde el cual se obtiene el Stage.
+     * @param fxmlPath  Ruta del archivo FXML.
+     * @param title     Título de la ventana.
+     * @param <T>       Tipo del controlador.
+     * @return          Controlador de la vista.
      */
     public static <T> T navigateFromNodeWithController(
             Node node,
@@ -86,89 +116,244 @@ public class Navigation {
             String title
     ) throws IOException {
 
-        Stage stage = (Stage) node.getScene().getWindow();
-        return navigateToWithController(stage, fxmlPath, title);
+        Stage stage = getStage(node);
+
+        return navigateToWithController(
+                stage,
+                fxmlPath,
+                title
+        );
     }
 
-    // CARGAR VISTAS
+    // CARGA DE VISTAS
 
     /**
      * Carga un FXML y retorna su nodo raíz.
+     *
+     * @param fxmlPath Ruta del archivo FXML.
+     * @return         Nodo raíz de la vista.
      */
-    public static Parent loadView(String fxmlPath) throws IOException {
-        FXMLLoader loader = new FXMLLoader(
-                Navigation.class.getResource(fxmlPath)
-        );
+    public static Parent loadView(
+            String fxmlPath
+    ) throws IOException {
+
+        FXMLLoader loader = createLoader(fxmlPath);
+
         return loader.load();
     }
 
     /**
      * Carga un FXML y retorna su controlador.
+     *
+     * @param fxmlPath Ruta del archivo FXML.
+     * @param <T>      Tipo del controlador.
+     * @return         Controlador de la vista.
      */
-    public static <T> T loadController(String fxmlPath) throws IOException {
-        FXMLLoader loader = new FXMLLoader(
-                Navigation.class.getResource(fxmlPath)
-        );
+    @SuppressWarnings("unchecked")
+    public static <T> T loadController(
+            String fxmlPath
+    ) throws IOException {
+
+        FXMLLoader loader = createLoader(fxmlPath);
+
         loader.load();
-        return loader.getController();
+
+        return (T) loader.getController();
     }
 
     /**
      * Carga un FXML y retorna tanto la vista como su controlador.
+     *
+     * @param fxmlPath Ruta del archivo FXML.
+     * @return         Resultado con root y controller.
      */
-    public static ViewLoaderResult loadViewWithController(String fxmlPath) throws IOException {
-        FXMLLoader loader = new FXMLLoader(
-                Navigation.class.getResource(fxmlPath)
-        );
+    public static ViewLoaderResult loadViewWithController(
+            String fxmlPath
+    ) throws IOException {
+
+        FXMLLoader loader = createLoader(fxmlPath);
+
         Parent root = loader.load();
-        return new ViewLoaderResult(root, loader.getController());
+
+        return new ViewLoaderResult(
+                root,
+                loader.getController()
+        );
     }
 
     /**
-     * Carga un FXML y permite configurar el controlador antes de retornar.
+     * Carga un FXML y permite configurar el controlador
+     * antes de retornar la vista.
+     *
+     * @param fxmlPath         Ruta del archivo FXML.
+     * @param controllerConfig Configuración que se aplicará al controlador.
+     * @return                 Nodo raíz de la vista.
      */
     public static Parent loadViewWithConfig(
             String fxmlPath,
             Consumer<Object> controllerConfig
     ) throws IOException {
 
-        FXMLLoader loader = new FXMLLoader(
-                Navigation.class.getResource(fxmlPath)
-        );
-        Parent root = loader.load();
-        Object controller = loader.getController();
+        ViewLoaderResult result =
+                loadViewWithController(fxmlPath);
+
+        Object controller = result.getController();
 
         if (controller != null && controllerConfig != null) {
             controllerConfig.accept(controller);
         }
 
-        return root;
+        return result.getRoot();
     }
 
-    // METODOS PRIVADOS
+    // MÉTODOS PRIVADOS
 
-    private static Scene createScene(Parent root) {
+    /**
+     * Crea un FXMLLoader para la ruta indicada.
+     *
+     * Centraliza la creación de FXMLLoader para evitar
+     * repetir la resolución del recurso en varios métodos.
+     */
+    private static FXMLLoader createLoader(
+            String fxmlPath
+    ) {
+
+        URL resource = Navigation.class.getResource(fxmlPath);
+
+        if (resource == null) {
+            throw new IllegalArgumentException(
+                    "No se encontró el archivo FXML: " + fxmlPath
+            );
+        }
+
+        return new FXMLLoader(resource);
+    }
+
+    /**
+     * Muestra una vista en un Stage.
+     *
+     * Centraliza toda la lógica relacionada con:
+     * - creación de Scene
+     * - configuración del Stage
+     * - aplicación del tema
+     * - visualización de la ventana
+     */
+    private static void showView(
+            Stage stage,
+            Parent root,
+            String title
+    ) {
+
+        Scene scene = createScene(root);
+
+        configureStage(
+                stage,
+                scene,
+                title
+        );
+
+
+
+        stage.show();
+    }
+
+    /**
+     * Configura el Stage con la Scene indicada.
+     */
+    private static void configureStage(
+            Stage stage,
+            Scene scene,
+            String title
+    ) {
+
+        stage.setScene(scene);
+        stage.setTitle(title);
+        stage.sizeToScene();
+        stage.centerOnScreen();
+        updateWindowTitle(title);
+
+        ThemeManager.applyTheme(scene);
+    }
+
+    /**
+     * Crea una Scene y agrega el stylesheet global.
+     */
+    private static Scene createScene(
+            Parent root
+    ) {
+
         Scene scene = new Scene(root);
+
         addStylesheet(scene);
+
         return scene;
     }
 
-    private static void addStylesheet(Scene scene) {
-        try {
-            String css = Navigation.class.getResource(CSS_PATH).toExternalForm();
-            scene.getStylesheets().add(css);
-        } catch (Exception e) {
-            System.err.println("No se pudo cargar el archivo CSS: " + CSS_PATH);
+    /**
+     * Agrega el stylesheet global a la Scene.
+     */
+    private static void addStylesheet(
+            Scene scene
+    ) {
+
+        URL resource = Navigation.class.getResource(CSS_PATH);
+
+        if (resource == null) {
+            System.err.println(
+                    "No se pudo encontrar el archivo CSS: "
+                            + CSS_PATH
+            );
+            return;
         }
+
+        String css = resource.toExternalForm();
+
+        scene.getStylesheets().add(css);
+    }
+
+    /**
+     * Obtiene el Stage asociado a un Node.
+     */
+    private static Stage getStage(
+            Node node
+    ) {
+
+        if (node == null) {
+            throw new IllegalArgumentException(
+                    "El Node no puede ser null."
+            );
+        }
+
+        if (node.getScene() == null) {
+            throw new IllegalStateException(
+                    "El Node no está asociado a una Scene."
+            );
+        }
+
+        if (node.getScene().getWindow() == null) {
+            throw new IllegalStateException(
+                    "La Scene del Node no tiene un Window asociado."
+            );
+        }
+
+        return (Stage) node.getScene().getWindow();
     }
 
     // RESULTADO DE CARGAR UNA VISTA
 
-    public static class ViewLoaderResult {
+    /**
+     * Contiene el resultado de cargar un FXML:
+     * tanto el nodo raíz como su controlador.
+     */
+    public static final class ViewLoaderResult {
+
         private final Parent root;
         private final Object controller;
 
-        public ViewLoaderResult(Parent root, Object controller) {
+        public ViewLoaderResult(
+                Parent root,
+                Object controller
+        ) {
             this.root = root;
             this.controller = controller;
         }
@@ -176,8 +361,15 @@ public class Navigation {
         public Parent getRoot() {
             return root;
         }
+
         public Object getController() {
             return controller;
+        }
+    }
+
+    public static void updateWindowTitle(String title) {
+        if (titleBarController != null) {
+            titleBarController.setWindowTitle(title);
         }
     }
 }
