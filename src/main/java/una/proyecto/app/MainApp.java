@@ -12,10 +12,10 @@ public class MainApp extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        primaryStage.setResizable(false);
         primaryStage.initStyle(StageStyle.UNDECORATED);
         Navigation.navigateTo(primaryStage,
                 "/una/proyecto/ui/login-view.fxml",
                 "Sistema de Reserva");
+        primaryStage.setResizable(false);
     }
 }

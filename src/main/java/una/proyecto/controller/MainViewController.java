@@ -260,7 +260,7 @@ public class MainViewController {
                 Stage stage = (Stage) btnLogout.getScene().getWindow();
                 stage.setHeight(500);
                 stage.setWidth(500);
-                stage.setResizable(false);
+                //stage.setResizable(true);
                 Navigation.navigateTo(stage, "/una/proyecto/ui/login-view.fxml", "Sistema de Reserva - Login");
 
             } catch (IOException e) {

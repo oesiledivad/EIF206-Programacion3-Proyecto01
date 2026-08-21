@@ -10,12 +10,19 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.animation.FadeTransition;
+import javafx.animation.Animation;
+import javafx.animation.Timeline;
+import javafx.animation.KeyFrame;
 import org.kordamp.ikonli.javafx.FontIcon;
 import una.proyecto.utils.Navigation;
 import una.proyecto.utils.ThemeManager;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.Optional;
+import java.time.LocalDate;
 
 public class LoginController {
     @FXML
@@ -23,6 +30,8 @@ public class LoginController {
 
     @FXML
     public FontIcon darkModeIcon;
+    @FXML
+    public Label lblCurrentDate;
 
     @FXML
     private TextField txtUserId;
@@ -48,6 +57,13 @@ public class LoginController {
 
         btnLogin.setOnAction(event -> handleLogin());
         btnSalir.setOnAction(event -> handleExitButton());
+        Timeline clock = new Timeline(new KeyFrame(Duration.ZERO, e -> {
+            lblCurrentDate.setText(LocalDateTime.now().format(
+                    DateTimeFormatter.ofPattern("dd 'de' MMMM 'del' yyyy, HH:mm:ss", new Locale("es", "ES"))
+            ));        }), new KeyFrame(Duration.seconds(1)));
+
+        clock.setCycleCount(Animation.INDEFINITE);
+        clock.play();
 
         boolean isDarkMode = btnDarkMode.getScene() != null && btnDarkMode.getScene().getRoot().getStyleClass().contains("dark-mode");
         updateIconTheme(isDarkMode);
@@ -144,7 +160,6 @@ public class LoginController {
                                     "Sistema de Reserva - Panel Principal"
                             );
 
-                    stage.setResizable(true);
 
                     mainController.setUserData(
                             userId,
