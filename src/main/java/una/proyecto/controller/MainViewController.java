@@ -203,7 +203,7 @@ public class MainViewController {
 
     @FXML
     public void goToReservations(ActionEvent actionEvent) {
-        loadViewWithData("reservations-view", currentUserId);
+        loadViewWithData("reservas-funcionario-view", currentUserId);
     }
 
     @FXML
@@ -213,17 +213,17 @@ public class MainViewController {
 
     @FXML
     public void goToCategorias(ActionEvent actionEvent) {
-        loadView("categorias-view");
+        loadView("categorias-administrador-view");
     }
 
     @FXML
     public void goToRecursos(ActionEvent actionEvent) {
-        loadView("recursos-view");
+        loadView("recursos'view");
     }
 
     @FXML
     public void goToCalendario(ActionEvent actionEvent) {
-        loadView("calendario-view");
+        loadView("calendarizacion-view");
     }
 
     @FXML
