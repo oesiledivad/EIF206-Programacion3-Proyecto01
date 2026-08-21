@@ -476,6 +476,189 @@ Text.heading-3 {
     -fx-underline: true;
 }
 
+/*  ESTILO TIPO TOGGLE PARA BOTONES NORMALES  */
+.btn-toggle-style {
+    -fx-background-color: -fx-accent-light;
+    -fx-text-fill: -fx-accent-primary;
+    -fx-border-color: -fx-accent-primary;
+    -fx-border-width: 1.5px;
+}
+
+.btn-toggle-style:hover {
+    -fx-background-color: derive(-fx-accent-light, -5%);
+    -fx-border-color: -fx-accent-primary;
+}
+
+.btn-toggle-style:pressed {
+    -fx-background-color: derive(-fx-accent-light, -12%);
+    -fx-effect: none;
+}
+
+
+/*
+   FAMILIA DE BOTONES GLOW (ESTILO TOGGLE + EFECTO DE LUZ)
+   */
+
+/* GLOW: PRIMARIO */
+.btn-glow-primary {
+    -fx-background-color: -fx-accent-light;
+    -fx-text-fill: -fx-accent-primary;
+    -fx-border-color: -fx-accent-primary;
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
+
+.btn-glow-primary:hover {
+    -fx-background-color: derive(-fx-accent-light, -5%);
+    -fx-border-color: -fx-accent-primary;
+    -fx-effect: dropshadow(gaussian, rgba(37, 99, 235, 0.4), 14, 0.2, 0, 4);
+}
+
+.btn-glow-primary:pressed {
+    -fx-background-color: derive(-fx-accent-light, -12%);
+    -fx-effect: none;
+}
+
+
+/* PELIGRO (DANGER) */
+.btn-glow-danger {
+    -fx-background-color: derive(-fx-danger, 85%);
+    -fx-text-fill: -fx-danger;
+    -fx-border-color: -fx-danger;
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
+
+.btn-glow-danger:hover {
+    -fx-background-color: derive(-fx-danger, 75%);
+    -fx-border-color: -fx-danger;
+    -fx-effect: dropshadow(gaussian, rgba(220, 38, 38, 0.4), 14, 0.2, 0, 4);
+}
+
+.btn-glow-danger:pressed {
+    -fx-background-color: derive(-fx-danger, 65%);
+    -fx-effect: none;
+}
+
+
+/* ÉXITO (SUCCESS) */
+.btn-glow-success {
+    -fx-background-color: derive(-fx-success, 85%);
+    -fx-text-fill: -fx-success;
+    -fx-border-color: -fx-success;
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
+
+.btn-glow-success:hover {
+    -fx-background-color: derive(-fx-success, 75%);
+    -fx-border-color: -fx-success;
+    -fx-effect: dropshadow(gaussian, rgba(22, 163, 74, 0.4), 14, 0.2, 0, 4);
+}
+
+.btn-glow-success:pressed {
+    -fx-background-color: derive(-fx-success, 65%);
+    -fx-effect: none;
+}
+
+
+/* ADVERTENCIA (WARNING) */
+.btn-glow-warning {
+    -fx-background-color: derive(-fx-warning, 85%);
+    -fx-text-fill: -fx-warning;
+    -fx-border-color: -fx-warning;
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
+
+.btn-glow-warning:hover {
+    -fx-background-color: derive(-fx-warning, 75%);
+    -fx-border-color: -fx-warning;
+    -fx-effect: dropshadow(gaussian, rgba(217, 119, 6, 0.4), 14, 0.2, 0, 4);
+}
+
+.btn-glow-warning:pressed {
+    -fx-background-color: derive(-fx-warning, 65%);
+    -fx-effect: none;
+}
+
+
+/*
+   FAMILIA DE BOTONES NEUTRALES CON SOMBRA DE COLOR EN HOVER
+  */
+
+/* NEUTRAL SHADOW: PRIMARIO  */
+.btn-toggle-shadow-primary {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-text-fill: -fx-text-secondary;
+    -fx-border-color: -fx-border-primary;
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
+.btn-toggle-shadow-primary:hover {
+    -fx-effect: dropshadow(gaussian, rgba(37, 99, 235, 0.4), 14, 0.2, 0, 4);
+}
+.btn-toggle-shadow-primary:pressed {
+    -fx-effect: none;
+}
+
+
+/* NEUTRAL SHADOW: PELIGRO */
+.btn-toggle-shadow-danger {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-text-fill: -fx-text-secondary;
+    -fx-border-color: -fx-border-primary;
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
+.btn-toggle-shadow-danger:hover {
+    -fx-effect: dropshadow(gaussian, rgba(220, 38, 38, 0.4), 14, 0.2, 0, 4);
+}
+.btn-toggle-shadow-danger:pressed {
+    -fx-effect: none;
+}
+
+
+/* ÉXITO (SUCCESS) */
+.btn-toggle-shadow-success {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-text-fill: -fx-text-secondary;
+    -fx-border-color: -fx-border-primary;
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
+.btn-toggle-shadow-success:hover {
+    -fx-effect: dropshadow(gaussian, rgba(22, 163, 74, 0.4), 14, 0.2, 0, 4);
+}
+.btn-toggle-shadow-success:pressed {
+    -fx-effect: none;
+}
+
+
+/* ADVERTENCIA (WARNING) */
+.btn-toggle-shadow-warning {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-text-fill: -fx-text-secondary;
+    -fx-border-color: -fx-border-primary;
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
+.btn-toggle-shadow-warning:hover {
+    -fx-effect: dropshadow(gaussian, rgba(217, 119, 6, 0.4), 14, 0.2, 0, 4);
+}
+.btn-toggle-shadow-warning:pressed {
+    -fx-effect: none;
+}
+
+
 /*
    INPUTS
     */
@@ -1202,6 +1385,60 @@ Text.heading-3 {
     -fx-padding: 10px 14px;
     -fx-text-fill: -fx-text-primary;
     -fx-font-size: 13px;
+}
+
+/*
+   LISTAS (LIST-VIEW)
+   */
+
+.list-view {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-border-color: -fx-border-primary;
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-padding: 4px;
+    -fx-background-insets: 0;
+}
+
+.list-view .virtual-flow {
+    -fx-background-color: transparent;
+}
+
+.list-view .virtual-flow .sheet {
+    -fx-background-color: -fx-bg-secondary;
+}
+
+.list-cell {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-text-fill: -fx-text-primary;
+    -fx-font-size: 13px;
+    -fx-padding: 10px 14px;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-border-color: transparent;
+}
+
+.list-cell:empty {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-border-color: transparent;
+}
+
+.list-cell:filled:hover {
+    -fx-background-color: -fx-bg-tertiary;
+    -fx-cursor: hand;
+}
+
+.list-cell:filled:pressed {
+    -fx-background-color: derive(-fx-bg-tertiary, -10%);
+}
+
+.list-cell:filled:selected {
+    -fx-background-color: -fx-accent-light;
+    -fx-text-fill: -fx-accent-primary;
+}
+
+.list-cell:filled:selected .text {
+    -fx-fill: -fx-accent-primary;
 }
 
 /*

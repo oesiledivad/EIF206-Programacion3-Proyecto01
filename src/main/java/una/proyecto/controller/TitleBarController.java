@@ -28,7 +28,7 @@ public class TitleBarController {
         if (stage.isMaximized()) {
             maximizeIcon.setIconLiteral("fa-window-restore");
         } else {
-            maximizeIcon.setIconLiteral("fa-square-o");
+            maximizeIcon.setIconLiteral("fa-window-maximize");
         }
     }
 
