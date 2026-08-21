@@ -269,6 +269,8 @@ public final class Navigation {
         stage.setScene(scene);
         stage.setTitle(title);
         stage.sizeToScene();
+        stage.setResizable(true);
+        ResizeHelper.addResizeListener(stage);
         stage.centerOnScreen();
         updateWindowTitle(title);
 

@@ -20,6 +20,7 @@
                   <VBox fx:id="testVBoxLogin" alignment="CENTER" prefHeight="400.0" prefWidth="400.0" spacing="20.0" styleClass="screen-1">
                      <children>
                         <Label styleClass="app-title" text="Sistema de Reservas" />
+                        <Label fx:id="lblCurrentDate" styleClass="text-xs" text="Label" />
                         <FontIcon iconLiteral="fa-lock" iconSize="45" styleClass="icon-primary" />
                         <VBox spacing="4.0" styleClass="card-input-container">
                            <children>
@@ -63,10 +64,6 @@
       </AnchorPane>
    </center>
    <top>
-      <fx:include
-              source="title-bar.fxml"
-              AnchorPane.leftAnchor="0.0"
-              AnchorPane.rightAnchor="0.0"
-              AnchorPane.topAnchor="0.0" />
+      <fx:include source="title-bar.fxml" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
    </top>
 </BorderPane>
