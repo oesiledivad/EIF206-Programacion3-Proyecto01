@@ -2,14 +2,16 @@ package una.proyecto.controller;
 
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import javafx.animation.FadeTransition;
+import org.kordamp.ikonli.javafx.FontIcon;
 import una.proyecto.utils.Navigation;
+import una.proyecto.utils.ThemeManager;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -17,6 +19,9 @@ import java.util.Optional;
 public class LoginController {
     @FXML
     public VBox testVBoxLogin;
+
+    @FXML
+    public FontIcon darkModeIcon;
     @FXML
     private TextField txtUserId;
 
@@ -41,26 +46,54 @@ public class LoginController {
 
         btnLogin.setOnAction(event -> handleLogin());
         btnSalir.setOnAction(event -> handleExitButton());
-        btnDarkMode.setOnAction(event -> toggleDarkMode());
+
+        boolean isDarkMode = btnDarkMode.getScene() != null && btnDarkMode.getScene().getRoot().getStyleClass().contains("dark-mode");
+        updateIconTheme(isDarkMode);
+
+        btnDarkMode.setOnAction(event -> toggleThemeWithFade());
         testVBoxLogin.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.ENTER) {
                 handleLogin();
+                event.consume();
             }
         });
 
         Platform.runLater(() -> txtUserId.requestFocus());
     }
 
-    private void toggleDarkMode() {
-        // TODO: arreglar esto y que persista
+    private void toggleThemeWithFade() {
         var root = btnDarkMode.getScene().getRoot();
+        boolean isDarkMode = root.getStyleClass().contains("dark-mode");
 
-        if (root.getStyleClass().contains("dark-mode")) {
-            root.getStyleClass().remove("dark-mode");
-            btnDarkMode.setText("Modo oscuro");
+        FadeTransition fadeOut = new FadeTransition(Duration.millis(180), testVBoxLogin);
+        fadeOut.setFromValue(1.0);
+        fadeOut.setToValue(0.3);
+
+        fadeOut.setOnFinished(e -> {
+            if (isDarkMode) {
+                root.getStyleClass().remove("dark-mode");
+                updateIconTheme(false);
+                ThemeManager.setDarkMode(false);
+            } else {
+                root.getStyleClass().add("dark-mode");
+                updateIconTheme(true);
+                ThemeManager.setDarkMode(true);
+            }
+
+            FadeTransition fadeIn = new FadeTransition(Duration.millis(180), testVBoxLogin);
+            fadeIn.setFromValue(0.3);
+            fadeIn.setToValue(1.0);
+            fadeIn.play();
+        });
+
+        fadeOut.play();
+    }
+
+    private void updateIconTheme(boolean isDarkMode) {
+        if (isDarkMode) {
+            darkModeIcon.setIconLiteral("fa-sun-o");
         } else {
-            root.getStyleClass().add("dark-mode");
-            btnDarkMode.setText("Modo claro");
+            darkModeIcon.setIconLiteral("fa-moon-o");
         }
     }
 
@@ -87,38 +120,58 @@ public class LoginController {
             return;
         }
 
-        if (authenticate(userId, password)) {
-            try {
-                Stage stage = (Stage) btnLogin.getScene().getWindow();
+        btnLogin.setText("Iniciando Sesion...");
+        btnLogin.setDisable(true);
+        btnSalir.setDisable(true);
+        btnDarkMode.setDisable(true);
+        txtUserId.setDisable(true);
+        txtPassword.setDisable(true);
 
-                MainViewController mainController =
-                        Navigation.navigateToWithController(
-                                stage,
-                                "/una/proyecto/ui/main-view.fxml",
-                                "Sistema de Reserva - Panel Principal"
-                        );
+        PauseTransition delay = new PauseTransition(Duration.millis(1000));
+        delay.setOnFinished(event -> {
 
-                stage.setResizable(true);
-                stage.setWidth(1200);
-                stage.setHeight(800);
-                stage.setMinWidth(900);
-                stage.setMinHeight(600);
+            if (authenticate(userId, password)) {
+                try {
+                    Stage stage = (Stage) btnLogin.getScene().getWindow();
 
-                mainController.setUserData(
-                        userId,
-                        getUserName(userId),
-                        getUserRole(userId)
-                );
+                    MainViewController mainController =
+                            Navigation.navigateToWithController(
+                                    stage,
+                                    "/una/proyecto/ui/main-view.fxml",
+                                    "Sistema de Reserva - Panel Principal"
+                            );
 
-            } catch (IOException e) {
-                e.printStackTrace();
-                showError("Error al cargar la aplicación");
+                    stage.setResizable(true);
+
+                    mainController.setUserData(
+                            userId,
+                            getUserName(userId),
+                            getUserRole(userId)
+                    );
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    showError("Error al cargar la aplicación");
+                    restoreControls();
+                }
+            } else {
+                showError("ID o clave incorrectos");
+                txtPassword.clear();
+                txtUserId.requestFocus();
+                restoreControls();
             }
-        } else {
-            showError("ID o clave incorrectos");
-            txtPassword.clear();
-            txtUserId.requestFocus();
-        }
+        });
+
+        delay.play();
+    }
+
+    private void restoreControls() {
+        btnLogin.setText("Iniciar Sesion");
+        btnLogin.setDisable(false);
+        btnSalir.setDisable(false);
+        txtUserId.setDisable(false);
+        txtPassword.setDisable(false);
+        btnDarkMode.setDisable(false);
     }
 
     // METODOS DE AUTENTICACION

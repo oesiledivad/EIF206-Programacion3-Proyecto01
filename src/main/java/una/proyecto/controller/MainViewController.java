@@ -65,6 +65,7 @@ public class MainViewController {
     @FXML
     public VBox sidebarMenu;
 
+
     // Usuario actual (se setea desde el login)
     private String currentUserId;
     private String currentUserRole;
@@ -253,10 +254,10 @@ public class MainViewController {
             try {
 
                 Stage stage = (Stage) btnLogout.getScene().getWindow();
-
-                Navigation.navigateTo(stage, "/una/proyecto/ui/login-view.fxml", "Sistema de Reserva - Login");
-
+                stage.setHeight(500);
+                stage.setWidth(500);
                 stage.setResizable(false);
+                Navigation.navigateTo(stage, "/una/proyecto/ui/login-view.fxml", "Sistema de Reserva - Login");
 
             } catch (IOException e) {
 

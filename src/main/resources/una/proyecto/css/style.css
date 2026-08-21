@@ -1,17 +1,45 @@
 /*
-   Versión 1.0
+   Versión 2.0
 */
+
+
+@font-face {
+    font-family: 'JetBrains Mono';
+    font-style: normal;
+    font-weight: normal;
+    src: local('JetBrains Mono'), url('../fonts/JetBrainsMono.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'JetBrains Mono';
+    font-style: normal;
+    font-weight: bold;
+    src: local('JetBrains Mono'), url('../fonts/JetBrainsMono-Bold.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'JetBrains Mono';
+    font-style: italic;
+    font-weight: normal;
+    src: local('JetBrains Mono'), url('../fonts/JetBrainsMono-Italic.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'JetBrains Mono';
+    font-style: italic;
+    font-weight: bold;
+    src: local('JetBrains Mono'), url('../fonts/JetBrainsMono-BoldItalic.ttf') format('truetype');
+}
+
 
 .root {
     /*  TIPOGRAFÍA  */
-    -fx-font-family: "Segoe UI", "Inter", "Roboto", -fx-system-font, sans-serif;
-    -fx-font-size: 14px;
+    -fx-font-family: "JetBrains Mono", "Inter", "Roboto", -fx-system-font, sans-serif;
+    -fx-font-size: 12px;
 
     /*  COLORES BASE  */
     -fx-bg-primary: #f8fafc;
     -fx-bg-secondary: #ffffff;
     -fx-bg-tertiary: #f1f5f9;
     -fx-bg-quaternary: #e2e8f0;
+    -fx-background-color: -fx-bg-primary;
 
     -fx-text-primary: #0f172a;
     -fx-text-secondary: #475569;
@@ -294,7 +322,7 @@ Text.heading-3 {
     */
 
 .button {
-    -fx-font-family: "Segoe UI", "Inter", sans-serif;
+    -fx-font-family: "JetBrains Mono", "Inter", sans-serif;
     -fx-font-size: 14px;
     -fx-font-weight: 600;
 
@@ -1659,3 +1687,128 @@ Text.heading-3 {
     -fx-fill: -fx-accent-light;
     -fx-stroke: -fx-accent-primary;
 }
+
+
+/* LOGIN */
+.screen-1 {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-padding: 30px;
+    -fx-background-radius: 30px;
+    -fx-effect: dropshadow(three-pass-box, -fx-shadow-elevated, 25, 0, 0, 10);
+}
+
+/* Título */
+.screen-1 .app-title {
+    -fx-text-fill: -fx-text-primary;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-padding: 0 0 5px 0;
+}
+
+/* Tarjetas de los inputs */
+.screen-1 .card-input,
+.screen-1 .card-input-container {
+    -fx-background-color: -fx-bg-tertiary;
+    -fx-border-radius: 16px;
+}
+
+.screen-1 .card-input {
+    -fx-background-radius: 20px;
+    -fx-padding: 12px 18px;
+    -fx-border-color: transparent;
+}
+
+.screen-1 .card-input-container {
+    -fx-background-radius: 16px;
+    -fx-padding: 10px 16px;
+}
+
+/* Hover de las tarjetas */
+.screen-1 .card-input:hover,
+.screen-1 .card-input-container:hover {
+    -fx-border-color: -fx-border-focus;
+    -fx-border-width: 1px;
+}
+
+/* Labels de los inputs */
+.screen-1 .input-label {
+    -fx-text-fill: -fx-text-secondary;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+/* Campos de texto */
+.screen-1 .text-field,
+.screen-1 .password-field {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: -fx-text-primary;
+    -fx-prompt-text-fill: -fx-text-muted;
+    -fx-padding: 0;
+    -fx-font-size: 13px;
+}
+
+/* Foco de los campos */
+.screen-1 .text-field:focused,
+.screen-1 .password-field:focused {
+    -fx-background-color: transparent;
+    -fx-box-shadow: none;
+}
+
+/* Boton principal */
+.screen-1 .btn-primary {
+    -fx-background-color: -fx-accent-primary;
+    -fx-text-fill: -fx-text-inverse;
+    -fx-background-radius: 25px;
+    -fx-padding: 10px 20px;
+    -fx-cursor: hand;
+    -fx-font-weight: bold;
+}
+
+.screen-1 .btn-primary:hover {
+    -fx-background-color: -fx-accent-hover;
+}
+
+.screen-1 .btn-primary:disabled {
+    -fx-opacity: 0.7;
+    -fx-cursor: wait;
+}
+
+/* Boton secundario */
+.screen-1 .btn-secondary {
+    -fx-background-color: transparent;
+    -fx-text-fill: -fx-text-secondary;
+    -fx-background-radius: 25px;
+    -fx-padding: 8px 20px;
+    -fx-cursor: hand;
+    -fx-border-color: -fx-border-primary;
+    -fx-border-radius: 25px;
+}
+
+.screen-1 .btn-secondary:hover {
+    -fx-background-color: -fx-danger-light;
+    -fx-text-fill: -fx-danger;
+}
+
+/* Boton Dark Mode */
+.theme-button {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-text-fill: -fx-text-primary;
+    -fx-background-radius: 50em;
+    -fx-border-color: -fx-border-primary;
+    -fx-border-radius: 50em;
+    -fx-effect: dropshadow(three-pass-box, -fx-shadow-color, 10, 0, 0, 2);
+    -fx-cursor: hand;
+}
+
+.theme-button:hover {
+    -fx-background-color: -fx-bg-tertiary;
+}
+
+/* Mensaje de error */
+.screen-1 #lblError {
+    -fx-text-fill: -fx-danger;
+    -fx-font-size: 12px;
+}
+
+
