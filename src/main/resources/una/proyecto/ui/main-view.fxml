@@ -72,7 +72,7 @@
       </VBox>
    </left>
    <center>
-      <StackPane fx:id="viewContainer" prefHeight="150.0" prefWidth="200.0" styleClass="view-container" BorderPane.alignment="CENTER">
+      <StackPane fx:id="viewContainer" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="view-container" BorderPane.alignment="CENTER">
          <padding>
             <Insets top="24.0" />
          </padding>

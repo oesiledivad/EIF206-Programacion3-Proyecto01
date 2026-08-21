@@ -31,6 +31,9 @@ public class Navigation {
 
         stage.setScene(scene);
         stage.setTitle(title);
+        stage.sizeToScene();
+        stage.centerOnScreen();
+        ThemeManager.applyTheme(scene);
         stage.show();
     }
 
@@ -50,6 +53,9 @@ public class Navigation {
 
         stage.setScene(scene);
         stage.setTitle(title);
+        stage.sizeToScene();
+        stage.centerOnScreen();
+        ThemeManager.applyTheme(scene);
         stage.show();
 
         return loader.getController();
