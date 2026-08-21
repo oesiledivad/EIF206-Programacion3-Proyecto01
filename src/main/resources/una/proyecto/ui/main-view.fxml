@@ -78,4 +78,8 @@
          </padding>
       </StackPane>
    </center>
+   <top>
+      <fx:include
+              source="title-bar.fxml" />
+   </top>
 </BorderPane>

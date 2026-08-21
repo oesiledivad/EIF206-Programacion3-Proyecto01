@@ -5,56 +5,68 @@
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="500.0" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="una.proyecto.controller.LoginController">
-   <children>
-      <StackPane layoutX="10.0" layoutY="10.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
+<BorderPane stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="una.proyecto.controller.LoginController">
+   <center>
+      <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="500.0">
          <children>
-            <VBox fx:id="testVBoxLogin" alignment="CENTER" prefHeight="400.0" prefWidth="400.0" spacing="20.0" styleClass="screen-1">
+            <StackPane layoutX="10.0" layoutY="10.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
                <children>
-                  <Label styleClass="app-title" text="Sistema de Reservas" />
-                  <FontIcon iconLiteral="fa-lock" iconSize="45" styleClass="icon-primary" />
-                  <VBox spacing="4.0" styleClass="card-input-container">
+                  <VBox fx:id="testVBoxLogin" alignment="CENTER" prefHeight="400.0" prefWidth="400.0" spacing="20.0" styleClass="screen-1">
                      <children>
-                        <Label styleClass="input-label" text="Usuario" />
-                        <HBox alignment="CENTER_LEFT" spacing="12.0">
+                        <Label styleClass="app-title" text="Sistema de Reservas" />
+                        <FontIcon iconLiteral="fa-lock" iconSize="45" styleClass="icon-primary" />
+                        <VBox spacing="4.0" styleClass="card-input-container">
                            <children>
-                              <FontIcon iconLiteral="fa-user" iconSize="18" styleClass="icon-primary" />
-                              <TextField fx:id="txtUserId" promptText="Ingresa tu usuario" HBox.hgrow="ALWAYS" />
+                              <Label styleClass="input-label" text="Usuario" />
+                              <HBox alignment="CENTER_LEFT" spacing="12.0">
+                                 <children>
+                                    <FontIcon iconLiteral="fa-user" iconSize="18" styleClass="icon-primary" />
+                                    <TextField fx:id="txtUserId" promptText="Ingresa tu usuario" HBox.hgrow="ALWAYS" />
+                                 </children>
+                              </HBox>
                            </children>
-                        </HBox>
-                     </children>
-                  </VBox>
-                  <VBox spacing="4.0" styleClass="card-input-container">
-                     <children>
-                        <Label styleClass="input-label" text="Contraseña" />
-                        <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" spacing="12.0">
+                        </VBox>
+                        <VBox spacing="4.0" styleClass="card-input-container">
                            <children>
-                              <FontIcon iconLiteral="fa-lock" iconSize="20" styleClass="icon-primary" />
-                              <PasswordField fx:id="txtPassword" promptText="Contraseña" HBox.hgrow="ALWAYS" />
+                              <Label styleClass="input-label" text="Contraseña" />
+                              <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" spacing="12.0">
+                                 <children>
+                                    <FontIcon iconLiteral="fa-lock" iconSize="20" styleClass="icon-primary" />
+                                    <PasswordField fx:id="txtPassword" promptText="Contraseña" HBox.hgrow="ALWAYS" />
+                                 </children>
+                              </HBox>
                            </children>
-                        </HBox>
-                     </children>
-                  </VBox>
-                  <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" spacing="12.0">
-                     <children>
-                        <Label fx:id="lblError" text="Label" />
-                        <Button fx:id="btnLogin" maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="btn-primary" text="Iniciar Sesion" />
-                        <Button fx:id="btnSalir" maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="btn-secondary" text="Salir" />
+                        </VBox>
+                        <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" spacing="12.0">
+                           <children>
+                              <Label fx:id="lblError" text="Label" />
+                              <Button fx:id="btnLogin" maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="btn-primary" text="Iniciar Sesion" />
+                              <Button fx:id="btnSalir" maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="btn-secondary" text="Salir" />
+                           </children>
+                        </VBox>
                      </children>
                   </VBox>
                </children>
-            </VBox>
+            </StackPane>
+            <Button fx:id="btnDarkMode" alignment="TOP_LEFT" contentDisplay="CENTER" graphicTextGap="0.0" layoutX="486.0" layoutY="153.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="theme-button" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="20.0">
+               <graphic>
+                  <FontIcon fx:id="darkModeIcon" iconLiteral="fa-moon-o" iconSize="24" styleClass="icon-primary" />
+               </graphic>
+            </Button>
          </children>
-      </StackPane>
-      <Button fx:id="btnDarkMode" alignment="TOP_LEFT" contentDisplay="CENTER" graphicTextGap="0.0" layoutX="486.0" layoutY="153.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="theme-button" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="20.0">
-         <graphic>
-            <FontIcon fx:id="darkModeIcon" iconLiteral="fa-moon-o" iconSize="24" styleClass="icon-primary" />
-         </graphic>
-      </Button>
-   </children>
-</AnchorPane>
+      </AnchorPane>
+   </center>
+   <top>
+      <fx:include
+              source="title-bar.fxml"
+              AnchorPane.leftAnchor="0.0"
+              AnchorPane.rightAnchor="0.0"
+              AnchorPane.topAnchor="0.0" />
+   </top>
+</BorderPane>

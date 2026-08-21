@@ -3,6 +3,7 @@ package una.proyecto.controller;
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.scene.Cursor;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
@@ -22,6 +23,7 @@ public class LoginController {
 
     @FXML
     public FontIcon darkModeIcon;
+
     @FXML
     private TextField txtUserId;
 
@@ -126,6 +128,7 @@ public class LoginController {
         btnDarkMode.setDisable(true);
         txtUserId.setDisable(true);
         txtPassword.setDisable(true);
+        btnLogin.getScene().setCursor(Cursor.WAIT);
 
         PauseTransition delay = new PauseTransition(Duration.millis(1000));
         delay.setOnFinished(event -> {
@@ -172,6 +175,8 @@ public class LoginController {
         txtUserId.setDisable(false);
         txtPassword.setDisable(false);
         btnDarkMode.setDisable(false);
+        btnLogin.getScene().setCursor(Cursor.DEFAULT);
+
     }
 
     // METODOS DE AUTENTICACION
