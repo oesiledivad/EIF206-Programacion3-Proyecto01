@@ -1,4 +1,4 @@
 package una.proyecto.model;
 
-public class Administradores {
+public class Administrador {
 }

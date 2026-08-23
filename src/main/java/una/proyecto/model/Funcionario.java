@@ -1,9 +1,16 @@
 package una.proyecto.model ;
-public class Funcionarios extends Usuarios {
+
+
+import jakarta.xml.bind.annotation.*;
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "Funcionario")
+public class Funcionario extends Usuario {
+    @XmlElement
     private String phone;
+    @XmlElement
     private String name;
     //Posee una lista de reservas
-    public Funcionarios(String clave, String id, String rol, String name, String phone){
+    public Funcionario(String clave, String id, String rol, String name, String phone){
         super(id,rol);
         this.phone=phone;
         this.name=name;

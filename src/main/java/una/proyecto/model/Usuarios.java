@@ -1,20 +1,21 @@
 package una.proyecto.model;
 
-public abstract class  Usuarios {
-private String clave;
-private String id;
-private String rol;
+import jakarta.xml.bind.annotation.*;
+import java.util.ArrayList;
+import java.util.List;
 
-public Usuarios( String id, String rol){
-    this.clave=id;//luego se modigica con el metodo changePassword
-    this.rol=rol;
-    this.id=id;
+@XmlRootElement(name = "usuarios")
+@XmlAccessorType(XmlAccessType.FIELD)
+public class Usuarios {
+
+    @XmlElements({
+            @XmlElement(name = "funcionario", type = Funcionario.class),
+            @XmlElement(name = "administrador", type = Administrador.class)
+    })
+    private List<Usuario> lista = new ArrayList<>();
+
+    public Usuarios() {}
+
+    public List<Usuario> getLista() { return lista; }
+    public void setLista(List<Usuario> lista) { this.lista = lista; }
 }
-public abstract void  chagePassword(String password);
-public String getClave(){return this.clave;}
-public String getId(){return this.id;}
-public String getRol(){return this.rol;}
-public void setClave(String clave){this.clave=clave;}
-
-}
-

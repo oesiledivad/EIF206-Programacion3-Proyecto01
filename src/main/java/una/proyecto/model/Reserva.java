@@ -39,6 +39,4 @@ public class Reserva {
     public String getIdFuncionario(){return this.idFuncionario;}
     public List<String> getIdRecursosAsignados(){return this.idRecursosAsignados;}
     public EstadoReserva getEstado(){return this.estado;}
-
-
 }

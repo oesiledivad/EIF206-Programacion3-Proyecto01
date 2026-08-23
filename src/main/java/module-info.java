@@ -5,10 +5,11 @@ module EIF.Programacion.Proyecto {
     requires javafx.graphics;
     requires atlantafx.base;
     requires org.kordamp.ikonli.javafx;
+    requires jakarta.xml.bind;
 
     opens una.proyecto.app to javafx.fxml, javafx.graphics;
     opens una.proyecto.controller to javafx.fxml;
-    opens una.proyecto.model to javafx.base;
+    opens una.proyecto.model to javafx.base, jakarta.xml.bind;
 
     exports una.proyecto.app;
 }
