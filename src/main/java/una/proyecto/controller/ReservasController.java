@@ -2,14 +2,14 @@ package una.proyecto.controller;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import una.proyecto.model.EstadoReserva;
+import una.proyecto.model.Reserva;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 public class ReservasController {
-    @FXML private Button btnestadisticas;
-    @FXML private Button btncalendarizacion;
-    @FXML private Button btnpanellateral;
-    @FXML private Button btnactividades;
+
     @FXML private Button btnreserva;
     @FXML private Button btncancelarreserva;
     @FXML private Button btnlimpiar;
@@ -20,7 +20,13 @@ public class ReservasController {
     @FXML private ChoiceBox choiceboxhorafin;
     @FXML private ListView listviewcategorias;
     @FXML private TableView tableviewmisreservas;
-    @FXML public void initialize(){}
+    @FXML public void initialize(){
+
+        btnreserva.setOnAction(event -> handleReservaButton());
+        btnlimpiar.setOnAction(event -> handleLimpiarButton());
+        btncancelarreserva.setOnAction(event -> handleCancelarReservaButton());
+
+    }
     private void handleEstadisticasButton(){}
     private void handleCalendarizacionButton(){}
     private void handlePanelLateralButton(){}
@@ -28,13 +34,20 @@ public class ReservasController {
     private void handleReservaButton(){
         String actividad= txtareaactividad.getText();
         LocalDate  date= datapickerfecha.getValue();
-        int dia=0; int mes=0; int annio=0;
-        if(date!=null){
-             dia = date.getDayOfMonth();
-            mes = date.getMonthValue();
-             annio=date.getYear();
+        LocalTime horaInicio= (LocalTime) choiceboxhorainicio.getValue();
+        LocalTime horaFin= (LocalTime) choiceboxhorafin.getValue();
+        //ACA NECESITO COMO TENER ACCESO A LA PERSONA QUE HIZO LOGGIN, PARA PODER ENVIAR SU CEDULA
+        //public Reserva(String actividad, LocalDate fecha, LocalTime horaInicio, LocalTime horaFin, String idFuncionario, List<String> idRecursosAsignados, EstadoReserva estado)
+        if (actividad.isBlank() || date==null ||horaInicio==null || horaFin==null){
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText("Campos incompletos");
+            alert.setContentText("Por favor, complete todos los campos antes de realizar la reserva.");
+            return;
         }
-        //guardamos los textfiel en variables y se crea una instancia de reserva
+        Reserva nueva= new Reserva(actividad,date,horaInicio,horaFin,"",null, EstadoReserva.ACTIVA);
+        //Reserva.service.add(nueva) <--- aca agregariamos la reserva
+
     }
     private void handleCancelarReservaButton(){
 
