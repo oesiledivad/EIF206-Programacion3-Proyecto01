@@ -6,7 +6,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -20,7 +20,7 @@ public class WindowHelper {
     /**
      * Configura el comportamiento de arrastre y los botones de la barra de título personalizada.
      */
-    public static void makeWindowDraggable(HBox titleBar, Button btnMinimize, Button btnMaximize, Button btnClose, Runnable onMaximizeChanged) {
+    public static void makeWindowDraggable(StackPane titleBar, Button btnMinimize, Button btnMaximize, Button btnClose, Runnable onMaximizeChanged) {
         titleBar.setOnMousePressed((MouseEvent event) -> {
             xOffset = event.getSceneX();
             yOffset = event.getSceneY();
@@ -36,7 +36,7 @@ public class WindowHelper {
             btnMinimize.setOnAction(event -> {
                 Stage stage = (Stage) btnMinimize.getScene().getWindow();
 
-                FadeTransition fade = new FadeTransition(Duration.millis(3500), stage.getScene().getRoot());
+                FadeTransition fade = new FadeTransition(Duration.millis(200), stage.getScene().getRoot());
                 fade.setFromValue(1.0);
                 fade.setToValue(0.0);
                 fade.setOnFinished(e -> {

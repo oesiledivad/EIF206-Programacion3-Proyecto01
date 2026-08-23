@@ -64,8 +64,6 @@ public class MainViewController {
     public Separator sepAdmin;
     @FXML
     public VBox sidebarMenu;
-    @FXML
-    private TitleBarController titleBarController;
 
 
     // Usuario actual (se setea desde el login)
@@ -94,8 +92,6 @@ public class MainViewController {
 
         // Configurar visibilidad según rol (admin/employee)
         configureMenuByRole();
-        Navigation.setTitleBarController(titleBarController);
-
     }
 
     /**
@@ -137,63 +133,51 @@ public class MainViewController {
      * Método genérico para cargar vistas en el StackPane
      */
     private void loadView(String viewName) {
-
-        try {
-
-            Parent view = Navigation.loadView("/una/proyecto/ui/" + viewName + ".fxml");
-
-            viewContainer.getChildren().setAll(view);
-
-        } catch (IOException e) {
-
-            e.printStackTrace();
-
-            showError("Error al cargar la vista: " + viewName);
-        }
+        loadView(viewName, null);
     }
 
     private void loadView(String viewName, String title) {
-
         try {
-
-            Parent view = Navigation.loadView("/una/proyecto/ui/" + viewName + ".fxml");
+            String fxmlPath = "/una/proyecto/ui/" + viewName + ".fxml";
+            Parent view = Navigation.loadView(fxmlPath);
 
             viewContainer.getChildren().setAll(view);
 
-            Stage stage = (Stage) mainLayout.getScene().getWindow();
-
-            stage.setTitle(title);
+            if (title != null && !title.isEmpty()) {
+                Stage stage = (Stage) mainLayout.getScene().getWindow();
+                stage.setTitle(title);
+                Navigation.updateWindowTitle(title);
+            }
 
         } catch (IOException e) {
-
             e.printStackTrace();
-
-            showError(
-                    "Error al cargar la vista: " + viewName
-            );
+            showError("Error al cargar la vista: " + viewName);
         }
     }
 
     /**
      * Método para cargar vista y pasar datos al controlador
      */
-    private void loadViewWithData(String viewName, String currentUserId) {
-
+    private void loadViewWithData(String viewName, String title, String currentUserId) {
         try {
-
             String fxmlPath = "/una/proyecto/ui/" + viewName + ".fxml";
 
             Navigation.ViewLoaderResult result = Navigation.loadViewWithController(fxmlPath);
 
-            Object controller =  result.getController();
+            Object controller = result.getController();
 
-            viewContainer.getChildren().clear();
-            viewContainer.getChildren().add(result.getRoot());
+            // TODO: Cast de controller para pasarle el userdata
+
+            viewContainer.getChildren().setAll(result.getRoot());
+
+            if (title != null && !title.isEmpty()) {
+                Stage stage = (Stage) mainLayout.getScene().getWindow();
+                stage.setTitle(title);
+                Navigation.updateWindowTitle(title);
+            }
 
         } catch (IOException e) {
-
             e.printStackTrace();
-
             showError("Error al cargar la vista: " + viewName);
         }
     }
@@ -202,23 +186,23 @@ public class MainViewController {
 
     @FXML
     public void goToDashboard(ActionEvent actionEvent) {
-        loadView("dashboard-view");
+        loadView("dashboard-view",  "Dashboard");
         // TODO: Actualizar datos del dashboard
     }
 
     @FXML
     public void goToReservations(ActionEvent actionEvent) {
-        loadViewWithData("reservas-funcionario-view", currentUserId);
+        loadViewWithData("reservas-funcionario-view", "Reservaciones",currentUserId);
     }
 
     @FXML
     public void goToFuncionarios(ActionEvent actionEvent) {
-        loadView("funcionarios-administrador-view", "Sistema de Reservas - Funcionarios");
+        loadView("funcionarios-administrador-view", "Funcionarios");
     }
 
     @FXML
     public void goToCategorias(ActionEvent actionEvent) {
-        loadView("categorias-administrador-view", "Sistema de Reservas - Categorias");
+        loadView("categorias-administrador-view", "Categorias");
     }
 
     @FXML
@@ -262,7 +246,7 @@ public class MainViewController {
                 stage.setWidth(500);
                 //stage.setResizable(true);
                 Navigation.navigateTo(stage, "/una/proyecto/ui/login-view.fxml", "Sistema de Reserva - Login");
-
+                Navigation.disableMaximizeButton();
             } catch (IOException e) {
 
                 e.printStackTrace();

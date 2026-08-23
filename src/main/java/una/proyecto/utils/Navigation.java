@@ -374,4 +374,28 @@ public final class Navigation {
             titleBarController.setWindowTitle(title);
         }
     }
+
+    public static void disableMinimizeButton() {
+        if (titleBarController != null) {
+            titleBarController.disableMinimizeButton();
+        }
+    }
+
+    public static void disableMaximizeButton() {
+        if (titleBarController != null) {
+            titleBarController.disableMaximizeButton();
+        }
+    }
+
+    public static void enableMaximizeButton() {
+        if (titleBarController != null) {
+            titleBarController.enableMaximizeButton();
+        }
+    }
+
+    public static void enableMinimizeButton() {
+        if (titleBarController != null) {
+            titleBarController.enableMinimizeButton();
+        }
+    }
 }

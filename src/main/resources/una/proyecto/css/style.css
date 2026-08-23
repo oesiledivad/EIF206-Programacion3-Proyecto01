@@ -2046,7 +2046,7 @@ Text.heading-3 {
 /* Mensaje de error */
 .screen-1 #lblError {
     -fx-text-fill: -fx-danger;
-    -fx-font-size: 12px;
+    -fx-font-size: 14px;
 }
 
 .custom-title-bar {

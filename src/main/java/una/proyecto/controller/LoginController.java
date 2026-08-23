@@ -22,7 +22,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.Optional;
-import java.time.LocalDate;
 
 public class LoginController {
     @FXML
@@ -166,6 +165,7 @@ public class LoginController {
                             getUserName(userId),
                             getUserRole(userId)
                     );
+                    Navigation.enableMaximizeButton();
 
                 } catch (IOException e) {
                     e.printStackTrace();

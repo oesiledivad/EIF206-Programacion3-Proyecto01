@@ -17,5 +17,6 @@ public class MainApp extends Application {
                 "/una/proyecto/ui/login-view.fxml",
                 "Sistema de Reserva");
         primaryStage.setResizable(false);
+        Navigation.disableMaximizeButton();
     }
 }
