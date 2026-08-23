@@ -43,7 +43,7 @@
             <DatePicker prefHeight="42.0" prefWidth="136.0" />
             <Label prefHeight="22.0" prefWidth="95.0" styleClass="btn-secondary" text="Categoria" />
             <ChoiceBox fx:id="choiceboxcategoria" prefHeight="42.0" prefWidth="136.0" />
-            <Button fx:id="btncargar" mnemonicParsing="false" prefHeight="42.0" prefWidth="104.0" styleClass="toggle-button" text="Cargar" />
+            <Button fx:id="btncargar" mnemonicParsing="false" prefHeight="42.0" prefWidth="112.0" styleClass="toggle-button" text="Cargar" />
             <Button fx:id="btnimprimir" mnemonicParsing="false" prefHeight="42.0" prefWidth="112.0" styleClass="toggle-button" text="Imprimir " />
          </children>
          <padding>
