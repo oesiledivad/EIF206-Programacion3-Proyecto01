@@ -143,10 +143,20 @@ public class MainViewController {
 
             viewContainer.getChildren().setAll(view);
 
-            if (title != null && !title.isEmpty()) {
+            if (mainLayout.getScene() != null) {
                 Stage stage = (Stage) mainLayout.getScene().getWindow();
-                stage.setTitle(title);
-                Navigation.updateWindowTitle(title);
+
+                if (stage != null) {
+                    if (title != null && !title.isEmpty()) {
+                        stage.setTitle(title);
+                        Navigation.updateWindowTitle(title);
+                    }
+
+                    if (!stage.isMaximized()) {
+                        stage.sizeToScene();
+                        stage.centerOnScreen();
+                    }
+                }
             }
 
         } catch (IOException e) {
@@ -170,10 +180,20 @@ public class MainViewController {
 
             viewContainer.getChildren().setAll(result.getRoot());
 
-            if (title != null && !title.isEmpty()) {
+            if (mainLayout.getScene() != null) {
                 Stage stage = (Stage) mainLayout.getScene().getWindow();
-                stage.setTitle(title);
-                Navigation.updateWindowTitle(title);
+
+                if (stage != null) {
+                    if (title != null && !title.isEmpty()) {
+                        stage.setTitle(title);
+                        Navigation.updateWindowTitle(title);
+                    }
+
+                    if (!stage.isMaximized()) {
+                        stage.sizeToScene();
+                        stage.centerOnScreen();
+                    }
+                }
             }
 
         } catch (IOException e) {
