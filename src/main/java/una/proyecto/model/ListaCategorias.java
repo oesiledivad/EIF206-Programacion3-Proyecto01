@@ -1,28 +1,39 @@
 package una.proyecto.model;
 
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
+
 import java.util.ArrayList;
 import java.util.List;
 
+@XmlRootElement(name = "categorias")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class ListaCategorias {
 
+    @XmlElement(name = "categoria")
     private List<Categorias> categorias;
 
     public ListaCategorias() {
         categorias = new ArrayList<>();
     }
 
-    // Agregar una categoría
     public void agregar(Categorias categoria) {
+
         int nuevoId = obtenerSiguienteId();
+
         categoria.setId(nuevoId);
+
         categorias.add(categoria);
     }
 
-    // Obtener el siguiente ID disponible
     private int obtenerSiguienteId() {
+
         int mayorId = 0;
 
         for (Categorias categoria : categorias) {
+
             if (categoria.getId() > mayorId) {
                 mayorId = categoria.getId();
             }
@@ -31,10 +42,10 @@ public class ListaCategorias {
         return mayorId + 1;
     }
 
-    // Buscar una categoría por descripción
     public Categorias buscarPorDescripcion(String descripcion) {
 
         for (Categorias categoria : categorias) {
+
             if (categoria.getDescripcion().equalsIgnoreCase(descripcion)) {
                 return categoria;
             }
@@ -43,10 +54,10 @@ public class ListaCategorias {
         return null;
     }
 
-    // Buscar una categoría por ID
     public Categorias buscarPorId(int id) {
 
         for (Categorias categoria : categorias) {
+
             if (categoria.getId() == id) {
                 return categoria;
             }
@@ -55,7 +66,6 @@ public class ListaCategorias {
         return null;
     }
 
-    // Modificar una categoría
     public boolean modificar(int id, String nuevaDescripcion) {
 
         Categorias categoria = buscarPorId(id);
@@ -68,7 +78,6 @@ public class ListaCategorias {
         return false;
     }
 
-    // Eliminar una categoría
     public boolean eliminar(int id) {
 
         Categorias categoria = buscarPorId(id);
@@ -81,7 +90,6 @@ public class ListaCategorias {
         return false;
     }
 
-    // Obtener todas las categorías
     public List<Categorias> getCategorias() {
         return categorias;
     }

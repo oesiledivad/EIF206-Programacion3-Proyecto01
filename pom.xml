@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>una.proyecto</groupId>
@@ -14,16 +16,21 @@
   </properties>
 
   <dependencies>
+
+    <!-- JavaFX -->
     <dependency>
       <groupId>org.openjfx</groupId>
       <artifactId>javafx-controls</artifactId>
       <version>21.0.6</version>
     </dependency>
+
     <dependency>
       <groupId>org.openjfx</groupId>
       <artifactId>javafx-fxml</artifactId>
       <version>21.0.6</version>
     </dependency>
+
+    <!-- FormsFX -->
     <dependency>
       <groupId>com.dlsc.formsfx</groupId>
       <artifactId>formsfx-core</artifactId>
@@ -34,36 +41,62 @@
           <artifactId>*</artifactId>
         </exclusion>
       </exclusions>
-    </dependency><dependency>
-    <groupId>org.kordamp.ikonli</groupId>
-    <artifactId>ikonli-javafx</artifactId>
-    <version>12.3.1</version>
-  </dependency>
+    </dependency>
+
+    <!-- Ikonli -->
+    <dependency>
+      <groupId>org.kordamp.ikonli</groupId>
+      <artifactId>ikonli-javafx</artifactId>
+      <version>12.3.1</version>
+    </dependency>
+
     <dependency>
       <groupId>org.kordamp.ikonli</groupId>
       <artifactId>ikonli-fontawesome-pack</artifactId>
       <version>12.3.1</version>
     </dependency>
+
+    <!-- AtlantaFX -->
     <dependency>
       <groupId>io.github.mkpaz</groupId>
       <artifactId>atlantafx-base</artifactId>
       <version>2.0.0</version>
     </dependency>
+
+    <!-- Jakarta JAXB -->
+    <dependency>
+      <groupId>jakarta.xml.bind</groupId>
+      <artifactId>jakarta.xml.bind-api</artifactId>
+      <version>4.0.2</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.glassfish.jaxb</groupId>
+      <artifactId>jaxb-runtime</artifactId>
+      <version>4.0.5</version>
+    </dependency>
+
+    <!-- JUnit -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
       <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
+
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>
       <version>${junit.version}</version>
       <scope>test</scope>
-    </dependency>  </dependencies>
+    </dependency>
+
+  </dependencies>
 
   <build>
     <plugins>
+
+      <!-- Compilador Java -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -73,26 +106,36 @@
           <target>17</target>
         </configuration>
       </plugin>
+
+      <!-- JavaFX Maven Plugin -->
       <plugin>
         <groupId>org.openjfx</groupId>
         <artifactId>javafx-maven-plugin</artifactId>
         <version>0.0.8</version>
+
         <executions>
           <execution>
-            <!-- Default configuration for running with: mvn clean javafx:run -->
             <id>default-cli</id>
+
             <configuration>
-              <mainClass>org.example.javafx_test/org.example.javafx_test.InicioController</mainClass>
+              <mainClass>
+                org.example.javafx_test/org.example.javafx_test.InicioController
+              </mainClass>
+
               <launcher>app</launcher>
               <jlinkZipName>app</jlinkZipName>
               <jlinkImageName>app</jlinkImageName>
+
               <noManPages>true</noManPages>
               <stripDebug>true</stripDebug>
               <noHeaderFiles>true</noHeaderFiles>
             </configuration>
+
           </execution>
         </executions>
+
       </plugin>
+
     </plugins>
   </build>
 
