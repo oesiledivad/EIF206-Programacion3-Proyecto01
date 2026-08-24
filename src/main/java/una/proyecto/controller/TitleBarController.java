@@ -10,19 +10,48 @@ import una.proyecto.utils.WindowHelper;
 import una.proyecto.utils.Navigation;
 
 public class TitleBarController {
-    @FXML public Label lblWindowTitle;
-    @FXML public FontIcon maximizeIcon;
-    @FXML private StackPane titleBar;
-    @FXML private Button btnMinimize;
-    @FXML private Button btnMaximize;
-    @FXML private Button btnClose;
+    @FXML
+    public Label lblWindowTitle;
+    @FXML
+    public FontIcon maximizeIcon;
+    @FXML
+    private StackPane titleBar;
+    @FXML
+    private Button btnMinimize;
+    @FXML
+    private Button btnMaximize;
+    @FXML
+    private Button btnClose;
+
+    private boolean isDraggable = true;
 
     @FXML
     public void initialize() {
         Navigation.setTitleBarController(this);
 
-        WindowHelper.makeWindowDraggable(titleBar, btnMinimize, btnMaximize, btnClose, this::updateMaximizeIcon);
+        applyWindowBehavior();
     }
+
+    /**
+     * Aplica el comportamiento según el estado de isDraggable.
+     */
+    public void applyWindowBehavior() {
+        if (isDraggable) {
+            WindowHelper.makeWindowDraggable(titleBar, btnMinimize, btnMaximize, btnClose, this::updateMaximizeIcon);
+        } else {
+            WindowHelper.makeWindowStatic(titleBar, btnMinimize, btnMaximize, btnClose, this::updateMaximizeIcon);
+        }
+    }
+
+    /**
+     * Permite desactivar el arrastre desde la vista de Login antes de que se carguen los componentes
+     * o mediante un método de configuración.
+     */
+    public void setDraggable(boolean draggable) {
+        this.isDraggable = draggable;
+        applyWindowBehavior();
+    }
+
     public void updateMaximizeIcon() {
         Stage stage = (Stage) btnMaximize.getScene().getWindow();
         if (stage != null) {

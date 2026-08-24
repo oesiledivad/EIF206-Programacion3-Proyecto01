@@ -166,7 +166,6 @@ public class LoginController {
                             getUserRole(userId)
                     );
                     Navigation.enableMaximizeButton();
-
                 } catch (IOException e) {
                     e.printStackTrace();
                     showError("Error al cargar la aplicación");

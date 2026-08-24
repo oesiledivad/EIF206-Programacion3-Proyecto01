@@ -28,6 +28,19 @@ public class WindowHelper {
 
         titleBar.setOnMouseDragged((MouseEvent event) -> {
             Stage stage = (Stage) titleBar.getScene().getWindow();
+
+            if (stage.isMaximized()) {
+                stage.setMaximized(false);
+
+                if (onMaximizeChanged != null) {
+                    onMaximizeChanged.run();
+                }
+
+                double currentWidth = stage.getWidth();
+                xOffset = currentWidth * (event.getSceneX() / titleBar.getWidth());
+                yOffset = event.getSceneY();
+            }
+
             stage.setX(event.getScreenX() - xOffset);
             stage.setY(event.getScreenY() - yOffset);
         });
@@ -49,30 +62,23 @@ public class WindowHelper {
 
         if (btnMaximize != null) {
             btnMaximize.setOnAction(event -> {
-
                 Stage stage = (Stage) btnMaximize.getScene().getWindow();
                 var root = stage.getScene().getRoot();
 
-                FadeTransition fadeOut =
-                        new FadeTransition(Duration.millis(120), root);
-
+                FadeTransition fadeOut = new FadeTransition(Duration.millis(120), root);
                 fadeOut.setFromValue(1.0);
                 fadeOut.setToValue(0.4);
 
                 fadeOut.setOnFinished(e -> {
-
                     stage.setMaximized(!stage.isMaximized());
                     if (onMaximizeChanged != null) {
                         onMaximizeChanged.run();
                     }
 
                     Platform.runLater(() -> {
-
                         FadeTransition fadeIn = new FadeTransition(Duration.millis(120), root);
-
                         fadeIn.setFromValue(0.4);
                         fadeIn.setToValue(1.0);
-
                         fadeIn.play();
                     });
                 });
@@ -92,7 +98,6 @@ public class WindowHelper {
 
                 Optional<ButtonType> result = alert.showAndWait();
                 if (result.isPresent() && result.get() == ButtonType.OK) {
-
                     FadeTransition fade = new FadeTransition(Duration.millis(200), stage.getScene().getRoot());
                     fade.setFromValue(1.0);
                     fade.setToValue(0.0);
@@ -102,6 +107,70 @@ public class WindowHelper {
                     });
                     fade.play();
                 }
+            });
+        }
+    }
+
+    /**
+     * Configura los botones de la barra de título SIN permitir el arrastre de la ventana
+     * y cerrando la aplicación directamente.
+     */
+    public static void makeWindowStatic(StackPane titleBar, Button btnMinimize, Button btnMaximize, Button btnClose, Runnable onMaximizeChanged) {
+
+        if (btnMinimize != null) {
+            btnMinimize.setOnAction(event -> {
+                Stage stage = (Stage) btnMinimize.getScene().getWindow();
+
+                FadeTransition fade = new FadeTransition(Duration.millis(200), stage.getScene().getRoot());
+                fade.setFromValue(1.0);
+                fade.setToValue(0.0);
+                fade.setOnFinished(e -> {
+                    stage.setIconified(true);
+                    stage.getScene().getRoot().setOpacity(1.0);
+                });
+                fade.play();
+            });
+        }
+
+        if (btnMaximize != null) {
+            btnMaximize.setOnAction(event -> {
+                Stage stage = (Stage) btnMaximize.getScene().getWindow();
+                var root = stage.getScene().getRoot();
+
+                FadeTransition fadeOut = new FadeTransition(Duration.millis(120), root);
+                fadeOut.setFromValue(1.0);
+                fadeOut.setToValue(0.4);
+
+                fadeOut.setOnFinished(e -> {
+                    stage.setMaximized(!stage.isMaximized());
+                    if (onMaximizeChanged != null) {
+                        onMaximizeChanged.run();
+                    }
+
+                    Platform.runLater(() -> {
+                        FadeTransition fadeIn = new FadeTransition(Duration.millis(120), root);
+                        fadeIn.setFromValue(0.4);
+                        fadeIn.setToValue(1.0);
+                        fadeIn.play();
+                    });
+                });
+
+                fadeOut.play();
+            });
+        }
+
+        if (btnClose != null) {
+            btnClose.setOnAction(event -> {
+                Stage stage = (Stage) btnClose.getScene().getWindow();
+
+                FadeTransition fade = new FadeTransition(Duration.millis(200), stage.getScene().getRoot());
+                fade.setFromValue(1.0);
+                fade.setToValue(0.0);
+                fade.setOnFinished(e -> {
+                    Platform.exit();
+                    System.exit(0);
+                });
+                fade.play();
             });
         }
     }

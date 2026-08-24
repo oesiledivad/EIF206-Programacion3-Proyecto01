@@ -207,7 +207,7 @@ public class MainViewController {
 
     @FXML
     public void goToRecursos(ActionEvent actionEvent) {
-        loadView("recursos'view");
+        loadView("recursos-administrador-view", "Recursos");
     }
 
     @FXML
@@ -222,7 +222,7 @@ public class MainViewController {
 
     @FXML
     public void goToEstadisticas(ActionEvent actionEvent) {
-        loadView("estadisticas-view");
+        loadView("estadisticas-view", "Estadisticas");
     }
 
     @FXML
@@ -247,6 +247,7 @@ public class MainViewController {
                 //stage.setResizable(true);
                 Navigation.navigateTo(stage, "/una/proyecto/ui/login-view.fxml", "Sistema de Reserva - Login");
                 Navigation.disableMaximizeButton();
+                Navigation.getTitleBarController().setDraggable(false);
             } catch (IOException e) {
 
                 e.printStackTrace();

@@ -15,7 +15,7 @@
 <?import javafx.scene.text.Font?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<VBox prefHeight="550.0" prefWidth="700.0" spacing="15.0" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="una.proyecto.controller.CategoriasAdministradorController">
+<VBox prefHeight="550.0" spacing="15.0" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="una.proyecto.controller.CategoriasAdministradorController">
 
    <padding>
       <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
@@ -24,7 +24,7 @@
    <children>
       <VBox spacing="8.0">
          <children>
-            <Label styleClass="section-title" text="Búsqueda">
+            <Label styleClass="title" text="Búsqueda">
                <font>
                   <Font size="15.0" />
                </font>
@@ -57,7 +57,7 @@
       <Separator prefWidth="200.0" />
       <VBox spacing="10.0">
          <children>
-            <Label text="Categoría">
+            <Label styleClass="section-title" text="Categoría">
                <font>
                   <Font size="15.0" />
                </font>
@@ -69,8 +69,8 @@
                   <ColumnConstraints hgrow="ALWAYS" />
                </columnConstraints>
                <rowConstraints>
-                  <RowConstraints minHeight="30.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints vgrow="SOMETIMES" />
+                  <RowConstraints vgrow="SOMETIMES" />
                </rowConstraints>
                <children>
                   <Label text="ID" />
@@ -113,7 +113,7 @@
       <Separator prefWidth="200.0" />
       <VBox fx:id="vboxTabla" spacing="5.0" VBox.vgrow="ALWAYS">
          <children>
-            <Label text="Listado" />
+            <Label styleClass="section-title" text="Listado" />
             <TableView fx:id="tablaCategorias" editable="true" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
                <columns>
                   <TableColumn fx:id="colID" prefWidth="150.0" text="ID" />

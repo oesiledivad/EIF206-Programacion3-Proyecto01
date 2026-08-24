@@ -661,7 +661,7 @@ Text.heading-3 {
 
 /*
    INPUTS
-    */
+*/
 
 .text-field, .password-field, .text-area {
     -fx-background-color: -fx-input-bg;
@@ -671,13 +671,13 @@ Text.heading-3 {
     -fx-border-color: -fx-input-border;
     -fx-border-width: 1.5px;
     -fx-border-radius: 8px;
-
     -fx-background-radius: 8px;
 
-    -fx-padding: 5px 7px;
-
+    -fx-font-family: "JetBrains Mono", "Inter", sans-serif;
     -fx-font-size: 14px;
-    -fx-font-family: "Segoe UI", "Inter", sans-serif;
+    -fx-font-weight: 600;
+
+    -fx-padding: 8px 12px;
 }
 
 .text-field:hover, .password-field:hover, .text-area:hover {
@@ -719,51 +719,49 @@ Text.heading-3 {
     -fx-border-width: 1.5px;
     -fx-border-radius: 8px;
     -fx-background-radius: 8px;
+
+    /* Mismas propiedades de fuente del botón */
+    -fx-font-family: "JetBrains Mono", "Inter", sans-serif;
     -fx-font-size: 14px;
-    -fx-padding: 6px 12px;
+    -fx-font-weight: 600;
+
+    /* Padding idéntico al del botón (8px arriba/abajo) */
+    -fx-padding: 0px; /* Anulamos el padding general y lo delegamos a la celda */
 }
 
-.combo-box:hover {
-    -fx-border-color: -fx-text-muted;
+/* Hacemos que la celda interna respete el padding exacto del botón */
+.combo-box .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: -fx-text-primary;
+    -fx-padding: 8px 12px; /* 8px arriba/abajo igual que el botón */
+    -fx-background-radius: 8px;
 }
 
-.combo-box:focused {
-    -fx-border-color: -fx-border-focus;
-    -fx-border-width: 2px;
-}
-
+/* Ajustamos el botón de la flecha para que no expanda la altura */
 .combo-box .arrow-button {
     -fx-background-color: transparent;
+    -fx-padding: 0px 10px 0px 5px;
 }
 
 .combo-box .arrow {
     -fx-background-color: -fx-text-muted;
 }
 
-.combo-box .list-cell {
-    -fx-background-color: -fx-input-bg;
-    -fx-text-fill: -fx-text-primary;
-    -fx-padding: 8px 12px;
-}
-
-.combo-box .list-view {
+/* Resto de tus estilos para el menú desplegable */
+.combo-box .list-view,
+.combo-box-popup .list-view {
     -fx-background-color: -fx-bg-secondary;
     -fx-border-color: -fx-border-primary;
     -fx-border-radius: 8px;
     -fx-background-radius: 8px;
 }
 
-.combo-box-popup .list-view {
-    -fx-background-color: -fx-bg-secondary;
-    -fx-border-color: -fx-border-primary;
-    -fx-border-radius: 8px;
-}
-
 .combo-box .list-cell:hover {
     -fx-background-color: -fx-bg-tertiary;
 }
 
-.combo-box .list-cell:selected {
+.combo-box .list-cell:selected,
+.combo-box .list-cell:filled:selected {
     -fx-background-color: -fx-accent-light;
     -fx-text-fill: -fx-accent-primary;
 }
@@ -2091,4 +2089,206 @@ Text.heading-3 {
     -fx-text-fill: white !important;
     -fx-scale-x: 0.92;
     -fx-scale-y: 0.92;
+}
+
+
+/*
+   CHART / GRÁFICOS
+   */
+
+.chart {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-background-radius: 8px;
+    -fx-padding: 16px;
+    -fx-effect: dropshadow(gaussian, -fx-shadow-color, 6, 0, 0, 2);
+
+    -fx-category-gap: 20px;
+    -fx-bar-gap: 4px;
+}
+
+/* Fondo del área de trazado */
+.chart-plot-background {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-border-color: -fx-border-primary;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+}
+
+/* Fondo del área del gráfico (alternativa) */
+.chart-content {
+    -fx-background-color: -fx-bg-secondary;
+}
+
+/* Líneas de cuadrícula verticales y horizontales */
+.chart-vertical-grid-lines {
+    -fx-stroke: -fx-border-primary;
+    -fx-stroke-width: 0.5px;
+    -fx-opacity: 0.5;
+}
+
+.chart-horizontal-grid-lines {
+    -fx-stroke: -fx-border-primary;
+    -fx-stroke-width: 0.5px;
+    -fx-opacity: 0.5;
+}
+
+/*  Ejes */
+.axis {
+    -fx-tick-label-fill: -fx-text-secondary;
+    -fx-tick-label-font-size: 11px;
+    -fx-tick-label-font-weight: 500;
+}
+
+.axis-label {
+    -fx-text-fill: -fx-text-primary;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+}
+
+/* Ticks (marcas) del eje */
+.axis-tick-mark {
+    -fx-stroke: -fx-border-primary;
+    -fx-stroke-width: 1px;
+}
+
+/* Línea del eje */
+.axis-line {
+    -fx-stroke: -fx-border-primary;
+    -fx-stroke-width: 1px;
+}
+
+/* Títulos de ejes */
+.axis .axis-label {
+    -fx-text-fill: -fx-text-secondary;
+    -fx-font-size: 12px;
+}
+
+/* Legend (leyenda) */
+.chart-legend {
+    -fx-background-color: -fx-bg-tertiary;
+    -fx-background-radius: 4px;
+    -fx-padding: 8px 12px;
+    -fx-border-color: -fx-border-primary;
+    -fx-border-radius: 4px;
+    -fx-border-width: 1px;
+}
+
+.chart-legend-item {
+    -fx-text-fill: -fx-text-secondary;
+    -fx-font-size: 11px;
+    -fx-padding: 2px 6px;
+}
+
+.chart-legend-item-symbol {
+    -fx-background-radius: 2px;
+    -fx-padding: 4px;
+}
+
+/*  Título del gráfico */
+.chart-title {
+    -fx-text-fill: -fx-text-primary;
+    -fx-font-size: 15px;
+    -fx-font-weight: 700;
+    -fx-padding: 0 0 12px 0;
+}
+
+/*
+   BARRAS DEL GRÁFICO (BarChart)
+   */
+
+/* --- Serie 1 (azul primario) --- */
+.default-color0.chart-bar {
+    -fx-bar-fill: -fx-accent-primary;
+    -fx-background-radius: 4px 4px 0 0;
+}
+
+.default-color0.chart-bar:hover {
+    -fx-bar-fill: -fx-accent-hover;
+    -fx-opacity: 0.85;
+}
+
+/* Serie 2 */
+.default-color1.chart-bar {
+    -fx-bar-fill: -fx-success;
+    -fx-background-radius: 4px 4px 0 0;
+}
+
+.default-color1.chart-bar:hover {
+    -fx-bar-fill: #15803d;
+    -fx-opacity: 0.85;
+}
+
+/* Serie 3 */
+.default-color2.chart-bar {
+    -fx-bar-fill: -fx-warning;
+    -fx-background-radius: 4px 4px 0 0;
+}
+
+.default-color2.chart-bar:hover {
+    -fx-bar-fill: #b45309;
+    -fx-opacity: 0.85;
+}
+
+/* Serie 4 (rojo peligro) */
+.default-color3.chart-bar {
+    -fx-bar-fill: -fx-danger;
+    -fx-background-radius: 4px 4px 0 0;
+}
+
+.default-color3.chart-bar:hover {
+    -fx-bar-fill: #b91c1c;
+    -fx-opacity: 0.85;
+}
+
+/* Serie 5 (azul secundario) */
+.default-color4.chart-bar {
+    -fx-bar-fill: #7c3aed;
+    -fx-background-radius: 4px 4px 0 0;
+}
+
+.default-color4.chart-bar:hover {
+    -fx-bar-fill: #6d28d9;
+    -fx-opacity: 0.85;
+}
+
+/* Serie 6 (celeste) */
+.default-color5.chart-bar {
+    -fx-bar-fill: #06b6d4;
+    -fx-background-radius: 4px 4px 0 0;
+}
+
+.default-color5.chart-bar:hover {
+    -fx-bar-fill: #0891b2;
+    -fx-opacity: 0.85;
+}
+
+/* Etiquetas de datos sobre las barras */
+.chart-bar .data-label {
+    -fx-text-fill: -fx-text-secondary;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+}
+
+/*
+   SCROLLBAR
+   */
+
+.chart .scroll-bar:horizontal,
+.chart .scroll-bar:vertical {
+    -fx-background-color: -fx-bg-tertiary;
+    -fx-background-radius: 10px;
+}
+
+.chart .scroll-bar .thumb {
+    -fx-background-color: -fx-accent-primary;
+    -fx-background-radius: 10px;
+}
+
+.chart .scroll-bar .thumb:hover {
+    -fx-background-color: -fx-accent-hover;
+}
+
+.chart .scroll-bar .increment-button,
+.chart .scroll-bar .decrement-button {
+    -fx-background-color: transparent;
 }

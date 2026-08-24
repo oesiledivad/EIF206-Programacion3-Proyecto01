@@ -398,4 +398,8 @@ public final class Navigation {
             titleBarController.enableMinimizeButton();
         }
     }
+
+    public static TitleBarController getTitleBarController() {
+        return titleBarController;
+    }
 }
