@@ -73,4 +73,9 @@ public class CategoriasAdministradorController {
             tablaCategorias.getItems().remove(categoriaSeleccionada);
         }
     }
+    @FXML
+    private void limpiarCampos() {
+        txtID.clear();
+        txtDescripcion.clear();
+    }
 }
