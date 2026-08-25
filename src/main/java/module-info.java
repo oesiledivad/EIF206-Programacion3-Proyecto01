@@ -4,7 +4,7 @@ module EIF.Programacion.Proyecto {
     requires javafx.controls;
     requires javafx.fxml;
     requires javafx.graphics;
-    requires atlantafx.base;
+
     requires org.kordamp.ikonli.javafx;
 
     requires java.xml;

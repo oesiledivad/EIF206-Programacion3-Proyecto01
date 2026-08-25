@@ -1,9 +1,15 @@
 package una.proyecto.controller;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
-import una.proyecto.model.Categorias;
+import una.proyecto.model.Categoria;
+import una.proyecto.service.CategoriaService;
 
 public class CategoriasAdministradorController {
 
@@ -17,31 +23,27 @@ public class CategoriasAdministradorController {
     private TextField txtDescripcion;
 
     @FXML
-    private Button btnBuscar;
+    private TableView<Categoria> tablaCategorias;
 
     @FXML
-    private Button btnImprimir;
+    private TableColumn<Categoria, Integer> colID;
 
     @FXML
-    private Button btnGuardar;
+    private TableColumn<Categoria, String> colDescripcion;
 
-    @FXML
-    private Button btnBorrar;
+    private final CategoriaService categoryService = new CategoriaService();
 
-    @FXML
-    private Button btnLimpiar;
-
-    @FXML
-    private TableView<Categorias> tablaCategorias;
-
-    @FXML
-    private TableColumn<Categorias, Integer> colID;
-
-    @FXML
-    private TableColumn<Categorias, String> colDescripcion;
+    private final ObservableList<Categoria> listaObservable = FXCollections.observableArrayList();
 
     @FXML
     public void initialize() {
+        configureTable();
+        loadCategories();
+        configureSelectionListener();
+        configureSearchListener();
+    }
+
+    private void configureTable() {
         colID.setCellValueFactory(
                 new PropertyValueFactory<>("id")
         );
@@ -49,33 +51,88 @@ public class CategoriasAdministradorController {
         colDescripcion.setCellValueFactory(
                 new PropertyValueFactory<>("descripcion")
         );
+
+        tablaCategorias.setItems(listaObservable);
     }
-    @FXML
-    private void guardarCategoria() {
 
-        int id = Integer.parseInt(txtID.getText());
-        String descripcion = txtDescripcion.getText();
-
-        Categorias categoria = new Categorias(id, descripcion);
-
-        tablaCategorias.getItems().add(categoria);
-
-        txtID.clear();
-        txtDescripcion.clear();
+    private void loadCategories() {
+        listaObservable.setAll(categoryService.obtenerTodas());
     }
+
+    private void configureSelectionListener() {
+        tablaCategorias.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+                    if (newValue != null) {
+                        txtID.setText(String.valueOf(newValue.getId()));
+                        txtID.setEditable(false);
+                        txtDescripcion.setText(newValue.getDescripcion());
+                    }
+                });
+    }
+
+    private void configureSearchListener() {
+        txtBuscarDescripcion.textProperty().addListener((observable, oldValue, newValue) -> searchCategories(newValue));
+    }
+
+    private void searchCategories(String searchText) {
+        listaObservable.setAll(categoryService.buscarPorDescripcion(searchText));
+    }
+
     @FXML
-    private void borrarCategoria() {
+    private void saveCategory() {
+        try {
+            int id = Integer.parseInt(txtID.getText());
+            String description = txtDescripcion.getText().trim();
 
-        Categorias categoriaSeleccionada =
-                tablaCategorias.getSelectionModel().getSelectedItem();
+            if (description.isEmpty()) {
+                showAlert("Error","La descripción no puede estar vacía.");
+                return;
+            }
 
-        if (categoriaSeleccionada != null) {
-            tablaCategorias.getItems().remove(categoriaSeleccionada);
+            Categoria category = new Categoria(id, description);
+
+            categoryService.save(category);
+
+            loadCategories();
+            clearForm();
+
+        } catch (NumberFormatException e) {
+            showAlert("Error", "El ID debe ser un número entero válido.");
         }
     }
+
     @FXML
-    private void limpiarCampos() {
+    private void deleteCategory() {
+        Categoria selectedCategory = tablaCategorias.getSelectionModel().getSelectedItem();
+
+        if (selectedCategory == null) {
+            showAlert("Aviso", "Debe seleccionar una categoría de la tabla.");
+            return;
+        }
+
+        categoryService.delete(selectedCategory.getId());
+
+        loadCategories();
+        clearForm();
+    }
+
+    @FXML
+    private void clearForm() {
         txtID.clear();
+        txtID.setEditable(true);
+
         txtDescripcion.clear();
+        txtBuscarDescripcion.clear();
+
+        tablaCategorias.getSelectionModel().clearSelection();
+    }
+
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+
+        alert.showAndWait();
     }
 }
