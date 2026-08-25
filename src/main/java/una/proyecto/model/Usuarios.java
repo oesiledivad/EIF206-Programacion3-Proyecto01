@@ -15,7 +15,6 @@ public class Usuarios {
     private List<Usuario> lista = new ArrayList<>();
 
     public Usuarios() {}
-
     public List<Usuario> getLista() { return lista; }
     public void setLista(List<Usuario> lista) { this.lista = lista; }
 }
