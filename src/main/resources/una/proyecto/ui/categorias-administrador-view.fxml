@@ -82,7 +82,7 @@
             </GridPane>
             <HBox alignment="CENTER_LEFT" spacing="10.0">
                <children>
-                  <Button fx:id="btnGuardar" mnemonicParsing="false" onAction="#guardarCategoria" prefHeight="35.0" styleClass="btn-toggle-shadow-primary" text="Guardar" wrapText="true" HBox.hgrow="ALWAYS">
+                  <Button fx:id="btnGuardar" mnemonicParsing="false" onAction="#saveCategory" prefHeight="35.0" styleClass="btn-toggle-shadow-primary" text="Guardar" wrapText="true" HBox.hgrow="ALWAYS">
                      <graphic>
                         <FontIcon iconColor="#1b00a1" iconLiteral="fa-save" iconSize="15" styleClass="btn-toggle-shadow-primary" />
                      </graphic>
@@ -90,7 +90,7 @@
                         <Insets right="20.0" top="20.0" />
                      </padding>
                   </Button>
-                  <Button fx:id="btnBorrar" mnemonicParsing="false" onAction="#borrarCategoria" prefHeight="35.0" styleClass="btn-toggle-shadow-primary" text="Borrar" wrapText="true" HBox.hgrow="ALWAYS">
+                  <Button fx:id="btnBorrar" mnemonicParsing="false" onAction="#deleteCategory" prefHeight="35.0" styleClass="btn-toggle-shadow-primary" text="Borrar" wrapText="true" HBox.hgrow="ALWAYS">
                      <graphic>
                         <FontIcon iconColor="#5e5e5e" iconLiteral="fa-trash" iconSize="15" />
                      </graphic>
