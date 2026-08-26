@@ -3,7 +3,7 @@ package una.proyecto.controller;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import una.proyecto.model.Funcionarios;
+import una.proyecto.model.Funcionario;
 
 public class FuncionariosAdministradorController {
 
@@ -14,10 +14,10 @@ public class FuncionariosAdministradorController {
     @FXML private TextField txtNombre;
     @FXML private TextField txtTelefono;
 
-    @FXML private TableView<Funcionarios> tblFuncionarios;
-    @FXML private TableColumn<Funcionarios, String> colID;
-    @FXML private TableColumn<Funcionarios, String> colNombre;
-    @FXML private TableColumn<Funcionarios, String> colTelefono;
+    @FXML private TableView<Funcionario> tblFuncionarios;
+    @FXML private TableColumn<Funcionario, String> colID;
+    @FXML private TableColumn<Funcionario, String> colNombre;
+    @FXML private TableColumn<Funcionario, String> colTelefono;
 
     @FXML
     private void initialize() {
@@ -30,13 +30,13 @@ public class FuncionariosAdministradorController {
 
         colNombre.setCellValueFactory(cellData ->
                 new SimpleStringProperty(
-                        cellData.getValue().getNombre()
+                        cellData.getValue().getName()
                 )
         );
 
         colTelefono.setCellValueFactory(cellData ->
                 new SimpleStringProperty(
-                        cellData.getValue().getTelefono()
+                        cellData.getValue().getPhone()
                 )
         );
     }
@@ -44,11 +44,12 @@ public class FuncionariosAdministradorController {
     @FXML
     private void guardarFuncionario() {
 
-        int id = Integer.parseInt(txtID.getText());
+        String id = txtID.getText();
         String nombre = txtNombre.getText();
         String telefono = txtTelefono.getText();
+        String rol = "FUNCIONARIO";
 
-        Funcionarios funcionario = new Funcionarios(id, nombre, telefono);
+        Funcionario funcionario = new Funcionario(id ,rol, nombre, telefono);
 
         tblFuncionarios.getItems().add(funcionario);
 
@@ -63,19 +64,19 @@ public class FuncionariosAdministradorController {
         String buscarID = txtBuscarID.getText().trim();
         String buscarNombre = txtBuscarNombre.getText().trim();
 
-        for (Funcionarios funcionario : tblFuncionarios.getItems()) {
+        for (Funcionario funcionario : tblFuncionarios.getItems()) {
 
             boolean coincideID = !buscarID.isEmpty()
                     && String.valueOf(funcionario.getId()).equals(buscarID);
 
             boolean coincideNombre = !buscarNombre.isEmpty()
-                    && funcionario.getNombre().equalsIgnoreCase(buscarNombre);
+                    && funcionario.getName().equalsIgnoreCase(buscarNombre);
 
             if (coincideID || coincideNombre) {
 
                 txtID.setText(String.valueOf(funcionario.getId()));
-                txtNombre.setText(funcionario.getNombre());
-                txtTelefono.setText(funcionario.getTelefono());
+                txtNombre.setText(funcionario.getName());
+                txtTelefono.setText(funcionario.getPhone());
 
                 tblFuncionarios.getSelectionModel().select(funcionario);
 
@@ -89,7 +90,7 @@ public class FuncionariosAdministradorController {
     @FXML
     private void editarFuncionario() {
 
-        Funcionarios funcionario = tblFuncionarios
+        Funcionario funcionario = tblFuncionarios
                 .getSelectionModel()
                 .getSelectedItem();
 
@@ -98,13 +99,12 @@ public class FuncionariosAdministradorController {
             return;
         }
 
-        int id = Integer.parseInt(txtID.getText());
+        // Para cuando se implemente la busqueda String id = txtID.getText();
         String nombre = txtNombre.getText();
         String telefono = txtTelefono.getText();
 
-        funcionario.setId(id);
-        funcionario.setNombre(nombre);
-        funcionario.setTelefono(telefono);
+        funcionario.setName(nombre);
+        funcionario.setPhone(telefono);
 
         tblFuncionarios.refresh();
 
@@ -114,7 +114,7 @@ public class FuncionariosAdministradorController {
     @FXML
     private void eliminarFuncionario() {
 
-        Funcionarios funcionario = tblFuncionarios
+        Funcionario funcionario = tblFuncionarios
                 .getSelectionModel()
                 .getSelectedItem();
 

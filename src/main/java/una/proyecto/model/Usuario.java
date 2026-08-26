@@ -29,6 +29,5 @@ public String getClave(){return this.clave;}
 public String getId(){return this.id;}
 public String getRol(){return this.rol;}
 public void setClave(String clave){this.clave=clave;}
-
 }
 

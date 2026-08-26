@@ -1,6 +1,5 @@
 package una.proyecto.model ;
 
-
 import jakarta.xml.bind.annotation.*;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Funcionario")
@@ -10,7 +9,7 @@ public class Funcionario extends Usuario {
     @XmlElement
     private String name;
     //Posee una lista de reservas
-    public Funcionario(String clave, String id, String rol, String name, String phone){
+    public Funcionario(String id, String rol, String name, String phone){
         super(id,rol);
         this.phone=phone;
         this.name=name;
@@ -25,4 +24,13 @@ public class Funcionario extends Usuario {
     public String getName(){
         return this.name;
     }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
 }

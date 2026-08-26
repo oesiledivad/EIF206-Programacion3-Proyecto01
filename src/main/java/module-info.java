@@ -9,7 +9,6 @@ module EIF.Programacion.Proyecto {
     requires jakarta.xml.bind;
 
     requires java.xml;
-    requires jakarta.xml.bind;
 
     opens una.proyecto.app to javafx.fxml, javafx.graphics;
     opens una.proyecto.controller to javafx.fxml;
