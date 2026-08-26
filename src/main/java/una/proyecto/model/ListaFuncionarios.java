@@ -1,15 +1,20 @@
 package una.proyecto.model;
 
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
 @XmlRootElement(name = "funcionarios")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class ListaFuncionarios {
-    private List<Funcionario> funcionarios = new ArrayList<>();
 
     @XmlElement(name = "funcionario")
+    private List<Funcionario> funcionarios = new ArrayList<>();
+
+    public ListaFuncionarios() {
+    }
+
     public List<Funcionario> getFuncionarios() {
         return funcionarios;
     }

@@ -14,6 +14,11 @@ public class Funcionario extends Usuario {
         this.phone=phone;
         this.name=name;
     }
+    public Funcionario(){
+        super();
+        // Constructor vacío requerido por JAXB
+        // lo hereda del de Usuario
+    }
     @Override
     public void chagePassword(String password){
     this.setClave(password);

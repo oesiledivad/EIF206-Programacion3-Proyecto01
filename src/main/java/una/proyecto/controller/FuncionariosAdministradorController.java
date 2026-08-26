@@ -1,143 +1,261 @@
 package una.proyecto.controller;
 
-import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
 import una.proyecto.model.Funcionario;
+import una.proyecto.service.FuncionarioService;
 
 public class FuncionariosAdministradorController {
 
-    @FXML private TextField txtBuscarID;
-    @FXML private TextField txtBuscarNombre;
-
-    @FXML private TextField txtID;
-    @FXML private TextField txtNombre;
-    @FXML private TextField txtTelefono;
-
-    @FXML private TableView<Funcionario> tblFuncionarios;
-    @FXML private TableColumn<Funcionario, String> colID;
-    @FXML private TableColumn<Funcionario, String> colNombre;
-    @FXML private TableColumn<Funcionario, String> colTelefono;
+    @FXML
+    private TextField txtBuscarID;
 
     @FXML
-    private void initialize() {
+    private TextField txtBuscarNombre;
 
-        colID.setCellValueFactory(cellData ->
-                new SimpleStringProperty(
-                        String.valueOf(cellData.getValue().getId())
-                )
+    @FXML
+    private TextField txtID;
+
+    @FXML
+    private TextField txtNombre;
+
+    @FXML
+    private TextField txtTelefono;
+
+    @FXML
+    private TableView<Funcionario> tblFuncionarios;
+
+    @FXML
+    private TableColumn<Funcionario, String> colID;
+
+    @FXML
+    private TableColumn<Funcionario, String> colNombre;
+
+    @FXML
+    private TableColumn<Funcionario, String> colTelefono;
+
+    private final FuncionarioService funcionarioService = new FuncionarioService();
+
+    private final ObservableList<Funcionario> listaObservable =
+            FXCollections.observableArrayList();
+
+    @FXML
+    public void initialize() {
+        configureTable();
+        loadFuncionarios();
+        configureSelectionListener();
+        configureSearchListeners();
+    }
+
+    private void configureTable() {
+
+        colID.setCellValueFactory(
+                new PropertyValueFactory<>("id")
         );
 
-        colNombre.setCellValueFactory(cellData ->
-                new SimpleStringProperty(
-                        cellData.getValue().getName()
-                )
+        colNombre.setCellValueFactory(
+                new PropertyValueFactory<>("name")
         );
 
-        colTelefono.setCellValueFactory(cellData ->
-                new SimpleStringProperty(
-                        cellData.getValue().getPhone()
-                )
+        colTelefono.setCellValueFactory(
+                new PropertyValueFactory<>("phone")
         );
+
+        tblFuncionarios.setItems(listaObservable);
+    }
+
+    private void loadFuncionarios() {
+        listaObservable.setAll(
+                funcionarioService.obtenerTodos()
+        );
+    }
+
+    private void configureSelectionListener() {
+
+        tblFuncionarios.getSelectionModel()
+                .selectedItemProperty()
+                .addListener((observable, oldValue, newValue) -> {
+
+                    if (newValue != null) {
+
+                        txtID.setText(newValue.getId());
+                        txtID.setEditable(false);
+
+                        txtNombre.setText(newValue.getName());
+                        txtTelefono.setText(newValue.getPhone());
+                    }
+                });
+    }
+
+    private void configureSearchListeners() {
+
+        txtBuscarID.textProperty().addListener(
+                (observable, oldValue, newValue) ->
+                        searchFuncionarios()
+        );
+
+        txtBuscarNombre.textProperty().addListener(
+                (observable, oldValue, newValue) ->
+                        searchFuncionarios()
+        );
+    }
+
+    private void searchFuncionarios() {
+
+        String id = txtBuscarID.getText().trim();
+        String nombre = txtBuscarNombre.getText().trim();
+
+        if (!id.isEmpty()) {
+
+            listaObservable.setAll(
+                    funcionarioService.buscarPorId(id)
+            );
+
+        } else if (!nombre.isEmpty()) {
+
+            listaObservable.setAll(
+                    funcionarioService.buscarPorNombre(nombre)
+            );
+
+        } else {
+
+            loadFuncionarios();
+        }
     }
 
     @FXML
     private void guardarFuncionario() {
 
-        String id = txtID.getText();
-        String nombre = txtNombre.getText();
-        String telefono = txtTelefono.getText();
-        String rol = "FUNCIONARIO";
+        String id = txtID.getText().trim();
+        String nombre = txtNombre.getText().trim();
+        String telefono = txtTelefono.getText().trim();
 
-        Funcionario funcionario = new Funcionario(id ,rol, nombre, telefono);
-
-        tblFuncionarios.getItems().add(funcionario);
-
-        txtID.clear();
-        txtNombre.clear();
-        txtTelefono.clear();
-    }
-
-    @FXML
-    private void buscarFuncionario() {
-
-        String buscarID = txtBuscarID.getText().trim();
-        String buscarNombre = txtBuscarNombre.getText().trim();
-
-        for (Funcionario funcionario : tblFuncionarios.getItems()) {
-
-            boolean coincideID = !buscarID.isEmpty()
-                    && String.valueOf(funcionario.getId()).equals(buscarID);
-
-            boolean coincideNombre = !buscarNombre.isEmpty()
-                    && funcionario.getName().equalsIgnoreCase(buscarNombre);
-
-            if (coincideID || coincideNombre) {
-
-                txtID.setText(String.valueOf(funcionario.getId()));
-                txtNombre.setText(funcionario.getName());
-                txtTelefono.setText(funcionario.getPhone());
-
-                tblFuncionarios.getSelectionModel().select(funcionario);
-
-                return;
-            }
+        if (id.isEmpty()) {
+            showAlert("Error", "El ID no puede estar vacío.");
+            return;
         }
 
-        mostrarAlerta("Búsqueda", "No se encontró el funcionario.");
+        if (nombre.isEmpty()) {
+            showAlert("Error", "El nombre no puede estar vacío.");
+            return;
+        }
+
+        if (telefono.isEmpty()) {
+            showAlert("Error", "El teléfono no puede estar vacío.");
+            return;
+        }
+
+        Funcionario funcionario =
+                new Funcionario(id, "FUNCIONARIO", nombre, telefono);
+
+        funcionarioService.save(funcionario);
+
+        loadFuncionarios();
+        clearForm();
+
+        showAlert(
+                "Funcionario",
+                "Funcionario guardado correctamente."
+        );
     }
 
     @FXML
     private void editarFuncionario() {
 
-        Funcionario funcionario = tblFuncionarios
-                .getSelectionModel()
-                .getSelectedItem();
+        Funcionario seleccionado =
+                tblFuncionarios.getSelectionModel().getSelectedItem();
 
-        if (funcionario == null) {
-            mostrarAlerta("Editar", "Seleccione un funcionario de la tabla.");
+        if (seleccionado == null) {
+            showAlert(
+                    "Aviso",
+                    "Debe seleccionar un funcionario de la tabla."
+            );
             return;
         }
 
-        // Para cuando se implemente la busqueda String id = txtID.getText();
-        String nombre = txtNombre.getText();
-        String telefono = txtTelefono.getText();
+        String nombre = txtNombre.getText().trim();
+        String telefono = txtTelefono.getText().trim();
 
-        funcionario.setName(nombre);
-        funcionario.setPhone(telefono);
+        if (nombre.isEmpty()) {
+            showAlert("Error", "El nombre no puede estar vacío.");
+            return;
+        }
 
-        tblFuncionarios.refresh();
+        if (telefono.isEmpty()) {
+            showAlert("Error", "El teléfono no puede estar vacío.");
+            return;
+        }
 
-        mostrarAlerta("Editar", "Funcionario actualizado correctamente.");
+        seleccionado.setName(nombre);
+        seleccionado.setPhone(telefono);
+
+        funcionarioService.save(seleccionado);
+
+        loadFuncionarios();
+        clearForm();
+
+        showAlert(
+                "Funcionario",
+                "Funcionario actualizado correctamente."
+        );
     }
 
     @FXML
     private void eliminarFuncionario() {
 
-        Funcionario funcionario = tblFuncionarios
-                .getSelectionModel()
-                .getSelectedItem();
+        Funcionario seleccionado =
+                tblFuncionarios.getSelectionModel().getSelectedItem();
 
-        if (funcionario == null) {
-            mostrarAlerta("Eliminar", "Seleccione un funcionario de la tabla.");
+        if (seleccionado == null) {
+            showAlert(
+                    "Aviso",
+                    "Debe seleccionar un funcionario de la tabla."
+            );
             return;
         }
 
-        tblFuncionarios.getItems().remove(funcionario);
+        funcionarioService.delete(seleccionado.getId());
+
+        loadFuncionarios();
+        clearForm();
+
+        showAlert(
+                "Funcionario",
+                "Funcionario eliminado correctamente."
+        );
+    }
+
+    @FXML
+    private void clearForm() {
 
         txtID.clear();
+        txtID.setEditable(true);
+
         txtNombre.clear();
         txtTelefono.clear();
 
-        mostrarAlerta("Eliminar", "Funcionario eliminado correctamente.");
+        txtBuscarID.clear();
+        txtBuscarNombre.clear();
+
+        tblFuncionarios.getSelectionModel().clearSelection();
+
+        loadFuncionarios();
     }
 
-    private void mostrarAlerta(String titulo, String mensaje) {
+    private void showAlert(String title, String message) {
 
-        Alert alerta = new Alert(Alert.AlertType.INFORMATION);
-        alerta.setTitle(titulo);
-        alerta.setHeaderText(null);
-        alerta.setContentText(mensaje);
-        alerta.showAndWait();
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+
+        alert.showAndWait();
     }
 }
