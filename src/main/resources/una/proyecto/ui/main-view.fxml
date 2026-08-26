@@ -13,16 +13,16 @@
 <?import javafx.scene.shape.Circle?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<BorderPane fx:id="mainLayout" minHeight="-Infinity" minWidth="-Infinity" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="una.proyecto.controller.MainViewController">
+<BorderPane fx:id="mainLayout" prefHeight="635.0" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="una.proyecto.controller.MainViewController">
    <left>
-      <VBox fx:id="sidebar" alignment="TOP_CENTER" minWidth="0.0" prefHeight="800.0" prefWidth="0.0" styleClass="sidebar" BorderPane.alignment="TOP_CENTER">
+      <VBox fx:id="sidebar" alignment="TOP_CENTER" prefHeight="600.0" styleClass="sidebar" BorderPane.alignment="TOP_CENTER">
          <children>
-            <VBox alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="100.0" spacing="2.0" styleClass="sidebar-header">
+            <VBox alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="100.0" spacing="2.0" styleClass="sidebar-header" VBox.vgrow="ALWAYS">
                <padding>
                   <Insets bottom="20.0" left="20.0" right="20.0" top="24.0" />
                </padding>
                <children>
-                  <Label styleClass="logo-text" text="Sistema de Reservas" />
+                  <Label styleClass="logo-text" text="Sistema de Reservas" wrapText="true" />
                   <VBox fx:id="sidebarMenu" prefHeight="200.0" prefWidth="100.0" spacing="2.0" styleClass="sidebar-menu" VBox.vgrow="ALWAYS">
                      <padding>
                         <Insets right="12.0" top="16.0" />
@@ -65,14 +65,14 @@
                         </VBox>
                      </children>
                   </HBox>
-                  <Button fx:id="btnLogout" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleLogout" styleClass="logout-button" text="Cerrar sesión" />
+                  <Button fx:id="btnLogout" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleLogout" styleClass="logout-button" text="Cerrar sesión" VBox.vgrow="ALWAYS" />
                </children>
             </VBox>
          </children>
       </VBox>
    </left>
    <center>
-      <StackPane fx:id="viewContainer" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="view-container" BorderPane.alignment="CENTER">
+      <StackPane fx:id="viewContainer" styleClass="view-container" BorderPane.alignment="CENTER">
          <padding>
             <Insets top="24.0" />
          </padding>

@@ -1,9 +1,11 @@
 package una.proyecto.utils;
 
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import una.proyecto.controller.TitleBarController;
 
@@ -258,22 +260,32 @@ public final class Navigation {
     }
 
     /**
-     * Configura el Stage con la Scene indicada.
+     * Configura el Stage con la Scene indicada, evitando que rebase la pantalla.
      */
     private static void configureStage(
             Stage stage,
             Scene scene,
             String title
     ) {
-
         stage.setScene(scene);
         stage.setTitle(title);
-        stage.sizeToScene();
+        //stage.sizeToScene();
         stage.setResizable(true);
         ResizeHelper.addResizeListener(stage);
+
+        Screen screen = Screen.getPrimary();
+        Rectangle2D visualBounds = screen.getVisualBounds();
+
+        if (stage.getWidth() > visualBounds.getWidth() || stage.getHeight() > visualBounds.getHeight()) {
+            stage.setWidth(Math.min(stage.getWidth(), visualBounds.getWidth() * 0.95));
+            stage.setHeight(Math.min(stage.getHeight(), visualBounds.getHeight() * 0.95));
+        }
+
+        if (stage.getMinWidth() <= 0) stage.setMinWidth(600);
+        if (stage.getMinHeight() <= 0) stage.setMinHeight(635);
+
         stage.centerOnScreen();
         updateWindowTitle(title);
-
         ThemeManager.applyTheme(scene);
     }
 
@@ -373,5 +385,33 @@ public final class Navigation {
         if (titleBarController != null) {
             titleBarController.setWindowTitle(title);
         }
+    }
+
+    public static void disableMinimizeButton() {
+        if (titleBarController != null) {
+            titleBarController.disableMinimizeButton();
+        }
+    }
+
+    public static void disableMaximizeButton() {
+        if (titleBarController != null) {
+            titleBarController.disableMaximizeButton();
+        }
+    }
+
+    public static void enableMaximizeButton() {
+        if (titleBarController != null) {
+            titleBarController.enableMaximizeButton();
+        }
+    }
+
+    public static void enableMinimizeButton() {
+        if (titleBarController != null) {
+            titleBarController.enableMinimizeButton();
+        }
+    }
+
+    public static TitleBarController getTitleBarController() {
+        return titleBarController;
     }
 }

@@ -64,8 +64,6 @@ public class MainViewController {
     public Separator sepAdmin;
     @FXML
     public VBox sidebarMenu;
-    @FXML
-    private TitleBarController titleBarController;
 
 
     // Usuario actual (se setea desde el login)
@@ -90,12 +88,10 @@ public class MainViewController {
         btnDashboard.setSelected(true);
 
         // Cargar el dashboard por defecto
-        loadView("dashboard-view");
+        loadView("funcionarios-administrador-view");
 
         // Configurar visibilidad según rol (admin/employee)
         configureMenuByRole();
-        Navigation.setTitleBarController(titleBarController);
-
     }
 
     /**
@@ -137,63 +133,72 @@ public class MainViewController {
      * Método genérico para cargar vistas en el StackPane
      */
     private void loadView(String viewName) {
-
-        try {
-
-            Parent view = Navigation.loadView("/una/proyecto/ui/" + viewName + ".fxml");
-
-            viewContainer.getChildren().setAll(view);
-
-        } catch (IOException e) {
-
-            e.printStackTrace();
-
-            showError("Error al cargar la vista: " + viewName);
-        }
+        loadView(viewName, null);
     }
 
     private void loadView(String viewName, String title) {
-
         try {
-
-            Parent view = Navigation.loadView("/una/proyecto/ui/" + viewName + ".fxml");
+            String fxmlPath = "/una/proyecto/ui/" + viewName + ".fxml";
+            Parent view = Navigation.loadView(fxmlPath);
 
             viewContainer.getChildren().setAll(view);
 
-            Stage stage = (Stage) mainLayout.getScene().getWindow();
+            if (mainLayout.getScene() != null) {
+                Stage stage = (Stage) mainLayout.getScene().getWindow();
 
-            stage.setTitle(title);
+                if (stage != null) {
+                    if (title != null && !title.isEmpty()) {
+                        stage.setTitle(title);
+                        Navigation.updateWindowTitle(title);
+                    }
+
+                    if (!stage.isMaximized()) {
+                        //stage.setHeight(800);
+                        //stage.setWidth(1280);
+                        stage.centerOnScreen();
+                    }
+                }
+            }
 
         } catch (IOException e) {
-
             e.printStackTrace();
-
-            showError(
-                    "Error al cargar la vista: " + viewName
-            );
+            showError("Error al cargar la vista: " + viewName);
         }
     }
 
     /**
      * Método para cargar vista y pasar datos al controlador
      */
-    private void loadViewWithData(String viewName, String currentUserId) {
-
+    private void loadViewWithData(String viewName, String title, String currentUserId) {
         try {
-
             String fxmlPath = "/una/proyecto/ui/" + viewName + ".fxml";
 
             Navigation.ViewLoaderResult result = Navigation.loadViewWithController(fxmlPath);
 
-            Object controller =  result.getController();
+            Object controller = result.getController();
 
-            viewContainer.getChildren().clear();
-            viewContainer.getChildren().add(result.getRoot());
+            // TODO: Cast de controller para pasarle el userdata
+
+            viewContainer.getChildren().setAll(result.getRoot());
+
+            if (mainLayout.getScene() != null) {
+                Stage stage = (Stage) mainLayout.getScene().getWindow();
+
+                if (stage != null) {
+                    if (title != null && !title.isEmpty()) {
+                        stage.setTitle(title);
+                        Navigation.updateWindowTitle(title);
+                    }
+
+                    if (!stage.isMaximized()) {
+                        //stage.sizeToScene();
+                        stage.centerOnScreen();
+                    }
+                }
+            }
 
         } catch (IOException e) {
-
             e.printStackTrace();
-
             showError("Error al cargar la vista: " + viewName);
         }
     }
@@ -202,28 +207,28 @@ public class MainViewController {
 
     @FXML
     public void goToDashboard(ActionEvent actionEvent) {
-        loadView("dashboard-view");
+        loadView("dashboard-view",  "Dashboard");
         // TODO: Actualizar datos del dashboard
     }
 
     @FXML
     public void goToReservations(ActionEvent actionEvent) {
-        loadViewWithData("reservas-funcionario-view", currentUserId);
+        loadViewWithData("reservas-funcionario-view", "Reservaciones",currentUserId);
     }
 
     @FXML
     public void goToFuncionarios(ActionEvent actionEvent) {
-        loadView("funcionarios-administrador-view", "Sistema de Reservas - Funcionarios");
+        loadView("funcionarios-administrador-view", "Funcionarios");
     }
 
     @FXML
     public void goToCategorias(ActionEvent actionEvent) {
-        loadView("categorias-administrador-view", "Sistema de Reservas - Categorias");
+        loadView("categorias-administrador-view", "Categorias");
     }
 
     @FXML
     public void goToRecursos(ActionEvent actionEvent) {
-        loadView("recursos'view");
+        loadView("recursos-administrador-view", "Recursos");
     }
 
     @FXML
@@ -238,7 +243,7 @@ public class MainViewController {
 
     @FXML
     public void goToEstadisticas(ActionEvent actionEvent) {
-        loadView("estadisticas-view");
+        loadView("estadisticas-view", "Estadisticas");
     }
 
     @FXML
@@ -258,11 +263,12 @@ public class MainViewController {
             try {
 
                 Stage stage = (Stage) btnLogout.getScene().getWindow();
-                stage.setHeight(500);
-                stage.setWidth(500);
                 //stage.setResizable(true);
                 Navigation.navigateTo(stage, "/una/proyecto/ui/login-view.fxml", "Sistema de Reserva - Login");
-
+                Navigation.disableMaximizeButton();
+                stage.setHeight(600);
+                stage.setWidth(635);
+                Navigation.getTitleBarController().setDraggable(false);
             } catch (IOException e) {
 
                 e.printStackTrace();

@@ -3,37 +3,85 @@ package una.proyecto.controller;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
 import una.proyecto.utils.WindowHelper;
+import una.proyecto.utils.Navigation;
 
 public class TitleBarController {
-    @FXML public Label lblWindowTitle;
-    @FXML public FontIcon maximizeIcon;
-    @FXML private HBox titleBar;
-    @FXML private Button btnMinimize;
-    @FXML private Button btnMaximize;
-    @FXML private Button btnClose;
+    @FXML
+    public Label lblWindowTitle;
+    @FXML
+    public FontIcon maximizeIcon;
+    @FXML
+    private StackPane titleBar;
+    @FXML
+    private Button btnMinimize;
+    @FXML
+    private Button btnMaximize;
+    @FXML
+    private Button btnClose;
+
+    private boolean isDraggable = true;
 
     @FXML
     public void initialize() {
-        WindowHelper.makeWindowDraggable(titleBar, btnMinimize, btnMaximize, btnClose, this::updateMaximizeIcon);
+        Navigation.setTitleBarController(this);
+
+        applyWindowBehavior();
     }
 
-    private void updateMaximizeIcon() {
-
-        Stage stage = (Stage) btnMaximize.getScene().getWindow();
-
-        if (stage.isMaximized()) {
-            maximizeIcon.setIconLiteral("fa-window-restore");
+    /**
+     * Aplica el comportamiento según el estado de isDraggable.
+     */
+    public void applyWindowBehavior() {
+        if (isDraggable) {
+            WindowHelper.makeWindowDraggable(titleBar, btnMinimize, btnMaximize, btnClose, this::updateMaximizeIcon);
         } else {
-            maximizeIcon.setIconLiteral("fa-window-maximize");
+            WindowHelper.makeWindowStatic(titleBar, btnMinimize, btnMaximize, btnClose, this::updateMaximizeIcon);
+        }
+    }
+
+    /**
+     * Permite desactivar el arrastre desde la vista de Login antes de que se carguen los componentes
+     * o mediante un método de configuración.
+     */
+    public void setDraggable(boolean draggable) {
+        this.isDraggable = draggable;
+        applyWindowBehavior();
+    }
+
+    public void updateMaximizeIcon() {
+        Stage stage = (Stage) btnMaximize.getScene().getWindow();
+        if (stage != null) {
+            if (stage.isMaximized()) {
+                maximizeIcon.setIconLiteral("fa-window-restore");
+            } else {
+                maximizeIcon.setIconLiteral("fa-window-maximize");
+            }
         }
     }
 
     public void setWindowTitle(String title) {
-        lblWindowTitle.setText(title);
+        if (lblWindowTitle != null) {
+            lblWindowTitle.setText(title);
+        }
     }
 
+    public void disableMinimizeButton() {
+        btnMinimize.setDisable(true);
+    }
+
+    public void disableMaximizeButton() {
+        btnMaximize.setDisable(true);
+    }
+
+    public void enableMinimizeButton() {
+        btnMinimize.setDisable(false);
+    }
+
+    public void enableMaximizeButton() {
+        btnMaximize.setDisable(false);
+    }
 }
