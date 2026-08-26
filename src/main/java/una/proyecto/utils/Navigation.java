@@ -269,7 +269,7 @@ public final class Navigation {
     ) {
         stage.setScene(scene);
         stage.setTitle(title);
-        stage.sizeToScene();
+        //stage.sizeToScene();
         stage.setResizable(true);
         ResizeHelper.addResizeListener(stage);
 
@@ -282,7 +282,7 @@ public final class Navigation {
         }
 
         if (stage.getMinWidth() <= 0) stage.setMinWidth(600);
-        if (stage.getMinHeight() <= 0) stage.setMinHeight(400);
+        if (stage.getMinHeight() <= 0) stage.setMinHeight(635);
 
         stage.centerOnScreen();
         updateWindowTitle(title);

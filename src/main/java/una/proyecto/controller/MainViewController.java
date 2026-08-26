@@ -88,7 +88,7 @@ public class MainViewController {
         btnDashboard.setSelected(true);
 
         // Cargar el dashboard por defecto
-        loadView("dashboard-view");
+        loadView("funcionarios-administrador-view");
 
         // Configurar visibilidad según rol (admin/employee)
         configureMenuByRole();
@@ -153,7 +153,8 @@ public class MainViewController {
                     }
 
                     if (!stage.isMaximized()) {
-                        stage.sizeToScene();
+                        //stage.setHeight(800);
+                        //stage.setWidth(1280);
                         stage.centerOnScreen();
                     }
                 }
@@ -190,7 +191,7 @@ public class MainViewController {
                     }
 
                     if (!stage.isMaximized()) {
-                        stage.sizeToScene();
+                        //stage.sizeToScene();
                         stage.centerOnScreen();
                     }
                 }
@@ -262,11 +263,11 @@ public class MainViewController {
             try {
 
                 Stage stage = (Stage) btnLogout.getScene().getWindow();
-                stage.setHeight(500);
-                stage.setWidth(500);
                 //stage.setResizable(true);
                 Navigation.navigateTo(stage, "/una/proyecto/ui/login-view.fxml", "Sistema de Reserva - Login");
                 Navigation.disableMaximizeButton();
+                stage.setHeight(600);
+                stage.setWidth(635);
                 Navigation.getTitleBarController().setDraggable(false);
             } catch (IOException e) {
 
