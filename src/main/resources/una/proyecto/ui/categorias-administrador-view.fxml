@@ -98,7 +98,7 @@
                         <Insets right="20.0" top="20.0" />
                      </padding>
                   </Button>
-                  <Button fx:id="btnLimpiar" mnemonicParsing="false" prefHeight="35.0" styleClass="btn-toggle-shadow-danger" text="Limpiar" wrapText="true" HBox.hgrow="ALWAYS">
+                  <Button fx:id="btnLimpiar" mnemonicParsing="false" onAction="#clearForm" prefHeight="35.0" styleClass="btn-toggle-shadow-danger" text="Limpiar" wrapText="true" HBox.hgrow="ALWAYS">
                      <graphic>
                         <FontIcon iconColor="#800000" iconLiteral="fa-ban" iconSize="15" />
                      </graphic>

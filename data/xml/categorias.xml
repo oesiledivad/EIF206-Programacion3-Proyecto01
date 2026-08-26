@@ -20,4 +20,8 @@
         <id>447747</id>
         <descripcion>Sala para 10 personas</descripcion>
     </categoria>
+    <categoria>
+        <id>1234</id>
+        <descripcion>Laptop Dell</descripcion>
+    </categoria>
 </categorias>
