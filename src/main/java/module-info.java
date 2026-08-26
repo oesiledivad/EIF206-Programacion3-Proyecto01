@@ -6,6 +6,7 @@ module EIF.Programacion.Proyecto {
     requires javafx.graphics;
 
     requires org.kordamp.ikonli.javafx;
+    requires jakarta.xml.bind;
 
     requires java.xml;
     requires jakarta.xml.bind;
