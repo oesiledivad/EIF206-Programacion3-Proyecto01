@@ -87,7 +87,7 @@
             </GridPane>
             <HBox alignment="CENTER_LEFT" spacing="10.0">
                <children>
-                  <Button fx:id="btnGuardar" mnemonicParsing="false" prefHeight="35.0" styleClass="toggle-button" text="Guardar">
+                  <Button fx:id="btnGuardar" mnemonicParsing="false" onAction="#guardarFuncionario" prefHeight="35.0" styleClass="toggle-button" text="Guardar">
                      <graphic>
                         <FontIcon iconColor="#1100a8" iconLiteral="fa-save" iconSize="15" />
                      </graphic>
@@ -95,7 +95,7 @@
                         <Insets right="15.0" top="5.0" />
                      </padding>
                   </Button>
-                  <Button fx:id="btnBorrar" mnemonicParsing="false" prefHeight="35.0" styleClass="toggle-button" text="Borrar">
+                  <Button fx:id="btnBorrar" mnemonicParsing="false" onAction="#eliminarFuncionario" prefHeight="35.0" styleClass="toggle-button" text="Borrar">
                      <graphic>
                         <FontIcon iconColor="#676767" iconLiteral="fa-trash" iconSize="15" />
                      </graphic>
@@ -103,7 +103,7 @@
                         <Insets right="15.0" top="5.0" />
                      </padding>
                   </Button>
-                  <Button fx:id="btnLimpiar" mnemonicParsing="false" prefHeight="35.0" styleClass="toggle-button" text="Limpiar">
+                  <Button fx:id="btnLimpiar" mnemonicParsing="false" onAction="#clearForm" prefHeight="35.0" styleClass="toggle-button" text="Limpiar">
                      <graphic>
                         <FontIcon iconColor="#980000" iconLiteral="fa-ban" iconSize="15" />
                      </graphic>
@@ -121,7 +121,7 @@
             <Label styleClass="section-title" text="Listado" />
             <HBox alignment="CENTER" VBox.vgrow="ALWAYS">
                <children>
-                  <TableView fx:id="tablaFuncionarios" editable="true" nodeOrientation="LEFT_TO_RIGHT" HBox.hgrow="ALWAYS">
+                  <TableView fx:id="tblFuncionarios" editable="true" nodeOrientation="LEFT_TO_RIGHT" HBox.hgrow="ALWAYS">
                      <columns>
                         <TableColumn fx:id="colID" minWidth="100.0" prefWidth="139.0" text="ID" />
                         <TableColumn fx:id="colNombre" minWidth="150.0" prefWidth="216.0" text="Nombre" />
