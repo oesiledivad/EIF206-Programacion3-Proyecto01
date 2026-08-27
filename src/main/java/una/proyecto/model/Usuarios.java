@@ -3,7 +3,6 @@ package una.proyecto.model;
 import jakarta.xml.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
-
 @XmlRootElement(name = "usuarios")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Usuarios {

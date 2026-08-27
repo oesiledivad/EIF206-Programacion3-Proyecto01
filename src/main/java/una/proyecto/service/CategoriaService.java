@@ -13,7 +13,6 @@ public class CategoriaService {
     public List<Categoria> obtenerTodas() {
         return XmlUtil.readListXml(RUTA_XML, ListaCategoria.class, ListaCategoria::getCategorias);
     }
-
     public void save(Categoria categoria) {
         List<Categoria> lista = obtenerTodas();
 

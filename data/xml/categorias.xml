@@ -5,19 +5,19 @@
         <descripcion>Laptop Windows</descripcion>
     </categoria>
     <categoria>
-        <id>1111</id>
-        <descripcion>Laptop Windows</descripcion>
-    </categoria>
-    <categoria>
-        <id>1112</id>
-        <descripcion>Laptop Macos</descripcion>
-    </categoria>
-    <categoria>
         <id>777744</id>
         <descripcion>Laptop Windows</descripcion>
     </categoria>
     <categoria>
         <id>447747</id>
         <descripcion>Sala para 10 personas</descripcion>
+    </categoria>
+    <categoria>
+        <id>77777</id>
+        <descripcion>jugadores</descripcion>
+    </categoria>
+    <categoria>
+        <id>8888</id>
+        <descripcion>nuevapc</descripcion>
     </categoria>
 </categorias>

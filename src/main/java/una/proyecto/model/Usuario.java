@@ -9,8 +9,6 @@ import jakarta.xml.bind.annotation.*;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlSeeAlso({Funcionario.class, Administrador.class}) // Indica a JAXB cuáles son sus clases hijas
-
-
 public abstract class Usuario {
     @XmlElement
 private String clave;

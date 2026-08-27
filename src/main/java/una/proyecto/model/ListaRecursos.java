@@ -30,11 +30,9 @@ import java.util.List;
 import una.proyecto.model.Recurso;
 @XmlRootElement(name="recursos")
 public class ListaRecursos {
-
     private  List<Recurso> recursos =new ArrayList<>();
-
     @XmlElement(name="recurso")
-    public List<Recurso> getRecursos() {
+    public   List<Recurso> getRecursos() {
         return recursos;
     }
     public void setRecursos(List<Recurso> recursos) {
