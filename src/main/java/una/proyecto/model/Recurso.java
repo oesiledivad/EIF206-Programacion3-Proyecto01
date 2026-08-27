@@ -14,9 +14,9 @@ public class Recurso {
     public Recurso(){}
 
 
-    public Recurso(String id, int numeroDeActivo, String idCategoria, String descripcion) {
+    public Recurso(String id, String idCategoria, String descripcion) {
         this.id = id;
-        this.numeroDeActivo = numeroDeActivo;
+        this.numeroDeActivo = 0;
         this.idCategoria = idCategoria;
         this.descripcion = descripcion;
     }

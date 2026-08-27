@@ -1,10 +1,12 @@
 package una.proyecto.service;
 
+import una.proyecto.model.Categoria;
 import una.proyecto.model.Recurso;
 import una.proyecto.model.ListaRecursos;
 import una.proyecto.utils.XmlUtil;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class RecursoService {
     private final String RUTA_XML = "data/xml/recursos.xml";
@@ -33,6 +35,15 @@ public class RecursoService {
         }
         XmlUtil.writeListXml(RUTA_XML, ListaRecursos.class, recursos, ListaRecursos::setRecursos);
     }
+
+    public List<Recurso> buscarPorFiltros(Categoria categoria, String descripcion) {
+        return obtenerTodosRecursos().stream()
+                .filter(r -> categoria == null || r.getIdCategoria().equals(categoria.getDescripcion()))
+                .filter(r -> descripcion == null || descripcion.isEmpty()
+                        || r.getDescripcion().toLowerCase().contains(descripcion.toLowerCase()))
+                .collect(Collectors.toList());
+    }
+
 }
 
 
