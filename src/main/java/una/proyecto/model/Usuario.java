@@ -1,14 +1,9 @@
 package una.proyecto.model;
-
-
-
-
-
-
 import jakarta.xml.bind.annotation.*;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlSeeAlso({Funcionario.class, Administrador.class}) // Indica a JAXB cuáles son sus clases hijas
+
 public abstract class Usuario {
     @XmlElement
 private String clave;
@@ -22,11 +17,15 @@ public Usuario(String id, String rol){
     this.rol=rol;
     this.id=id;
 }
+
+protected Usuario() {
+    // Constructor vacío requerido por JAXB
+}
+
 public abstract void  chagePassword(String password);
 public String getClave(){return this.clave;}
 public String getId(){return this.id;}
 public String getRol(){return this.rol;}
 public void setClave(String clave){this.clave=clave;}
-
 }
 
