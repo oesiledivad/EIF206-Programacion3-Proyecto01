@@ -63,7 +63,7 @@ public class RecursosController {
     @FXML
     public void initialize(){
         lblErrorFiltro.setVisible(false);
-
+        cargarTodoRecursos();
         cargarCategorias();
         configureTable();
         configureComboBoxFormulario();
@@ -78,6 +78,9 @@ public class RecursosController {
     }
     private void cargarCategorias(){
         listaCategorias.setAll(categoriaService.obtenerTodas());
+    }
+    private void cargarTodoRecursos(){
+        listaObservable.setAll(recursoService.obtenerTodosRecursos());
     }
     private void configureComboBoxFiltro(){
     comboBoxCategoriaFiltro.setItems(listaCategorias);
