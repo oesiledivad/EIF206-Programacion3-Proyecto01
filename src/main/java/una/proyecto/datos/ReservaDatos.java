@@ -1,5 +1,5 @@
-package una.proyecto.dao;
+package una.proyecto.datos;
 
-public class ReservaDAO {
+public class ReservaDatos {
 //aca van los metodos de guardar, de cargar y el CRUD
 }
