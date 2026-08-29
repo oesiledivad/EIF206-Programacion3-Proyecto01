@@ -27,7 +27,7 @@
                   <ComboBox fx:id="comboBoxCategoriaFiltro" styleClass="combo-box" HBox.hgrow="ALWAYS" />
                   <Label text="Descripción" />
                   <TextField fx:id="txtFieldDescripcionFiltro" HBox.hgrow="ALWAYS" />
-                  <Button fx:id="btnBuscar" mnemonicParsing="false" styleClass="btn-toggle-shadow-primary" text="Buscar" HBox.hgrow="ALWAYS">
+                  <Button fx:id="btnBuscar" onAction="#btnBuscarRecurso" mnemonicParsing="false" styleClass="btn-toggle-shadow-primary" text="Buscar" HBox.hgrow="ALWAYS">
                      <graphic>
                         <FontIcon iconLiteral="fa-search" styleClass="icon-primary" />
                      </graphic>
@@ -69,15 +69,15 @@
             </GridPane>
             <HBox spacing="10.0">
                <children>
-                  <Button fx:id="btnGuardarRecurso" mnemonicParsing="false" styleClass="btn-toggle-shadow-primary" text="Guardar">
+                  <Button fx:id="btnGuardarRecurso" onAction="#btnGuardarRecurso" mnemonicParsing="false" styleClass="btn-toggle-shadow-primary" text="Guardar">
                      <graphic>
                         <FontIcon iconLiteral="fa-save" styleClass="icon-primary" />
                      </graphic></Button>
-                  <Button fx:id="btnBorrarRecurso" mnemonicParsing="false" styleClass="btn-toggle-shadow-danger" text="Borrar">
+                  <Button fx:id="btnBorrarRecurso" onAction="#btnBorrarRecurso" mnemonicParsing="false" styleClass="btn-toggle-shadow-danger" text="Borrar">
                      <graphic>
                         <FontIcon iconLiteral="fa-trash" styleClass="icon-primary" />
                      </graphic></Button>
-                  <Button fx:id="btnLimpiarRecurso" mnemonicParsing="false" styleClass="btn-toggle-shadow-warning" text="Limpiar">
+                  <Button fx:id="btnLimpiarRecurso" onAction="#btnLimpiarCasilla" mnemonicParsing="false" styleClass="btn-toggle-shadow-warning" text="Limpiar">
                      <graphic>
                         <FontIcon iconLiteral="fa-ban" styleClass="icon-primary" />
                      </graphic></Button>
@@ -91,9 +91,9 @@
             <Label styleClass="section-title" text="Listado" />
             <TableView fx:id="tableViewRecursos" editable="true" VBox.vgrow="ALWAYS">
               <columns>
-                <TableColumn minWidth="-1.0" prefWidth="-1.0" text="ID" />
-                <TableColumn minWidth="-1.0" prefWidth="-1.0" text="Categoría" />
-                  <TableColumn minWidth="-1.0" prefWidth="-1.0" text="Descripción" />
+                  <TableColumn fx:id="tableColumId" text="ID" />
+                  <TableColumn fx:id="tableColumCategoria" text="Categoría" />
+                  <TableColumn fx:id="tableColumDescripcion" text="Descripción" />
               </columns>
                <columnResizePolicy>
                   <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
