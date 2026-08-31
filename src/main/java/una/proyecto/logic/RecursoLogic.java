@@ -37,7 +37,9 @@ public class RecursoLogic {
         nuevo.actualizar(actualizado);
 
     }
-
+    public boolean existe(String id) {
+        return nuevo.leerPorId(id) != null;
+    }
     public void eliminar(String id) {
         Recurso existente = nuevo.leerPorId(id);
         if (existente == null) {
