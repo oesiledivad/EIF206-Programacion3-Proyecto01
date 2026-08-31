@@ -18,7 +18,7 @@ public class ReservaService {
         List<Reserva> lista = obtenerTodasReservas();
         Boolean encontrado =false;
         for(int i=0; i<lista.size(); i++){
-            if (lista.get(i).getId()==reserva.getId()){
+            if (lista.get(i).getId().equals(reserva.getId())){
                 lista.set(i, reserva);
                 encontrado=true;
                 break ;

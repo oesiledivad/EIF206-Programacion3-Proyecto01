@@ -13,6 +13,8 @@ public class Reserva {
     private String idFuncionario;
     private List<String> idRecursosAsignados;
     private EstadoReserva estado;
+    public Reserva() {
+    }
     public Reserva(String actividad, LocalDate fecha, LocalTime horaInicio, LocalTime horaFin, String idFuncionario, List<String> idRecursosAsignados, EstadoReserva estado) {
         this.id = "";
         this.actividad = actividad;

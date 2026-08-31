@@ -238,7 +238,7 @@ public class MainViewController {
 
     @FXML
     public void goToActividades(ActionEvent actionEvent) {
-        loadView("actividades-view");
+        loadView("calendarizacion-actividades-view", "Actividades");
     }
 
     @FXML
