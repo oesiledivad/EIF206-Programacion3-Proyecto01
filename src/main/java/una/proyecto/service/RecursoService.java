@@ -1,16 +1,27 @@
 package una.proyecto.service;
 
+import una.proyecto.datos.RecursoDatos;
+import una.proyecto.logic.RecursoLogic;
 import una.proyecto.model.Categoria;
 import una.proyecto.model.Recurso;
 import una.proyecto.model.ListaRecursos;
 import una.proyecto.utils.XmlUtil;
 
+import java.io.File;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class RecursoService {
     private final String RUTA_XML = "data/xml/recursos.xml";
-
+    private  RecursoLogic recursoLogica;
+    public RecursoService(){
+        try {
+            RecursoDatos recursoDatos = new RecursoDatos("data/xml/recursos.xml");
+            this.recursoLogica = new RecursoLogic(recursoDatos);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al inicializar RecursoService: " + e.getMessage(), e);
+        }
+    }
     public List<Recurso> obtenerTodosRecursos(){
         return XmlUtil.readListXml(RUTA_XML, ListaRecursos.class, ListaRecursos::getRecursos);
     }
@@ -37,11 +48,7 @@ public class RecursoService {
     }
 
     public List<Recurso> buscarPorFiltros(Categoria categoria, String descripcion) {
-        return obtenerTodosRecursos().stream()
-                .filter(r -> categoria == null || r.getIdCategoria().equals(categoria.getDescripcion()))
-                .filter(r -> descripcion == null || descripcion.isEmpty()
-                        || r.getDescripcion().toLowerCase().contains(descripcion.toLowerCase()))
-                .collect(Collectors.toList());
+        return recursoLogica.buscarFiltro(categoria, descripcion);
     }
 
 }
