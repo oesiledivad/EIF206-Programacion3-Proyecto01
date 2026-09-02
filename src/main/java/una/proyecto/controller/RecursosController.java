@@ -6,11 +6,14 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.util.StringConverter;
+import org.apache.pdfbox.text.PDFMarkedContentExtractor;
 import una.proyecto.model.Categoria;
 import una.proyecto.model.Recurso;
 import una.proyecto.service.CategoriaService;
 import una.proyecto.service.RecursoService;
 import una.proyecto.utils.AppFactory;
+import una.proyecto.utils.GeneradorPDFS;
+import una.proyecto.utils.TablePDF;
 
 import java.util.List;
 
@@ -105,7 +108,18 @@ public class RecursosController {
         comboBoxCategoria.setItems(listaCategorias);
         comboBoxCategoria.setConverter(crearConverter());
     }
+// PROBANDO SI IMPRIME CORRECTAMENTE
 
+    @FXML public void btnImprimir(){
+        try {
+            TablePDF nuevo = GeneradorPDFS.desdeTableView(tableViewRecursos);
+            GeneradorPDFS.generarPDF(nuevo, "Recursos.pdf");
+            showAlert("Éxito", "PDF generado correctamente.");
+        }catch (Exception e){
+            showAlert("Error"," Error al generar PDF");
+            return;
+        }
+    }
     @FXML public void  btnBuscarRecurso(){
       String descripcion = txtFieldDescripcionFiltro.getText();
       Categoria nueva = comboBoxCategoriaFiltro.getValue();

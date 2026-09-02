@@ -76,7 +76,16 @@
       <artifactId>jaxb-runtime</artifactId>
       <version>4.0.5</version>
     </dependency>
-
+    <dependency>
+      <groupId>org.apache.pdfbox</groupId>
+      <artifactId>pdfbox</artifactId>
+      <version>3.0.8</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.vandeseer</groupId>
+      <artifactId>easytable</artifactId>
+      <version>1.0.2</version> <!-- Asegúrate de usar la última versión estable -->
+    </dependency>
   </dependencies>
 
   <build>
