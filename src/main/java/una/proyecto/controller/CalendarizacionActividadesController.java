@@ -7,6 +7,8 @@ import una.proyecto.model.FilaCalendarizacion;
 import una.proyecto.model.Reserva;
 import una.proyecto.service.CalendarizacionService;
 import una.proyecto.model.EstadoReserva;
+import una.proyecto.utils.GeneradorPDFS;
+import una.proyecto.utils.TablePDF;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -279,5 +281,57 @@ public class CalendarizacionActividadesController {
         alert.setHeaderText(null);
         alert.setContentText(mensaje);
         alert.showAndWait();
+    }
+
+    @FXML
+    public void btnImprimir() {
+        try {
+            TablePDF nuevo = new TablePDF();
+
+            // Encabezados
+            nuevo.setEncabezados(List.of(
+                    tblColumHora.getText(),
+                    tblColumLunes.getText(),
+                    tblColumMartes.getText(),
+                    tblColumMiercoles.getText(),
+                    tblColumJueves.getText(),
+                    tblColumViernes.getText(),
+                    tblColumSabado.getText(),
+                    tblColumDomingo.getText()
+            ));
+
+            // Filas
+            for (TreeItem<FilaCalendarizacion> item :
+                    tblActividades.getRoot().getChildren()) {
+
+                FilaCalendarizacion fila = item.getValue();
+
+                nuevo.agregarFila(List.of(
+                        fila.getHora(),
+                        fila.getLunes(),
+                        fila.getMartes(),
+                        fila.getMiercoles(),
+                        fila.getJueves(),
+                        fila.getViernes(),
+                        fila.getSabado(),
+                        fila.getDomingo()
+                ));
+            }
+
+            GeneradorPDFS.generarPDF(nuevo, "Calendarizacion.pdf");
+
+            mostrarAlerta(
+                    "Éxito",
+                    "PDF generado correctamente."
+            );
+
+        } catch (Exception e) {
+            mostrarAlerta(
+                    "Error",
+                    "Error al generar PDF."
+            );
+
+            e.printStackTrace();
+        }
     }
 }

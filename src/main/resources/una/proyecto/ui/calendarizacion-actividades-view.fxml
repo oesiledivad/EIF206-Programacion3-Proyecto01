@@ -25,13 +25,13 @@
             <HBox alignment="CENTER_LEFT" spacing="12.0">
                <children>
                   <Label lineSpacing="10.0" prefHeight="17.0" prefWidth="111.0" stylesheets="@../css/style.css" text="Fecha de referencia" HBox.hgrow="ALWAYS" />
-                  <DatePicker fx:id="dtpicker" prefHeight="35.0" prefWidth="140.0" />
-                  <Button fx:id="btnCargar" lineSpacing="10.0" mnemonicParsing="false" onAction="#cargarSemana" prefHeight="39.0" prefWidth="108.0" styleClass="toggle-button" stylesheets="@../css/style.css" text="Cargar">
+                  <DatePicker fx:id="dtpicker" prefHeight="26.0" prefWidth="140.0" />
+                  <Button fx:id="btnCargar" lineSpacing="10.0" mnemonicParsing="false" onAction="#cargarSemana" prefHeight="39.0" prefWidth="108.0" styleClass="btn-toggle-shadow-success" stylesheets="@../css/style.css" text="Cargar">
                      <graphic>
                         <FontIcon iconColor="#008036" iconLiteral="fa-check" />
                      </graphic>
                   </Button>
-                  <Button fx:id="btnImprimir" lineSpacing="5.0" mnemonicParsing="false" prefHeight="39.0" prefWidth="105.0" styleClass="toggle-button" stylesheets="@../css/style.css" text="Imprimir">
+                  <Button fx:id="btnImprimir" lineSpacing="5.0" mnemonicParsing="false" onAction="#btnImprimir" prefHeight="39.0" prefWidth="145.0" styleClass="btn-toggle-shadow-primary" stylesheets="@../css/style.css" text="Imprimir PDF">
                      <graphic>
                         <FontIcon iconColor="#6e0000" iconLiteral="fa-print" />
                      </graphic>
@@ -48,7 +48,7 @@
                   <Font size="18.0" />
                </font>
             </Label>
-            <TreeTableView fx:id="tblActividades" prefHeight="305.0" prefWidth="587.0">
+            <TreeTableView fx:id="tblActividades" prefHeight="305.0" prefWidth="587.0" styleClass="table-view">
               <columns>
                 <TreeTableColumn fx:id="tblColumHora" prefWidth="75.0" text="Hora" />
 
