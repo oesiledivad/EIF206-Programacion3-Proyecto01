@@ -12,10 +12,4 @@
         <idCategoria>Laptop Windows</idCategoria>
         <descripcion>0000</descripcion>
     </recurso>
-    <recurso>
-        <id>123</id>
-        <numeroDeActivo>0</numeroDeActivo>
-        <idCategoria>Laptop Windows</idCategoria>
-        <descripcion>hola</descripcion>
-    </recurso>
 </recursos>
