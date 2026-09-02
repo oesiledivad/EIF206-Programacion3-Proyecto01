@@ -14,7 +14,10 @@ import javafx.animation.Animation;
 import javafx.animation.Timeline;
 import javafx.animation.KeyFrame;
 import org.kordamp.ikonli.javafx.FontIcon;
+import una.proyecto.model.Usuario;
+import una.proyecto.service.AuthService;
 import una.proyecto.utils.Navigation;
+import una.proyecto.utils.SessionManager;
 import una.proyecto.utils.ThemeManager;
 
 import java.io.IOException;
@@ -49,6 +52,8 @@ public class LoginController {
 
     @FXML
     private Label lblError;
+
+    private final AuthService authService = new AuthService();
 
     @FXML
     public void initialize() {
@@ -152,19 +157,12 @@ public class LoginController {
                 try {
                     Stage stage = (Stage) btnLogin.getScene().getWindow();
 
-                    MainViewController mainController =
-                            Navigation.navigateToWithController(
-                                    stage,
-                                    "/una/proyecto/ui/main-view.fxml",
-                                    "Sistema de Reserva - Panel Principal"
-                            );
-
-
-                    mainController.setUserData(
-                            userId,
-                            getUserName(userId),
-                            getUserRole(userId)
+                    Navigation.navigateToWithController(
+                            stage,
+                            "/una/proyecto/ui/main-view.fxml",
+                            "Sistema de Reserva - Panel Principal"
                     );
+
                     Navigation.enableMaximizeButton();
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -196,22 +194,20 @@ public class LoginController {
     // METODOS DE AUTENTICACION
 
     private boolean authenticate(String userId, String password) {
-        // TODO: Implementar autenticación contra archivo XML
-        return (userId.equals("admin") || userId.equals("user"))
-                && password.length() >= 4;
-    }
 
-    private String getUserName(String userId) {
-        // TODO: Obtener nombre desde XML
-        if ("admin".equals(userId)) return "Administrador";
-        if ("user".equals(userId)) return "Farmeador Aura";
-        return userId;
-    }
+        Usuario usuario = authService.authenticate(userId, password);
 
-    private String getUserRole(String userId) {
-        // TODO: Obtener rol desde XML
-        if ("admin".equals(userId)) return "ADMIN";
-        return "FUNCIONARIO";
+        if (usuario == null) {
+            return false;
+        }
+
+        SessionManager.getInstance().login(
+                usuario.getId(),
+                usuario.getName(),
+                usuario.getRole()
+        );
+
+        return true;
     }
 
     // METODOS DE UTILIDAD
@@ -219,10 +215,12 @@ public class LoginController {
     private void showError(String message) {
         lblError.setText(message);
         lblError.setVisible(true);
-        lblError.setVisible(true);
 
         PauseTransition pause = new PauseTransition(Duration.seconds(5));
+
         pause.setOnFinished(e -> lblError.setVisible(false));
+
         pause.play();
     }
+
 }
