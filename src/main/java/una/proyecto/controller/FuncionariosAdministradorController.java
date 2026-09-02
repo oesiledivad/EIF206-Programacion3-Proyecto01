@@ -40,19 +40,24 @@ public class FuncionariosAdministradorController {
     @FXML
     private TableColumn<Funcionario, String> colTelefono;
 
-    private final FuncionarioService funcionarioService = new FuncionarioService();
+    private final FuncionarioService funcionarioService =
+            new FuncionarioService();
 
     private final ObservableList<Funcionario> listaObservable =
             FXCollections.observableArrayList();
 
     @FXML
     public void initialize() {
+
         configureTable();
-        loadFuncionarios();
         configureSelectionListener();
         configureSearchListeners();
+        loadFuncionarios();
     }
 
+    /**
+     * Configura la tabla de funcionarios.
+     */
     private void configureTable() {
 
         colID.setCellValueFactory(
@@ -70,29 +75,38 @@ public class FuncionariosAdministradorController {
         tblFuncionarios.setItems(listaObservable);
     }
 
+    /**
+     * Carga a todos los funcionarios desde el archivo usuarios.xml.
+     */
     private void loadFuncionarios() {
-        listaObservable.setAll(
-                funcionarioService.obtenerTodos()
-        );
+
+        listaObservable.setAll(funcionarioService.getAllEmployees());
     }
 
+    /**
+     * Configura el table selection listener.
+     */
     private void configureSelectionListener() {
 
         tblFuncionarios.getSelectionModel()
                 .selectedItemProperty()
                 .addListener((observable, oldValue, newValue) -> {
 
-                    if (newValue != null) {
-
-                        txtID.setText(newValue.getId());
-                        txtID.setEditable(false);
-
-                        txtNombre.setText(newValue.getName());
-                        txtTelefono.setText(newValue.getPhone());
+                    if (newValue == null) {
+                        return;
                     }
+
+                    txtID.setText(newValue.getId());
+                    txtNombre.setText(newValue.getName());
+                    txtTelefono.setText(newValue.getPhone());
+
+                    txtID.setEditable(false);
                 });
     }
 
+    /**
+     * Configura los campos de búsqueda.
+     */
     private void configureSearchListeners() {
 
         txtBuscarID.textProperty().addListener(
@@ -106,22 +120,21 @@ public class FuncionariosAdministradorController {
         );
     }
 
+    /**
+     * Busca funcionarios por ID o nombre.
+     */
     private void searchFuncionarios() {
 
         String id = txtBuscarID.getText().trim();
-        String nombre = txtBuscarNombre.getText().trim();
+        String name = txtBuscarNombre.getText().trim();
 
         if (!id.isEmpty()) {
 
-            listaObservable.setAll(
-                    funcionarioService.buscarPorId(id)
-            );
+            listaObservable.setAll(funcionarioService.findById(id));
 
-        } else if (!nombre.isEmpty()) {
+        } else if (!name.isEmpty()) {
 
-            listaObservable.setAll(
-                    funcionarioService.buscarPorNombre(nombre)
-            );
+            listaObservable.setAll(funcionarioService.findByName(name));
 
         } else {
 
@@ -129,108 +142,132 @@ public class FuncionariosAdministradorController {
         }
     }
 
+    /**
+     * Crea un nuevo funcionario.
+     * <p>
+     * La contraseña inicial del funcionario la asigna automáticamente
+     * FuncionarioService utilizando el ID del empleado.
+     */
     @FXML
     private void guardarFuncionario() {
 
         String id = txtID.getText().trim();
-        String nombre = txtNombre.getText().trim();
-        String telefono = txtTelefono.getText().trim();
+        String name = txtNombre.getText().trim();
+        String phone = txtTelefono.getText().trim();
 
         if (id.isEmpty()) {
             showAlert("Error", "El ID no puede estar vacío.");
             return;
         }
 
-        if (nombre.isEmpty()) {
+        if (name.isEmpty()) {
             showAlert("Error", "El nombre no puede estar vacío.");
             return;
         }
 
-        if (telefono.isEmpty()) {
+        if (phone.isEmpty()) {
             showAlert("Error", "El teléfono no puede estar vacío.");
             return;
         }
 
-        Funcionario funcionario =
-                new Funcionario(id, "FUNCIONARIO", nombre, telefono);
+        Funcionario funcionario = new Funcionario(id, "FUNCIONARIO", name, phone);
 
-        funcionarioService.save(funcionario);
+        boolean saved = funcionarioService.addEmployee(funcionario);
+
+        if (!saved) {
+
+            showAlert("Error", "Ya existe un usuario con ese ID.");
+
+            return;
+        }
 
         loadFuncionarios();
         clearForm();
 
-        showAlert(
-                "Funcionario",
-                "Funcionario guardado correctamente."
-        );
+        showAlert("Funcionario", "Funcionario guardado correctamente.");
     }
 
+    /**
+     * Actualiza al funcionario seleccionado.
+     */
     @FXML
     private void editarFuncionario() {
 
-        Funcionario seleccionado =
-                tblFuncionarios.getSelectionModel().getSelectedItem();
+        Funcionario selected = tblFuncionarios.getSelectionModel().getSelectedItem();
 
-        if (seleccionado == null) {
-            showAlert(
-                    "Aviso",
-                    "Debe seleccionar un funcionario de la tabla."
-            );
+        if (selected == null) {
+
+            showAlert("Aviso", "Debe seleccionar un funcionario de la tabla.");
+
             return;
         }
 
-        String nombre = txtNombre.getText().trim();
-        String telefono = txtTelefono.getText().trim();
+        String name = txtNombre.getText().trim();
+        String phone = txtTelefono.getText().trim();
 
-        if (nombre.isEmpty()) {
+        if (name.isEmpty()) {
+
             showAlert("Error", "El nombre no puede estar vacío.");
+
             return;
         }
 
-        if (telefono.isEmpty()) {
+        if (phone.isEmpty()) {
+
             showAlert("Error", "El teléfono no puede estar vacío.");
+
             return;
         }
 
-        seleccionado.setName(nombre);
-        seleccionado.setPhone(telefono);
+        selected.setName(name);
+        selected.setPhone(phone);
 
-        funcionarioService.save(seleccionado);
+        boolean updated = funcionarioService.updateEmployee(selected);
+
+        if (!updated) {
+
+            showAlert("Error", "No se pudo actualizar el funcionario.");
+
+            return;
+        }
 
         loadFuncionarios();
         clearForm();
 
-        showAlert(
-                "Funcionario",
-                "Funcionario actualizado correctamente."
-        );
+        showAlert("Funcionario", "Funcionario actualizado correctamente.");
     }
 
+    /**
+     * Elimina al funcionario seleccionado.
+     */
     @FXML
     private void eliminarFuncionario() {
 
-        Funcionario seleccionado =
-                tblFuncionarios.getSelectionModel().getSelectedItem();
+        Funcionario selected = tblFuncionarios.getSelectionModel().getSelectedItem();
 
-        if (seleccionado == null) {
-            showAlert(
-                    "Aviso",
-                    "Debe seleccionar un funcionario de la tabla."
-            );
+        if (selected == null) {
+            showAlert("Aviso","Debe seleccionar un funcionario de la tabla.");
             return;
         }
 
-        funcionarioService.delete(seleccionado.getId());
+        boolean deleted = funcionarioService.deleteEmployee(selected.getId());
+
+        if (!deleted) {
+
+            showAlert("Error", "No se pudo eliminar el funcionario.");
+
+            return;
+        }
 
         loadFuncionarios();
         clearForm();
 
-        showAlert(
-                "Funcionario",
-                "Funcionario eliminado correctamente."
-        );
+        showAlert("Funcionario", "Funcionario eliminado correctamente.");
     }
 
+    /**
+     * Borra el formulario y los campos de búsqueda.
+     */
     @FXML
     private void clearForm() {
 
@@ -248,6 +285,9 @@ public class FuncionariosAdministradorController {
         loadFuncionarios();
     }
 
+    /**
+     * Muestra un cuadro de diálogo informativo.
+     */
     private void showAlert(String title, String message) {
 
         Alert alert = new Alert(Alert.AlertType.INFORMATION);

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<usuarios>
+    <usuario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="administrador">
+        <id>admin</id>
+        <rol>ADMIN</rol>
+        <clave>admin</clave>
+    </usuario>
+</usuarios>

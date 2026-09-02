@@ -13,6 +13,7 @@ module EIF.Programacion.Proyecto {
     opens una.proyecto.app to javafx.fxml, javafx.graphics;
     opens una.proyecto.controller to javafx.fxml;
     opens una.proyecto.model to javafx.base, jakarta.xml.bind;
+    opens una.proyecto.datos.wrapper to jakarta.xml.bind;
 
     exports una.proyecto.app;
 }
