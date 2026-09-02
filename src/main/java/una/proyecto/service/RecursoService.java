@@ -1,47 +1,35 @@
 package una.proyecto.service;
 
+import una.proyecto.datos.RecursoDatos;
+import una.proyecto.logic.RecursoLogic;
 import una.proyecto.model.Categoria;
 import una.proyecto.model.Recurso;
 import una.proyecto.model.ListaRecursos;
 import una.proyecto.utils.XmlUtil;
 
+import java.io.File;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class RecursoService {
-    private final String RUTA_XML = "data/xml/recursos.xml";
-
+    private  RecursoLogic recursoLogica;
+    public RecursoService(RecursoLogic recursoLogic){
+            this.recursoLogica = recursoLogic;
+    }
     public List<Recurso> obtenerTodosRecursos(){
-        return XmlUtil.readListXml(RUTA_XML, ListaRecursos.class, ListaRecursos::getRecursos);
+        return recursoLogica.obtenerTodos();
+    }
+    public void update(Recurso actualizado){
+        recursoLogica.actualizar(actualizado);
     }
     public void delete(String id){
-        List<Recurso> recursos = obtenerTodosRecursos();
-        recursos.removeIf(recurso -> recurso.getId().equals(id));
-        XmlUtil.writeListXml(RUTA_XML, ListaRecursos.class,recursos,ListaRecursos::setRecursos);
+       recursoLogica.eliminar(id);
     }
-    public void save(Recurso recurso){
-        List<Recurso> recursos = obtenerTodosRecursos();
-        boolean encontrado=false;
-        for (int i=0; i<recursos.size(); i++){
-            if (recursos.get(i).getId().equals(recurso.getId())){
-                recursos.set(i, recurso);
-
-                encontrado=true;
-                break;
-            }
-            }
-        if(!encontrado){
-            recursos.add(recurso);
-        }
-        XmlUtil.writeListXml(RUTA_XML, ListaRecursos.class, recursos, ListaRecursos::setRecursos);
+    public void save(Recurso  nuevoRecurso){
+        recursoLogica.crear(nuevoRecurso);
     }
-
     public List<Recurso> buscarPorFiltros(Categoria categoria, String descripcion) {
-        return obtenerTodosRecursos().stream()
-                .filter(r -> categoria == null || r.getIdCategoria().equals(categoria.getDescripcion()))
-                .filter(r -> descripcion == null || descripcion.isEmpty()
-                        || r.getDescripcion().toLowerCase().contains(descripcion.toLowerCase()))
-                .collect(Collectors.toList());
+        return recursoLogica.buscarFiltro(categoria, descripcion);
     }
 
 }
