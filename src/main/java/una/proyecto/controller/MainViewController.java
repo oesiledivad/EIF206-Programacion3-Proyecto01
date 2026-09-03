@@ -9,6 +9,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import una.proyecto.utils.Navigation;
+import una.proyecto.utils.SessionManager;
 
 import java.io.IOException;
 
@@ -16,46 +17,32 @@ public class MainViewController {
 
     @FXML
     public BorderPane mainLayout;
-
     @FXML
     public VBox sidebar;
-
     @FXML
     public ToggleButton btnDashboard;
-
     @FXML
     public ToggleGroup menuGroup;
-
     @FXML
     public ToggleButton btnReservas;
-
     @FXML
     public ToggleButton btnFuncionarios;
-
     @FXML
     public ToggleButton btnCategorias;
-
     @FXML
     public ToggleButton btnRecursos;
-
     @FXML
     public ToggleButton btnCalendario;
-
     @FXML
     public ToggleButton btnActividades;
-
     @FXML
     public ToggleButton btnEstadisticas;
-
     @FXML
     public Label lblUsername;
-
     @FXML
     public Label lblUserRole;
-
     @FXML
     public Button btnLogout;
-
     @FXML
     public StackPane viewContainer;
     @FXML
@@ -64,11 +51,6 @@ public class MainViewController {
     public Separator sepAdmin;
     @FXML
     public VBox sidebarMenu;
-
-
-    // Usuario actual (se setea desde el login)
-    private String currentUserId;
-    private String currentUserRole;
 
     @FXML
     public void initialize() {
@@ -84,21 +66,37 @@ public class MainViewController {
             btnEstadisticas.setToggleGroup(menuGroup);
         }
 
+        // Cargar los datos del usuario directamente desde el SessionManager Singleton
+        cargarDatosSesion();
+
         // Seleccionar Dashboard por defecto
         btnDashboard.setSelected(true);
 
         // Cargar el dashboard por defecto
-        loadView("funcionarios-administrador-view");
+        loadView("dashboard-view");
 
-        // Configurar visibilidad según rol (admin/employee)
+        // Configurar visibilidad según rol
         configureMenuByRole();
+    }
+
+    /**
+     * Carga la información de la sesión activa en los componentes visuales
+     */
+    private void cargarDatosSesion() {
+        SessionManager session = SessionManager.getInstance();
+        String nombre = session.getName();
+        String id = session.getId();
+        String rol = session.getRole();
+
+        lblUsername.setText(nombre != null ? nombre : (id != null ? id : "Usuario"));
+        lblUserRole.setText(rol != null ? rol : "FUNCIONARIO");
     }
 
     /**
      * Configura qué opciones del menú son visibles según el rol del usuario
      */
     private void configureMenuByRole() {
-        boolean isAdmin = "ADMIN".equals(currentUserRole);
+        boolean isAdmin = SessionManager.getInstance().isAdmin();
 
         btnFuncionarios.setVisible(isAdmin);
         btnFuncionarios.setManaged(isAdmin);
@@ -116,17 +114,6 @@ public class MainViewController {
             sepGeneral.setVisible(isAdmin);
             sepGeneral.setManaged(isAdmin);
         }
-    }
-
-    /**
-     * Establece los datos del usuario después del login
-     */
-    public void setUserData(String userId, String userName, String role) {
-        this.currentUserId = userId;
-        this.currentUserRole = role;
-        lblUsername.setText(userName != null ? userName : userId);
-        lblUserRole.setText(role != null ? role : "Usuario");
-        configureMenuByRole();
     }
 
     /**
@@ -153,8 +140,6 @@ public class MainViewController {
                     }
 
                     if (!stage.isMaximized()) {
-                        //stage.setHeight(800);
-                        //stage.setWidth(1280);
                         stage.centerOnScreen();
                     }
                 }
@@ -172,12 +157,7 @@ public class MainViewController {
     private void loadViewWithData(String viewName, String title, String currentUserId) {
         try {
             String fxmlPath = "/una/proyecto/ui/" + viewName + ".fxml";
-
             Navigation.ViewLoaderResult result = Navigation.loadViewWithController(fxmlPath);
-
-            Object controller = result.getController();
-
-            // TODO: Cast de controller para pasarle el userdata
 
             viewContainer.getChildren().setAll(result.getRoot());
 
@@ -191,7 +171,6 @@ public class MainViewController {
                     }
 
                     if (!stage.isMaximized()) {
-                        //stage.sizeToScene();
                         stage.centerOnScreen();
                     }
                 }
@@ -207,13 +186,12 @@ public class MainViewController {
 
     @FXML
     public void goToDashboard(ActionEvent actionEvent) {
-        loadView("dashboard-view",  "Dashboard");
-        // TODO: Actualizar datos del dashboard
+        loadView("dashboard-view", "Dashboard");
     }
 
     @FXML
     public void goToReservations(ActionEvent actionEvent) {
-        loadViewWithData("reservas-funcionario-view", "Reservaciones",currentUserId);
+        loadViewWithData("reservas-funcionario-view", "Reservaciones", SessionManager.getInstance().getId());
     }
 
     @FXML
@@ -248,31 +226,23 @@ public class MainViewController {
 
     @FXML
     public void handleLogout(ActionEvent actionEvent) {
-
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-
         confirm.setTitle("Cerrar Sesión");
         confirm.setHeaderText("¿Está seguro que desea cerrar sesión?");
         confirm.setContentText("Se cerrará la sesión actual.");
 
         if (confirm.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
-
-            currentUserId = null;
-            currentUserRole = null;
+            SessionManager.getInstance().logout();
 
             try {
-
                 Stage stage = (Stage) btnLogout.getScene().getWindow();
-                //stage.setResizable(true);
                 Navigation.navigateTo(stage, "/una/proyecto/ui/login-view.fxml", "Sistema de Reserva - Login");
                 Navigation.disableMaximizeButton();
                 stage.setHeight(600);
                 stage.setWidth(635);
                 Navigation.getTitleBarController().setDraggable(false);
             } catch (IOException e) {
-
                 e.printStackTrace();
-
                 showError("Error al volver al login");
             }
         }

@@ -1,31 +1,76 @@
 package una.proyecto.model;
-import jakarta.xml.bind.annotation.*;
+
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlSeeAlso;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlSeeAlso({Funcionario.class, Administrador.class}) // Indica a JAXB cuáles son sus clases hijas
-
+@XmlSeeAlso({
+        Funcionario.class,
+        Administrador.class
+})
 public abstract class Usuario {
-    @XmlElement
-private String clave;
-    @XmlElement
-private String id;
-    @XmlElement
-private String rol;
 
-public Usuario(String id, String rol){
-    this.clave=id;//luego se modigica con el metodo changePassword
-    this.rol=rol;
-    this.id=id;
+    private String id;
+    private String role;
+    private String password;
+    private String name;
+
+    /**
+     * Empty constructor required by JAXB.
+     */
+    public Usuario() {
+    }
+
+    /**
+     * Creates a user with the basic information.
+     *
+     * @param id user identification
+     * @param role user role
+     * @param name user's name
+     */
+    public Usuario(String id, String role, String name) {
+        this.id = id;
+        this.role = role;
+        this.name = name;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    /**
+     * Changes the user's password.
+     *
+     * @param password new password
+     */
+    public abstract void changePassword(String password);
 }
-
-protected Usuario() {
-    // Constructor vacío requerido por JAXB
-}
-
-public abstract void  chagePassword(String password);
-public String getClave(){return this.clave;}
-public String getId(){return this.id;}
-public String getRol(){return this.rol;}
-public void setClave(String clave){this.clave=clave;}
-}
-
