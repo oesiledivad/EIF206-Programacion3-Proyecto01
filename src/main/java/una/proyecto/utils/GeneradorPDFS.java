@@ -80,7 +80,7 @@ public class GeneradorPDFS {
             if (!carpeta.exists()) {
                 carpeta.mkdirs();
             }
-            File archivoSalida = new File(carpeta, "Reporte_Recursos.pdf");
+            File archivoSalida = new File(carpeta, path);
             documento.save(archivoSalida);
         }
     }

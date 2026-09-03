@@ -34,7 +34,7 @@
                <children>
                   <Label text="Descripción" HBox.hgrow="ALWAYS" />
                   <TextField fx:id="txtBuscarDescripcion" prefHeight="35.0" HBox.hgrow="ALWAYS" />
-                  <Button fx:id="btnBuscar" mnemonicParsing="false" prefHeight="35.0" styleClass="toggle-button" text="Buscar" wrapText="true" HBox.hgrow="ALWAYS">
+                  <Button fx:id="btnBuscar" mnemonicParsing="false" prefHeight="35.0" styleClass="btn-toggle-shadow-primary" text="Buscar" wrapText="true" HBox.hgrow="ALWAYS">
                      <graphic>
                         <FontIcon iconColor="#1000c0" iconLiteral="fa-search" />
                      </graphic>
@@ -42,7 +42,7 @@
                         <Insets right="20.0" top="20.0" />
                      </padding>
                   </Button>
-                  <Button fx:id="btnImprimir" mnemonicParsing="false" prefHeight="35.0" styleClass="toggle-button" text="Imprimir" wrapText="true" HBox.hgrow="ALWAYS">
+                  <Button fx:id="btnImprimir" mnemonicParsing="false" onAction="#btnImprimir" prefHeight="35.0" styleClass="btn-toggle-shadow-primary" text="Imprimir" wrapText="true" HBox.hgrow="ALWAYS">
                      <graphic>
                         <FontIcon iconColor="#800202" iconLiteral="fa-print" iconSize="18" />
                      </graphic>
@@ -82,7 +82,7 @@
             </GridPane>
             <HBox alignment="CENTER_LEFT" spacing="10.0">
                <children>
-                  <Button fx:id="btnGuardar" mnemonicParsing="false" onAction="#saveCategory" prefHeight="35.0" styleClass="btn-toggle-shadow-primary" text="Guardar" wrapText="true" HBox.hgrow="ALWAYS">
+                  <Button fx:id="btnGuardar" mnemonicParsing="false" onAction="#saveCategory" prefHeight="35.0" styleClass="btn-toggle-shadow-success" text="Guardar" wrapText="true" HBox.hgrow="ALWAYS">
                      <graphic>
                         <FontIcon iconColor="#1b00a1" iconLiteral="fa-save" iconSize="15" styleClass="btn-toggle-shadow-primary" />
                      </graphic>
@@ -90,7 +90,7 @@
                         <Insets right="20.0" top="20.0" />
                      </padding>
                   </Button>
-                  <Button fx:id="btnBorrar" mnemonicParsing="false" onAction="#deleteCategory" prefHeight="35.0" styleClass="btn-toggle-shadow-primary" text="Borrar" wrapText="true" HBox.hgrow="ALWAYS">
+                  <Button fx:id="btnBorrar" mnemonicParsing="false" onAction="#deleteCategory" prefHeight="35.0" styleClass="btn-toggle-shadow-danger" text="Borrar" wrapText="true" HBox.hgrow="ALWAYS">
                      <graphic>
                         <FontIcon iconColor="#5e5e5e" iconLiteral="fa-trash" iconSize="15" />
                      </graphic>
@@ -98,7 +98,7 @@
                         <Insets right="20.0" top="20.0" />
                      </padding>
                   </Button>
-                  <Button fx:id="btnLimpiar" mnemonicParsing="false" onAction="#clearForm" prefHeight="35.0" styleClass="btn-toggle-shadow-danger" text="Limpiar" wrapText="true" HBox.hgrow="ALWAYS">
+                  <Button fx:id="btnLimpiar" mnemonicParsing="false" onAction="#clearForm" prefHeight="35.0" styleClass="btn-toggle-shadow-warning" text="Limpiar" wrapText="true" HBox.hgrow="ALWAYS">
                      <graphic>
                         <FontIcon iconColor="#800000" iconLiteral="fa-ban" iconSize="15" />
                      </graphic>

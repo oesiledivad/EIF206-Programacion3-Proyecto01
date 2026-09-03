@@ -10,6 +10,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import una.proyecto.model.Categoria;
 import una.proyecto.service.CategoriaService;
+import una.proyecto.utils.GeneradorPDFS;
+import una.proyecto.utils.TablePDF;
 
 public class CategoriasAdministradorController {
 
@@ -134,5 +136,15 @@ public class CategoriasAdministradorController {
         alert.setContentText(message);
 
         alert.showAndWait();
+    }
+    @FXML public void btnImprimir(){
+        try {
+            TablePDF nuevo = GeneradorPDFS.desdeTableView(tablaCategorias);
+            GeneradorPDFS.generarPDF(nuevo, "Categorias.pdf");
+            showAlert("Éxito", "PDF generado correctamente.");
+        }catch (Exception e){
+            showAlert("Error"," Error al generar PDF");
+            e.printStackTrace();
+        }
     }
 }

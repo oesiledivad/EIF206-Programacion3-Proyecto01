@@ -7,25 +7,25 @@
     font-family: 'JetBrains Mono';
     font-style: normal;
     font-weight: normal;
-    src: local('JetBrains Mono'), url('../fonts/JetBrainsMono.ttf') format('truetype');
+    src: local('JetBrains Mono'), url('JetBrainsMono.ttf') format('truetype');
 }
 @font-face {
     font-family: 'JetBrains Mono';
     font-style: normal;
     font-weight: bold;
-    src: local('JetBrains Mono'), url('../fonts/JetBrainsMono-Bold.ttf') format('truetype');
+    src: local('JetBrains Mono'), url('JetBrainsMono-Bold.ttf') format('truetype');
 }
 @font-face {
     font-family: 'JetBrains Mono';
     font-style: italic;
     font-weight: normal;
-    src: local('JetBrains Mono'), url('../fonts/JetBrainsMono-Italic.ttf') format('truetype');
+    src: local('JetBrains Mono'), url('JetBrainsMono-Italic.ttf') format('truetype');
 }
 @font-face {
     font-family: 'JetBrains Mono';
     font-style: italic;
     font-weight: bold;
-    src: local('JetBrains Mono'), url('../fonts/JetBrainsMono-BoldItalic.ttf') format('truetype');
+    src: local('JetBrains Mono'), url('JetBrainsMono-BoldItalic.ttf') format('truetype');
 }
 
 
