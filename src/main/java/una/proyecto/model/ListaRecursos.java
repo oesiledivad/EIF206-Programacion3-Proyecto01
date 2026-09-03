@@ -28,6 +28,7 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import java.util.ArrayList;
 import java.util.List;
 import una.proyecto.model.Recurso;
+
 @XmlRootElement(name="recursos")
 public class ListaRecursos {
     private  List<Recurso> recursos =new ArrayList<>();
