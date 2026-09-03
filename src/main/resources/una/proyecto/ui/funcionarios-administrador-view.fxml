@@ -35,7 +35,7 @@
                   <Label text="Nombre" />
                   <TextField fx:id="txtBuscarNombre" prefHeight="35.0" HBox.hgrow="ALWAYS" />
 
-                  <Button fx:id="btnBuscar" mnemonicParsing="false" prefHeight="35.0" styleClass="toggle-button" text="Buscar">
+                  <Button fx:id="btnBuscar" mnemonicParsing="false" prefHeight="35.0" styleClass="btn-toggle-shadow-primary" text="Buscar">
                      <graphic>
                         <FontIcon iconColor="#1000c0" iconLiteral="fa-search" />
                      </graphic>
@@ -43,7 +43,7 @@
                         <Insets right="15.0" top="5.0" />
                      </padding>
                   </Button>
-                  <Button fx:id="btnImprimir" mnemonicParsing="false" prefHeight="35.0" styleClass="toggle-button" text="Imprimir">
+                  <Button fx:id="btnImprimir" mnemonicParsing="false" onAction="#btnImprimir" prefHeight="35.0" styleClass="btn-toggle-shadow-primary" text="Imprimir">
                      <graphic>
                         <FontIcon iconColor="#800202" iconLiteral="fa-print" iconSize="18" />
                      </graphic>
@@ -87,7 +87,7 @@
             </GridPane>
             <HBox alignment="CENTER_LEFT" spacing="10.0">
                <children>
-                  <Button fx:id="btnGuardar" mnemonicParsing="false" onAction="#guardarFuncionario" prefHeight="35.0" styleClass="toggle-button" text="Guardar">
+                  <Button fx:id="btnGuardar" mnemonicParsing="false" onAction="#guardarFuncionario" prefHeight="35.0" styleClass="btn-toggle-shadow-success" text="Guardar">
                      <graphic>
                         <FontIcon iconColor="#1100a8" iconLiteral="fa-save" iconSize="15" />
                      </graphic>
@@ -95,7 +95,7 @@
                         <Insets right="15.0" top="5.0" />
                      </padding>
                   </Button>
-                  <Button fx:id="btnBorrar" mnemonicParsing="false" onAction="#eliminarFuncionario" prefHeight="35.0" styleClass="toggle-button" text="Borrar">
+                  <Button fx:id="btnBorrar" mnemonicParsing="false" onAction="#eliminarFuncionario" prefHeight="35.0" styleClass="btn-toggle-shadow-danger" text="Borrar">
                      <graphic>
                         <FontIcon iconColor="#676767" iconLiteral="fa-trash" iconSize="15" />
                      </graphic>
@@ -103,7 +103,7 @@
                         <Insets right="15.0" top="5.0" />
                      </padding>
                   </Button>
-                  <Button fx:id="btnLimpiar" mnemonicParsing="false" onAction="#clearForm" prefHeight="35.0" styleClass="toggle-button" text="Limpiar">
+                  <Button fx:id="btnLimpiar" mnemonicParsing="false" onAction="#clearForm" prefHeight="35.0" styleClass="btn-toggle-shadow-warning" text="Limpiar">
                      <graphic>
                         <FontIcon iconColor="#980000" iconLiteral="fa-ban" iconSize="15" />
                      </graphic>

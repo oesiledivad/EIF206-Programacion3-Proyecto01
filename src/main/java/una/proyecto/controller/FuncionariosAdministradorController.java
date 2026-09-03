@@ -10,6 +10,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import una.proyecto.model.Funcionario;
 import una.proyecto.service.FuncionarioService;
+import una.proyecto.utils.GeneradorPDFS;
+import una.proyecto.utils.TablePDF;
 
 public class FuncionariosAdministradorController {
 
@@ -298,4 +300,15 @@ public class FuncionariosAdministradorController {
 
         alert.showAndWait();
     }
+    @FXML public void btnImprimir(){
+        try {
+            TablePDF nuevo = GeneradorPDFS.desdeTableView(tblFuncionarios);
+            GeneradorPDFS.generarPDF(nuevo, "Funcionarios.pdf");
+            showAlert("Éxito", "PDF generado correctamente.");
+        }catch (Exception e){
+            showAlert("Error"," Error al generar PDF");
+            e.printStackTrace();
+        }
+    }
 }
+
