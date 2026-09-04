@@ -10,6 +10,9 @@ import una.proyecto.model.Reserva;
 import una.proyecto.service.CategoriaService;
 import una.proyecto.service.RecursoService;
 import una.proyecto.service.ReservaService;
+import una.proyecto.datos.UsuarioDAO;
+import una.proyecto.logic.FuncionarioLogic;
+import una.proyecto.service.FuncionarioService;
 
 public class AppFactory {
     public static RecursoService createRecursoDatos(){
@@ -28,6 +31,20 @@ public class AppFactory {
             return new ReservaService(logicReserva);
         } catch (Exception e) {
             throw new RuntimeException("Error al inicializar ReservaService: " + e.getMessage(), e);
+        }
+    }
+    public static FuncionarioService createFuncionarioService(){
+        UsuarioDAO usuarioDAO = new UsuarioDAO();
+        FuncionarioLogic funcionarioLogic = new FuncionarioLogic(usuarioDAO);
+        return new FuncionarioService(funcionarioLogic);
+    }
+    public static CategoriaService createCategoriaService(){
+        try{
+            CategoriaDatos datosCategoria= new CategoriaDatos("data/xml/categorias.xml");
+            CategoriaLogic logicCategoria= new CategoriaLogic(datosCategoria);
+            return new CategoriaService(logicCategoria);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al inicializar CategoriaService: " + e.getMessage(), e);
         }
     }
 

@@ -12,6 +12,7 @@ import una.proyecto.model.Funcionario;
 import una.proyecto.service.FuncionarioService;
 import una.proyecto.utils.GeneradorPDFS;
 import una.proyecto.utils.TablePDF;
+import una.proyecto.utils.AppFactory;
 
 public class FuncionariosAdministradorController {
 
@@ -42,8 +43,7 @@ public class FuncionariosAdministradorController {
     @FXML
     private TableColumn<Funcionario, String> colTelefono;
 
-    private final FuncionarioService funcionarioService =
-            new FuncionarioService();
+    private final FuncionarioService funcionarioService = AppFactory.createFuncionarioService();
 
     private final ObservableList<Funcionario> listaObservable =
             FXCollections.observableArrayList();
@@ -157,36 +157,16 @@ public class FuncionariosAdministradorController {
         String name = txtNombre.getText().trim();
         String phone = txtTelefono.getText().trim();
 
-        if (id.isEmpty()) {
-            showAlert("Error", "El ID no puede estar vacío.");
-            return;
-        }
-
-        if (name.isEmpty()) {
-            showAlert("Error", "El nombre no puede estar vacío.");
-            return;
-        }
-
-        if (phone.isEmpty()) {
-            showAlert("Error", "El teléfono no puede estar vacío.");
-            return;
-        }
-
         Funcionario funcionario = new Funcionario(id, "FUNCIONARIO", name, phone);
 
-        boolean saved = funcionarioService.addEmployee(funcionario);
-
-        if (!saved) {
-
-            showAlert("Error", "Ya existe un usuario con ese ID.");
-
-            return;
+        try {
+            funcionarioService.addEmployee(funcionario);
+            loadFuncionarios();
+            clearForm();
+            showAlert("Funcionario", "Funcionario guardado correctamente.");
+        } catch (IllegalArgumentException e) {
+            showAlert("Error", e.getMessage());
         }
-
-        loadFuncionarios();
-        clearForm();
-
-        showAlert("Funcionario", "Funcionario guardado correctamente.");
     }
 
     /**
@@ -198,45 +178,21 @@ public class FuncionariosAdministradorController {
         Funcionario selected = tblFuncionarios.getSelectionModel().getSelectedItem();
 
         if (selected == null) {
-
             showAlert("Aviso", "Debe seleccionar un funcionario de la tabla.");
-
             return;
         }
 
-        String name = txtNombre.getText().trim();
-        String phone = txtTelefono.getText().trim();
+        selected.setName(txtNombre.getText().trim());
+        selected.setPhone(txtTelefono.getText().trim());
 
-        if (name.isEmpty()) {
-
-            showAlert("Error", "El nombre no puede estar vacío.");
-
-            return;
+        try {
+            funcionarioService.updateEmployee(selected);
+            loadFuncionarios();
+            clearForm();
+            showAlert("Funcionario", "Funcionario actualizado correctamente.");
+        } catch (IllegalArgumentException e) {
+            showAlert("Error", e.getMessage());
         }
-
-        if (phone.isEmpty()) {
-
-            showAlert("Error", "El teléfono no puede estar vacío.");
-
-            return;
-        }
-
-        selected.setName(name);
-        selected.setPhone(phone);
-
-        boolean updated = funcionarioService.updateEmployee(selected);
-
-        if (!updated) {
-
-            showAlert("Error", "No se pudo actualizar el funcionario.");
-
-            return;
-        }
-
-        loadFuncionarios();
-        clearForm();
-
-        showAlert("Funcionario", "Funcionario actualizado correctamente.");
     }
 
     /**
@@ -248,23 +204,18 @@ public class FuncionariosAdministradorController {
         Funcionario selected = tblFuncionarios.getSelectionModel().getSelectedItem();
 
         if (selected == null) {
-            showAlert("Aviso","Debe seleccionar un funcionario de la tabla.");
+            showAlert("Aviso", "Debe seleccionar un funcionario de la tabla.");
             return;
         }
 
-        boolean deleted = funcionarioService.deleteEmployee(selected.getId());
-
-        if (!deleted) {
-
-            showAlert("Error", "No se pudo eliminar el funcionario.");
-
-            return;
+        try {
+            funcionarioService.deleteEmployee(selected.getId());
+            loadFuncionarios();
+            clearForm();
+            showAlert("Funcionario", "Funcionario eliminado correctamente.");
+        } catch (IllegalArgumentException e) {
+            showAlert("Error", e.getMessage());
         }
-
-        loadFuncionarios();
-        clearForm();
-
-        showAlert("Funcionario", "Funcionario eliminado correctamente.");
     }
 
     /**

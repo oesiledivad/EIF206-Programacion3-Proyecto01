@@ -12,7 +12,7 @@
 <?import javafx.scene.text.Font?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="446.0" prefWidth="587.0" spacing="12.0" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="una.proyecto.controller.CalendarizacionActividadesController">
+<VBox spacing="12.0" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="una.proyecto.controller.CalendarizacionActividadesController">
    <children>
       <VBox spacing="12.0">
          <children>
@@ -41,31 +41,31 @@
          </children>
       </VBox>
       <Separator prefWidth="200.0" />
-      <VBox prefHeight="319.0" prefWidth="587.0">
+      <VBox VBox.vgrow="ALWAYS">
          <children>
             <Label prefHeight="17.0" prefWidth="246.0" text="Actividades Semanales">
                <font>
                   <Font size="18.0" />
                </font>
             </Label>
-            <TreeTableView fx:id="tblActividades" prefHeight="305.0" prefWidth="587.0" styleClass="table-view">
-              <columns>
-                <TreeTableColumn fx:id="tblColumHora" prefWidth="75.0" text="Hora" />
+            <TreeTableView fx:id="tblActividades" styleClass="table-view" VBox.vgrow="ALWAYS">
+               <columns>
+                  <TreeTableColumn fx:id="tblColumHora" prefWidth="75.0" text="Hora" />
 
-                 <TreeTableColumn fx:id="tblColumLunes" prefWidth="75.0" text="Lunes" />
+                  <TreeTableColumn fx:id="tblColumLunes" prefWidth="75.0" text="Lunes" />
 
-                 <TreeTableColumn fx:id="tblColumMartes" prefWidth="75.0" text="Martes" />
+                  <TreeTableColumn fx:id="tblColumMartes" prefWidth="75.0" text="Martes" />
 
-                 <TreeTableColumn fx:id="tblColumMiercoles" prefWidth="85.0" text="Miércoles" />
+                  <TreeTableColumn fx:id="tblColumMiercoles" prefWidth="85.0" text="Miércoles" />
 
-                 <TreeTableColumn fx:id="tblColumJueves" prefWidth="75.0" text="Jueves" />
+                  <TreeTableColumn fx:id="tblColumJueves" prefWidth="75.0" text="Jueves" />
 
-                 <TreeTableColumn fx:id="tblColumViernes" prefWidth="75.0" text="Viernes" />
+                  <TreeTableColumn fx:id="tblColumViernes" prefWidth="75.0" text="Viernes" />
 
-                 <TreeTableColumn fx:id="tblColumSabado" prefWidth="75.0" text="Sábado" />
+                  <TreeTableColumn fx:id="tblColumSabado" prefWidth="75.0" text="Sábado" />
 
-                 <TreeTableColumn fx:id="tblColumDomingo" prefWidth="75.0" text="Domingo" />
-              </columns>
+                  <TreeTableColumn fx:id="tblColumDomingo" prefWidth="75.0" text="Domingo" />
+               </columns>
             </TreeTableView>
          </children>
       </VBox>
