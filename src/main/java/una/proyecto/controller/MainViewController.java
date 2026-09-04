@@ -8,6 +8,9 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import una.proyecto.logic.MainLogic;
+import una.proyecto.logic.MainLogic.UserSessionInfo;
+import una.proyecto.logic.MainLogic.MenuPermissions;
 import una.proyecto.utils.Navigation;
 import una.proyecto.utils.SessionManager;
 
@@ -52,8 +55,18 @@ public class MainViewController {
     @FXML
     public VBox sidebarMenu;
 
+    // INYECCIÓN DE LOGICA
+    private final MainLogic mainLogic  = new MainLogic();
+
     @FXML
     public void initialize() {
+        setupMenuGroup();
+        loadUserInfo();
+        configureMenuByPermissions();
+        loadDefaultView();
+    }
+
+    private void setupMenuGroup() {
         if (menuGroup == null) {
             menuGroup = new ToggleGroup();
             btnDashboard.setToggleGroup(menuGroup);
@@ -65,85 +78,78 @@ public class MainViewController {
             btnActividades.setToggleGroup(menuGroup);
             btnEstadisticas.setToggleGroup(menuGroup);
         }
-
-        // Cargar los datos del usuario directamente desde el SessionManager Singleton
-        cargarDatosSesion();
-
-        // Seleccionar Dashboard por defecto
-        btnDashboard.setSelected(true);
-
-        // Cargar el dashboard por defecto
-        loadView("dashboard-view");
-
-        // Configurar visibilidad según rol
-        configureMenuByRole();
     }
 
     /**
-     * Carga la información de la sesión activa en los componentes visuales
+     * Carga la información del usuario usando la lógica de negocio
      */
-    private void cargarDatosSesion() {
-        SessionManager session = SessionManager.getInstance();
-        String nombre = session.getName();
-        String id = session.getId();
-        String rol = session.getRole();
+    private void loadUserInfo() {
+        UserSessionInfo userInfo = mainLogic.getCurrentUserInfo();
 
-        lblUsername.setText(nombre != null ? nombre : (id != null ? id : "Usuario"));
-        lblUserRole.setText(rol != null ? rol : "FUNCIONARIO");
+        lblUsername.setText(userInfo.getDisplayName());
+        lblUserRole.setText(userInfo.getDisplayRole());
     }
 
     /**
-     * Configura qué opciones del menú son visibles según el rol del usuario
+     * Configura el menú según los permisos del usuario
      */
-    private void configureMenuByRole() {
-        boolean isAdmin = SessionManager.getInstance().isAdmin();
+    private void configureMenuByPermissions() {
+        MenuPermissions permissions = mainLogic.getMenuPermissions();
 
-        btnFuncionarios.setVisible(isAdmin);
-        btnFuncionarios.setManaged(isAdmin);
-        btnCategorias.setVisible(isAdmin);
-        btnCategorias.setManaged(isAdmin);
-        btnRecursos.setVisible(isAdmin);
-        btnRecursos.setManaged(isAdmin);
+        // Visibilidad de elementos administrativos
+        boolean showAdmin = permissions.isAdmin();
+
+        btnFuncionarios.setVisible(showAdmin);
+        btnFuncionarios.setManaged(showAdmin);
+        btnCategorias.setVisible(showAdmin);
+        btnCategorias.setManaged(showAdmin);
+        btnRecursos.setVisible(showAdmin);
+        btnRecursos.setManaged(showAdmin);
 
         if (sepAdmin != null) {
-            sepAdmin.setVisible(isAdmin);
-            sepAdmin.setManaged(isAdmin);
+            sepAdmin.setVisible(showAdmin);
+            sepAdmin.setManaged(showAdmin);
         }
 
         if (sepGeneral != null) {
-            sepGeneral.setVisible(isAdmin);
-            sepGeneral.setManaged(isAdmin);
+            sepGeneral.setVisible(showAdmin);
+            sepGeneral.setManaged(showAdmin);
         }
     }
 
     /**
-     * Método genérico para cargar vistas en el StackPane
+     * Carga la vista por defecto
      */
-    private void loadView(String viewName) {
-        loadView(viewName, null);
+    private void loadDefaultView() {
+        btnDashboard.setSelected(true);
+        loadViewWithAccessControl("dashboard-view");
     }
 
+    /**
+     * Carga una vista con control de acceso
+     */
+    private void loadViewWithAccessControl(String viewName) {
+        if (!mainLogic.hasAccessToView(viewName)) {
+            showError("No tiene permisos para acceder a esta vista");
+            return;
+        }
+
+        String title = mainLogic.getViewTitle(viewName);
+        loadView(viewName, title);
+        // Estado actual del controlador
+    }
+
+    /**
+     * Método genérico para cargar vistas
+     */
     private void loadView(String viewName, String title) {
         try {
             String fxmlPath = "/una/proyecto/ui/" + viewName + ".fxml";
             Parent view = Navigation.loadView(fxmlPath);
-
             viewContainer.getChildren().setAll(view);
 
-            if (mainLayout.getScene() != null) {
-                Stage stage = (Stage) mainLayout.getScene().getWindow();
-
-                if (stage != null) {
-                    if (title != null && !title.isEmpty()) {
-                        stage.setTitle(title);
-                        Navigation.updateWindowTitle(title);
-                    }
-
-                    if (!stage.isMaximized()) {
-                        stage.centerOnScreen();
-                    }
-                }
-            }
+            updateWindowTitle(title);
+            centerWindowIfNotMaximized();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -152,29 +158,16 @@ public class MainViewController {
     }
 
     /**
-     * Método para cargar vista y pasar datos al controlador
+     * Carga vista con datos específicos para el controlador
      */
-    private void loadViewWithData(String viewName, String title, String currentUserId) {
+    private void loadViewWithData(String viewName, String title, String userId) {
         try {
             String fxmlPath = "/una/proyecto/ui/" + viewName + ".fxml";
             Navigation.ViewLoaderResult result = Navigation.loadViewWithController(fxmlPath);
-
             viewContainer.getChildren().setAll(result.getRoot());
 
-            if (mainLayout.getScene() != null) {
-                Stage stage = (Stage) mainLayout.getScene().getWindow();
-
-                if (stage != null) {
-                    if (title != null && !title.isEmpty()) {
-                        stage.setTitle(title);
-                        Navigation.updateWindowTitle(title);
-                    }
-
-                    if (!stage.isMaximized()) {
-                        stage.centerOnScreen();
-                    }
-                }
-            }
+            updateWindowTitle(title);
+            centerWindowIfNotMaximized();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -182,46 +175,71 @@ public class MainViewController {
         }
     }
 
-    // METODOS DE NAVEGACIÓN
+    // Métodos auxiliares de UI
+    private void updateWindowTitle(String title) {
+        if (mainLayout.getScene() != null) {
+            Stage stage = (Stage) mainLayout.getScene().getWindow();
+            if (stage != null && title != null && !title.isEmpty()) {
+                stage.setTitle("Sistema de Reserva - " + title);
+                Navigation.updateWindowTitle(title);
+            }
+        }
+    }
+
+    private void centerWindowIfNotMaximized() {
+        if (mainLayout.getScene() != null) {
+            Stage stage = (Stage) mainLayout.getScene().getWindow();
+            if (stage != null && !stage.isMaximized()) {
+                stage.centerOnScreen();
+            }
+        }
+    }
+
+    // MÉTODOS DE NAVEGACIÓN
 
     @FXML
     public void goToDashboard(ActionEvent actionEvent) {
-        loadView("dashboard-view", "Dashboard");
+        loadViewWithAccessControl("dashboard-view");
     }
 
     @FXML
     public void goToReservations(ActionEvent actionEvent) {
-        loadViewWithData("reservas-funcionario-view", "Reservaciones", SessionManager.getInstance().getId());
+        if (mainLogic.hasAccessToView("reservas-funcionario-view")) {
+            loadViewWithData("reservas-funcionario-view", "Reservaciones",
+                    SessionManager.getInstance().getId());
+        } else {
+            showError("No tiene permisos para acceder a reservaciones");
+        }
     }
 
     @FXML
     public void goToFuncionarios(ActionEvent actionEvent) {
-        loadView("funcionarios-administrador-view", "Funcionarios");
+        loadViewWithAccessControl("funcionarios-administrador-view");
     }
 
     @FXML
     public void goToCategorias(ActionEvent actionEvent) {
-        loadView("categorias-administrador-view", "Categorias");
+        loadViewWithAccessControl("categorias-administrador-view");
     }
 
     @FXML
     public void goToRecursos(ActionEvent actionEvent) {
-        loadView("recursos-administrador-view", "Recursos");
+        loadViewWithAccessControl("recursos-administrador-view");
     }
 
     @FXML
     public void goToCalendario(ActionEvent actionEvent) {
-        loadView("calendarizacion-view");
+        loadViewWithAccessControl("calendarizacion-view");
     }
 
     @FXML
     public void goToActividades(ActionEvent actionEvent) {
-        loadView("calendarizacion-actividades-view", "Actividades");
+        loadViewWithAccessControl("calendarizacion-actividades-view");
     }
 
     @FXML
     public void goToEstadisticas(ActionEvent actionEvent) {
-        loadView("estadisticas-view", "Estadisticas");
+        loadViewWithAccessControl("estadisticas-view");
     }
 
     @FXML
@@ -232,7 +250,8 @@ public class MainViewController {
         confirm.setContentText("Se cerrará la sesión actual.");
 
         if (confirm.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
-            SessionManager.getInstance().logout();
+            // Usar logica para logout
+            mainLogic.logoutUser();
 
             try {
                 Stage stage = (Stage) btnLogout.getScene().getWindow();
@@ -240,7 +259,11 @@ public class MainViewController {
                 Navigation.disableMaximizeButton();
                 stage.setHeight(600);
                 stage.setWidth(635);
-                Navigation.getTitleBarController().setDraggable(false);
+
+                if (Navigation.getTitleBarController() != null) {
+                    Navigation.getTitleBarController().setDraggable(false);
+                }
+
             } catch (IOException e) {
                 e.printStackTrace();
                 showError("Error al volver al login");
@@ -248,19 +271,11 @@ public class MainViewController {
         }
     }
 
-    // METODOS DE UTILIDAD
+    // MÉTODOS DE UTILIDAD
 
     private void showError(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Error");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
-
-    private void showInfo(String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Información");
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
