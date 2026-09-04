@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<StackPane fx:id="titleBar" prefHeight="35.0" styleClass="custom-title-bar" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="una.proyecto.controller.TitleBarController">
+<StackPane fx:id="titleBar" prefHeight="35.0" styleClass="custom-title-bar" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="una.proyecto.controller.TitleBarController">
     <children>
         <Label fx:id="lblWindowTitle" alignment="CENTER" styleClass="window-title-text" text="Sistema de Reservas" StackPane.alignment="CENTER" />
         <HBox alignment="CENTER_RIGHT" mouseTransparent="false" spacing="8.0" StackPane.alignment="CENTER_RIGHT">

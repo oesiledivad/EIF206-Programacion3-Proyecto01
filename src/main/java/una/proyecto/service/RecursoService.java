@@ -31,7 +31,9 @@ public class RecursoService {
     public List<Recurso> buscarPorFiltros(Categoria categoria, String descripcion) {
         return recursoLogica.buscarFiltro(categoria, descripcion);
     }
-
+    public List<String> recursosdeXcategoria(String cate){
+        return recursoLogica.idRecursos(cate);
+    }
 }
 
 

@@ -3,6 +3,7 @@ import una.proyecto.datos.RecursoDatos;
 import una.proyecto.model.Categoria;
 import una.proyecto.model.Recurso;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,6 +41,7 @@ public class RecursoLogic {
     public boolean existe(String id) {
         return nuevo.leerPorId(id) != null;
     }
+
     public void eliminar(String id) {
         Recurso existente = nuevo.leerPorId(id);
         if (existente == null) {
@@ -50,7 +52,17 @@ public class RecursoLogic {
     public List<Recurso> obtenerTodos() {
         return nuevo.obtenerTodos();
     }
+    public List<String> idRecursos(String idCategoria){
+        List<Recurso> recursos=obtenerTodos();
+        List<String> ids= new ArrayList<>();
+        for(Recurso recur : recursos){
+            if(recur.getIdCategoria().equals(idCategoria)){
+                ids.add(recur.getId());
+            }
 
+        }
+        return ids;
+    }
     public List<Recurso> buscarFiltro(Categoria categoria, String descripcion){
         return nuevo.obtenerTodos().stream().filter(r-> categoria==null || r.getIdCategoria().equals(categoria.getDescripcion()))
                 .filter(r-> descripcion== null || descripcion.isEmpty()|| r.getDescripcion().toLowerCase().contains(descripcion.toLowerCase()))

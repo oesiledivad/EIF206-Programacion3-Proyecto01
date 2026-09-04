@@ -1,6 +1,7 @@
 package una.proyecto.service;
 
 import una.proyecto.model.Reserva;
+import una.proyecto.utils.AppFactory;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -12,7 +13,7 @@ public class CalendarizacionService {
     private final ReservaService reservaService;
 
     public CalendarizacionService() {
-        this.reservaService = new ReservaService();
+        this.reservaService = AppFactory.createReservaService();
     }
 
     public List<Reserva> obtenerReservasDeLaSemana(LocalDate fecha) {
