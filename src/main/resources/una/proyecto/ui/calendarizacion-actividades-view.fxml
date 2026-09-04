@@ -43,28 +43,31 @@
       <Separator prefWidth="200.0" />
       <VBox VBox.vgrow="ALWAYS">
          <children>
-            <Label prefHeight="17.0" prefWidth="246.0" text="Actividades Semanales">
+            <Label prefHeight="21.0" prefWidth="131.0" stylesheets="@../css/style.css" text="Actividades Semanales">
                <font>
-                  <Font size="18.0" />
+                  <Font size="20.0" />
                </font>
             </Label>
             <TreeTableView fx:id="tblActividades" styleClass="table-view" VBox.vgrow="ALWAYS">
+               <columnResizePolicy>
+                  <TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+               </columnResizePolicy>
                <columns>
-                  <TreeTableColumn fx:id="tblColumHora" prefWidth="75.0" text="Hora" />
+                  <TreeTableColumn fx:id="tblColumHora" minWidth="60.0" prefWidth="70.0" text="Hora" />
 
-                  <TreeTableColumn fx:id="tblColumLunes" prefWidth="75.0" text="Lunes" />
+                  <TreeTableColumn fx:id="tblColumLunes" minWidth="90.0" prefWidth="100.0" text="Lunes" />
 
-                  <TreeTableColumn fx:id="tblColumMartes" prefWidth="75.0" text="Martes" />
+                  <TreeTableColumn fx:id="tblColumMartes" minWidth="90.0" prefWidth="100.0" text="Martes" />
 
-                  <TreeTableColumn fx:id="tblColumMiercoles" prefWidth="85.0" text="Miércoles" />
+                  <TreeTableColumn fx:id="tblColumMiercoles" minWidth="95.0" prefWidth="110.0" text="Miércoles" />
 
-                  <TreeTableColumn fx:id="tblColumJueves" prefWidth="75.0" text="Jueves" />
+                  <TreeTableColumn fx:id="tblColumJueves" minWidth="90.0" prefWidth="100.0" text="Jueves" />
 
-                  <TreeTableColumn fx:id="tblColumViernes" prefWidth="75.0" text="Viernes" />
+                  <TreeTableColumn fx:id="tblColumViernes" minWidth="90.0" prefWidth="100.0" text="Viernes" />
 
-                  <TreeTableColumn fx:id="tblColumSabado" prefWidth="75.0" text="Sábado" />
+                  <TreeTableColumn fx:id="tblColumSabado" minWidth="90.0" prefWidth="100.0" text="Sábado" />
 
-                  <TreeTableColumn fx:id="tblColumDomingo" prefWidth="75.0" text="Domingo" />
+                  <TreeTableColumn fx:id="tblColumDomingo" minWidth="95.0" prefWidth="105.0" text="Domingo" />
                </columns>
             </TreeTableView>
          </children>

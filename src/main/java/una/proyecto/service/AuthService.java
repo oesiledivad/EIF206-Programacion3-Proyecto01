@@ -1,16 +1,16 @@
 package una.proyecto.service;
 
-import una.proyecto.datos.UsuarioDAO;
+import una.proyecto.datos.UsuarioDatos;
 import una.proyecto.model.Usuario;
 
 import java.util.List;
 
 public class AuthService {
 
-    private final UsuarioDAO usuarioDAO;
+    private final UsuarioDatos usuarioDatos;
 
     public AuthService() {
-        this.usuarioDAO = new UsuarioDAO();
+        this.usuarioDatos = new UsuarioDatos();
     }
 
     public Usuario authenticate(String id, String password) {
@@ -19,7 +19,7 @@ public class AuthService {
             return null;
         }
 
-        List<Usuario> users = usuarioDAO.loadUsers();
+        List<Usuario> users = usuarioDatos.loadUsers();
 
         for (Usuario user : users) {
 
