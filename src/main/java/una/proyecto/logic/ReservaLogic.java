@@ -1,5 +1,6 @@
 package una.proyecto.logic;
 import una.proyecto.datos.ReservaDatos;
+import una.proyecto.model.Categoria;
 import una.proyecto.model.Reserva;
 import java.util.List;
 
@@ -24,7 +25,18 @@ public class ReservaLogic {
     public boolean existe(String id) {
         return reservaDatos.leerPorId(id) != null;
     }
-
+    public void actualizarCategoriasDeReserva(Reserva reserva, List<Categoria> nuevasCategorias) {
+        if(nuevasCategorias == null) {
+            throw new IllegalArgumentException("La lista de nuevas categorías no puede ser nula");
+        }
+        reserva.getCategoriasDeRecursos().addAll(nuevasCategorias);
+    }
+    public void borrarCategoriasDeReserva(Reserva reserva, List<Categoria> categoriasABorrar) {
+        if(categoriasABorrar== null) {
+            throw new IllegalArgumentException("La lista de categorías a borrar no puede ser nula");
+        }
+        reserva.getCategoriasDeRecursos().removeAll(categoriasABorrar);
+    }
     public void eliminar(String id) {
         Reserva existente = reservaDatos.leerPorId(id);
         if (existente == null) {

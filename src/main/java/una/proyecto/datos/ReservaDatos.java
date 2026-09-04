@@ -4,7 +4,7 @@ import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Marshaller;
 import jakarta.xml.bind.Unmarshaller;
 
-import una.proyecto.model.Reservas;
+import una.proyecto.datos.wrapper.Reservas;
 import una.proyecto.model.Reserva;
 
 import java.io.File;

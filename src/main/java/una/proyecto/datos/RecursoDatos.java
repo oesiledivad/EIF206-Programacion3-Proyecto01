@@ -4,11 +4,10 @@ import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Marshaller;
 import jakarta.xml.bind.Unmarshaller;
-import una.proyecto.model.ListaRecursos;
+import una.proyecto.datos.wrapper.ListaRecursos;
 import una.proyecto.model.Recurso;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
