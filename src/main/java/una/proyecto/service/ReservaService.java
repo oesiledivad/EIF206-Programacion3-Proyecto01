@@ -1,41 +1,25 @@
 package una.proyecto.service;
 
-
-
-import una.proyecto.model.Reservas;
+import una.proyecto.logic.ReservaLogic;
 import una.proyecto.model.Reserva;
-import una.proyecto.utils.XmlUtil;
 
 import java.util.List;
 
 public class ReservaService {
-    //return XmlUtil.readListXml(RUTA_XML, ListaCategoria.class, ListaCategoria::getCategorias);
-    private final String RUTA_XML = "data/xml/reservas.xml";
-    public List<Reserva> obtenerTodasReservas(){
-        return XmlUtil.readListXml(RUTA_XML, una.proyecto.model.Reservas.class, una.proyecto.model.Reservas::getReservas);
+    private final ReservaLogic reservaLogica;
+    public ReservaService(ReservaLogic reservaLogic) {
+        this.reservaLogica = reservaLogic;
     }
-    public void save(Reserva reserva){
-        List<Reserva> lista = obtenerTodasReservas();
-        Boolean encontrado =false;
-        for(int i=0; i<lista.size(); i++){
-            if (lista.get(i).getId().equals(reserva.getId())){
-                lista.set(i, reserva);
-                encontrado=true;
-                break ;
-            }
-        }
-        if (!encontrado) {
-            lista.add(reserva);
-        }
-
-        XmlUtil.writeListXml(RUTA_XML, Reservas.class, lista, Reservas::setReservas);
+    public List<Reserva> obtenerTodasReservas() {
+        return reservaLogica.obtenerTodos();
     }
-
-    public void delete(String id){
-        List<Reserva> lista =obtenerTodasReservas();
-        lista.removeIf(reserva -> reserva.getId().equals(id));
-        XmlUtil.writeListXml(RUTA_XML, Reservas.class,lista,Reservas::setReservas);
+    public void delete(String id) {
+        reservaLogica.eliminar(id);
     }
-
+    public void save(Reserva nuevaReserva) {
+        reservaLogica.crear(nuevaReserva);
+    }
+    public Reserva buscarPorId(String id) {
+        return reservaLogica.leerPorId(id);
+    }
 }
-

@@ -16,7 +16,10 @@ public class Categoria {
         this.id = id;
         this.descripcion = descripcion;
     }
-
+    @Override
+    public String toString() {
+        return descripcion;
+    }
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
