@@ -14,10 +14,8 @@ import javafx.animation.Animation;
 import javafx.animation.Timeline;
 import javafx.animation.KeyFrame;
 import org.kordamp.ikonli.javafx.FontIcon;
-import una.proyecto.model.Usuario;
-import una.proyecto.service.AuthService;
+import una.proyecto.logic.LoginLogic;
 import una.proyecto.utils.Navigation;
-import una.proyecto.utils.SessionManager;
 import una.proyecto.utils.ThemeManager;
 
 import java.io.IOException;
@@ -53,34 +51,50 @@ public class LoginController {
     @FXML
     private Label lblError;
 
-    private final AuthService authService = new AuthService();
+    private final LoginLogic LoginLogic = new LoginLogic();
 
     @FXML
     public void initialize() {
-        lblError.setVisible(false);
+        setupUIComponents();
+        setupEventHandlers();
+        setupClock();
+        setupTheme();
+        setupKeyboardShortcuts();
 
+        Platform.runLater(() -> txtUserId.requestFocus());
+    }
+
+    private void setupUIComponents() {
+        lblError.setVisible(false);
+    }
+
+    private void setupEventHandlers() {
         btnLogin.setOnAction(event -> handleLogin());
         btnSalir.setOnAction(event -> handleExitButton());
-        Timeline clock = new Timeline(new KeyFrame(Duration.ZERO, e -> {
-            lblCurrentDate.setText(LocalDateTime.now().format(
-                    DateTimeFormatter.ofPattern("dd 'de' MMMM 'del' yyyy, HH:mm:ss", new Locale("es", "ES"))
-            ));        }), new KeyFrame(Duration.seconds(1)));
+        btnDarkMode.setOnAction(event -> toggleThemeWithFade());
+    }
+
+    private void setupClock() {
+        Timeline clock = new Timeline(new KeyFrame(Duration.ZERO, e -> lblCurrentDate.setText(LocalDateTime.now().format(
+                DateTimeFormatter.ofPattern("dd 'de' MMMM 'del' yyyy, HH:mm:ss", new Locale("es", "ES"))
+        ))), new KeyFrame(Duration.seconds(1)));
 
         clock.setCycleCount(Animation.INDEFINITE);
         clock.play();
+    }
 
+    private void setupTheme() {
         boolean isDarkMode = btnDarkMode.getScene() != null && btnDarkMode.getScene().getRoot().getStyleClass().contains("dark-mode");
         updateIconTheme(isDarkMode);
+    }
 
-        btnDarkMode.setOnAction(event -> toggleThemeWithFade());
+    private void setupKeyboardShortcuts() {
         testVBoxLogin.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.ENTER) {
                 handleLogin();
                 event.consume();
             }
         });
-
-        Platform.runLater(() -> txtUserId.requestFocus());
     }
 
     private void toggleThemeWithFade() {
@@ -137,90 +151,81 @@ public class LoginController {
         String userId = txtUserId.getText().trim();
         String password = txtPassword.getText().trim();
 
+        // Validacion basica de UI
         if (userId.isEmpty() || password.isEmpty()) {
             showError("Por favor ingrese ID y clave");
             return;
         }
 
-        btnLogin.setText("Iniciando Sesion...");
-        btnLogin.setDisable(true);
-        btnSalir.setDisable(true);
-        btnDarkMode.setDisable(true);
-        txtUserId.setDisable(true);
-        txtPassword.setDisable(true);
-        btnLogin.getScene().setCursor(Cursor.WAIT);
+        // Preparar UI para proceso de autenticacion
+        setUIStateForLogin(true);
 
-        PauseTransition delay = new PauseTransition(Duration.millis(1000));
-        delay.setOnFinished(event -> {
-
-            if (authenticate(userId, password)) {
-                try {
-                    Stage stage = (Stage) btnLogin.getScene().getWindow();
-
-                    Navigation.navigateToWithController(
-                            stage,
-                            "/una/proyecto/ui/main-view.fxml",
-                            "Sistema de Reserva - Panel Principal"
-                    );
-
-                    Navigation.enableMaximizeButton();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    showError("Error al cargar la aplicación");
-                    restoreControls();
-                }
-            } else {
-                showError("ID o clave incorrectos");
-                txtPassword.clear();
-                txtUserId.requestFocus();
-                restoreControls();
-            }
-        });
+        // Ejecutar validacion
+        PauseTransition delay = createDelay(userId, password);
 
         delay.play();
     }
 
-    private void restoreControls() {
-        btnLogin.setText("Iniciar Sesion");
-        btnLogin.setDisable(false);
-        btnSalir.setDisable(false);
-        txtUserId.setDisable(false);
-        txtPassword.setDisable(false);
-        btnDarkMode.setDisable(false);
-        btnLogin.getScene().setCursor(Cursor.DEFAULT);
+    private PauseTransition createDelay(String userId, String password) {
+        PauseTransition delay = new PauseTransition(Duration.millis(1000));
+        delay.setOnFinished(event -> {
+            // DELEGAR A LA CAPA DE LOGICA
+            LoginLogic.LoginResult result = LoginLogic.validateCredentials(userId, password);
 
+            if (result.isSuccess()) {
+                navigateToMainScreen();
+            } else {
+                showError(result.getMessage());
+                txtPassword.clear();
+                txtUserId.requestFocus();
+                setUIStateForLogin(false);
+            }
+        });
+        return delay;
     }
 
-    // METODOS DE AUTENTICACION
-
-    private boolean authenticate(String userId, String password) {
-
-        Usuario usuario = authService.authenticate(userId, password);
-
-        if (usuario == null) {
-            return false;
+    private void navigateToMainScreen() {
+        try {
+            Stage stage = (Stage) btnLogin.getScene().getWindow();
+            Navigation.navigateToWithController(
+                    stage,
+                    "/una/proyecto/ui/main-view.fxml",
+                    "Sistema de Reserva - Panel Principal"
+            );
+            Navigation.enableMaximizeButton();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showError("Error al cargar la aplicación");
+            setUIStateForLogin(false);
         }
-
-        SessionManager.getInstance().login(
-                usuario.getId(),
-                usuario.getName(),
-                usuario.getRole()
-        );
-
-        return true;
     }
 
-    // METODOS DE UTILIDAD
+    private void setUIStateForLogin(boolean inProcess) {
+        if (inProcess) {
+            btnLogin.setText("Iniciando Sesión...");
+            btnLogin.setDisable(true);
+            btnSalir.setDisable(true);
+            btnDarkMode.setDisable(true);
+            txtUserId.setDisable(true);
+            txtPassword.setDisable(true);
+            btnLogin.getScene().setCursor(Cursor.WAIT);
+        } else {
+            btnLogin.setText("Iniciar Sesión");
+            btnLogin.setDisable(false);
+            btnSalir.setDisable(false);
+            txtUserId.setDisable(false);
+            txtPassword.setDisable(false);
+            btnDarkMode.setDisable(false);
+            btnLogin.getScene().setCursor(Cursor.DEFAULT);
+        }
+    }
 
     private void showError(String message) {
         lblError.setText(message);
         lblError.setVisible(true);
 
         PauseTransition pause = new PauseTransition(Duration.seconds(5));
-
         pause.setOnFinished(e -> lblError.setVisible(false));
-
         pause.play();
     }
-
 }
