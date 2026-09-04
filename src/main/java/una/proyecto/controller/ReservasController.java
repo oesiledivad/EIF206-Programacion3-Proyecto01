@@ -13,9 +13,10 @@ import una.proyecto.service.RecursoService;
 import una.proyecto.service.ReservaService;
 import una.proyecto.utils.AppFactory;
 import una.proyecto.utils.SessionManager;
-
+import javafx.scene.control.SelectionMode;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ReservasController {
@@ -72,13 +73,15 @@ public class ReservasController {
         columFecha.setCellValueFactory(new PropertyValueFactory<>("fecha"));
         columHora.setCellValueFactory(new PropertyValueFactory<>("horario"));
         columEstado.setCellValueFactory(new PropertyValueFactory<>("estado"));
-        columRecurso.setCellValueFactory(cellData -> {
+        /*columRecurso.setCellValueFactory(cellData -> {
             List<String> recursos = cellData.getValue().getIdRecursosAsignados();
             if (recursos == null || recursos.isEmpty()) {
                 return new javafx.beans.property.SimpleStringProperty("");
             }
             return new javafx.beans.property.SimpleStringProperty(String.join(", ", recursos));
         });
+        */
+
         tableviewmisreservas.setItems(listaReserva);
     }
     private void configureListView(){
@@ -112,7 +115,9 @@ public class ReservasController {
             LocalTime horaInicio = choiceboxhorainicio.getValue();
             LocalTime horaFin = choiceboxhorafin.getValue();
             String idUsuario = SessionManager.getInstance().getId();
-            Categoria asignada = listviewcategorias.getSelectionModel().getSelectedItem();
+            List<Categoria> asignada = new ArrayList<>(
+                    listviewcategorias.getSelectionModel().getSelectedItems()
+            );
 
             // 1. Validar que ningún campo esencial esté vacío (incluyendo la categoría seleccionada)
             if (actividad == null || actividad.isBlank() || date == null || horaInicio == null || horaFin == null || asignada == null) {
@@ -123,11 +128,9 @@ public class ReservasController {
                 alert.showAndWait();
                 return;
             }
-            // 2. Obtener los IDs de recursos a partir de la categoría seleccionada
-            RecursoService recursoService = AppFactory.createRecursoDatos();
-            List<String> listRecursos = recursoService.recursosdeXcategoria(Integer.toString(asignada.getId()));
+
             // 3. Crear el objeto Reserva
-            Reserva nueva = new Reserva(actividad, date, horaInicio, horaFin, idUsuario, listRecursos, EstadoReserva.ACTIVA);
+            Reserva nueva = new Reserva(actividad, date, horaInicio, horaFin, idUsuario, asignada, EstadoReserva.ACTIVA);
             // 4. Guardar en backend y actualizar la ObservableList de la TableView
             reservaService.save(nueva);
             listaReserva.add(nueva);

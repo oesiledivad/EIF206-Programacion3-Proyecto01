@@ -17,8 +17,8 @@ module EIF.Programacion.Proyecto {
     opens una.proyecto.controller to javafx.fxml;
     opens una.proyecto.model to javafx.base, jakarta.xml.bind;
     opens una.proyecto.utils to org.glassfish.jaxb.core, org.glassfish.jaxb.runtime, jakarta.xml.bind;
-    opens una.proyecto.datos.wrapper to jakarta.xml.bind;
 
     exports una.proyecto.app;
     exports una.proyecto.utils to org.glassfish.jaxb.core, org.glassfish.jaxb.runtime;
+    opens una.proyecto.datos.wrapper to jakarta.xml.bind, javafx.base;
 }

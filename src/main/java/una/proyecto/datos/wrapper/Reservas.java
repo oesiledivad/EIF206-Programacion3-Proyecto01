@@ -1,5 +1,7 @@
-package una.proyecto.model;
+package una.proyecto.datos.wrapper;
 import jakarta.xml.bind.annotation.*;//esto me permite traerme toda slas etiquetas XML
+import una.proyecto.model.Reserva;
+
 import java.util.ArrayList;
 import java.util.List;
 @XmlRootElement(name="reservas")

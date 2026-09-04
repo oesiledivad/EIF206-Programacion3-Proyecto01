@@ -1,4 +1,4 @@
-package una.proyecto.model;
+package una.proyecto.datos.wrapper;
 
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
