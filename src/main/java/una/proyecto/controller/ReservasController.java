@@ -92,7 +92,7 @@ public class ReservasController {
     // Ajustá "createCategoriaService()" / "findAll()" al nombre real de tu service.
     private void cargarCategorias(){
         try {
-            var categoriaService = new CategoriaService();
+            var categoriaService = AppFactory.createCategoriaService();
             listaCategoria.addAll(categoriaService.obtenerTodas());
         } catch (Exception e) {
             e.printStackTrace();

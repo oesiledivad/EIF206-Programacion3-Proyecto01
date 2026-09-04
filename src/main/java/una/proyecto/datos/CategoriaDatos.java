@@ -5,7 +5,7 @@ import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Marshaller;
 import jakarta.xml.bind.Unmarshaller;
 import una.proyecto.model.Categoria;
-import una.proyecto.model.ListaCategorias;
+import una.proyecto.model.ListaCategoria;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -21,7 +21,7 @@ public class CategoriaDatos {
     public CategoriaDatos(String filePath) throws Exception {
         this.filePath = filePath;
         try {
-            this.ctx = JAXBContext.newInstance(ListaCategorias.class, Categoria.class);
+            this.ctx = JAXBContext.newInstance(ListaCategoria.class, Categoria.class);
         } catch (JAXBException e) {
             throw new Exception("Error al inicializar JAXBContext: " + e.getMessage(), e);
         }
@@ -32,7 +32,7 @@ public class CategoriaDatos {
         try {
             Marshaller marshaller = ctx.createMarshaller();
             marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-            ListaCategorias wrapper = new ListaCategorias();
+            ListaCategoria wrapper = new ListaCategoria();
             wrapper.setCategorias(lista);
             marshaller.marshal(wrapper, new File(filePath));
         } catch (JAXBException e) {
@@ -47,7 +47,7 @@ public class CategoriaDatos {
         }
         try {
             Unmarshaller unmarshaller = ctx.createUnmarshaller();
-            ListaCategorias wrapper = (ListaCategorias) unmarshaller.unmarshal(file);
+            ListaCategoria wrapper = (ListaCategoria) unmarshaller.unmarshal(file);
             List<Categoria> lista = wrapper.getCategorias();
             return lista != null ? new ArrayList<>(lista) : new ArrayList<>();
         } catch (JAXBException e) {

@@ -10,6 +10,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import una.proyecto.model.Categoria;
 import una.proyecto.service.CategoriaService;
+import una.proyecto.utils.AppFactory;
 import una.proyecto.utils.GeneradorPDFS;
 import una.proyecto.utils.TablePDF;
 
@@ -33,7 +34,7 @@ public class CategoriasAdministradorController {
     @FXML
     private TableColumn<Categoria, String> colDescripcion;
 
-    private final CategoriaService categoryService = new CategoriaService();
+    private final CategoriaService categoryService = AppFactory.createCategoriaService();
 
     private final ObservableList<Categoria> listaObservable = FXCollections.observableArrayList();
 
@@ -90,7 +91,7 @@ public class CategoriasAdministradorController {
                 return;
             }
 
-            Categoria category = new Categoria(id, description);
+            Categoria category = new Categoria( String.valueOf(id), description);
 
             categoryService.save(category);
 

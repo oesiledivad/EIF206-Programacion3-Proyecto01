@@ -61,7 +61,7 @@ public class RecursosController {
 
     private final RecursoService recursoService  = AppFactory.createRecursoDatos();
     private final ObservableList<Recurso> listaObservable = FXCollections.observableArrayList();
-    private final CategoriaService categoriaService = new CategoriaService(); // ajusta el nombre si tu clase se llama distinto
+    private final CategoriaService categoriaService = AppFactory.createCategoriaService(); // ajusta el nombre si tu clase se llama distinto
     private final ObservableList<Categoria> listaCategorias = FXCollections.observableArrayList();
 
     @FXML
