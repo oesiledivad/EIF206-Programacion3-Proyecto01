@@ -114,8 +114,16 @@ public class ReservaLogic {
         return reservaDatos.obtenerTodos();
     }
     public void verificarHoras(LocalDate fecha, LocalTime horaInicio, LocalTime horaFin) {
-        if (horaInicio.isAfter(horaFin)) {
-            throw new IllegalArgumentException("La hora de inicio no puede ser posterior a la hora de fin");
+        if (horaInicio.isAfter(horaFin) || horaInicio.equals(horaFin)) {
+            throw new IllegalArgumentException("La hora de inicio debe ser anterior a la hora de fin");
+        }
+
+        if (fecha.isEqual(LocalDate.now()) && horaInicio.isBefore(LocalTime.now())) {
+            throw new IllegalArgumentException("No se puede reservar en un horario que ya pasó");
+        }
+
+        if (fecha.isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException("No se puede reservar en una fecha pasada");
         }
 
         List<Reserva> reservas = reservaDatos.obtenerTodos();
