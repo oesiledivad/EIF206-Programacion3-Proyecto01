@@ -1,6 +1,6 @@
 package una.proyecto.logic;
 
-import una.proyecto.datos.UsuarioDAO;
+import una.proyecto.datos.UsuarioDatos;
 import una.proyecto.model.Funcionario;
 import una.proyecto.model.Usuario;
 
@@ -10,14 +10,14 @@ import java.util.stream.Collectors;
 
 public class FuncionarioLogic {
 
-    private final UsuarioDAO usuarioDAO;
+    private final UsuarioDatos usuarioDatos;
 
-    public FuncionarioLogic(UsuarioDAO usuarioDAO) {
-        this.usuarioDAO = usuarioDAO;
+    public FuncionarioLogic(UsuarioDatos usuarioDatos) {
+        this.usuarioDatos = usuarioDatos;
     }
 
     public List<Funcionario> obtenerTodos() {
-        return usuarioDAO.loadUsers()
+        return usuarioDatos.loadUsers()
                 .stream()
                 .filter(user -> user instanceof Funcionario)
                 .map(user -> (Funcionario) user)
@@ -59,7 +59,7 @@ public class FuncionarioLogic {
         nuevo.setRole("FUNCIONARIO");
         nuevo.setPassword(nuevo.getId());
 
-        boolean agregado = usuarioDAO.addUser(nuevo);
+        boolean agregado = usuarioDatos.addUser(nuevo);
 
         if (!agregado) {
             throw new IllegalArgumentException("Ya existe un usuario con id " + nuevo.getId());
@@ -71,7 +71,7 @@ public class FuncionarioLogic {
             throw new IllegalArgumentException("El id del funcionario no puede estar vacío");
         }
 
-        Usuario existente = usuarioDAO.findUserById(actualizado.getId());
+        Usuario existente = usuarioDatos.findUserById(actualizado.getId());
 
         if (!(existente instanceof Funcionario)) {
             throw new IllegalArgumentException("El funcionario con id " + actualizado.getId() + " no existe");
@@ -81,7 +81,7 @@ public class FuncionarioLogic {
         actualizado.setRole("FUNCIONARIO");
         actualizado.setPassword(existente.getPassword());
 
-        boolean actualizadoOk = usuarioDAO.updateUser(actualizado);
+        boolean actualizadoOk = usuarioDatos.updateUser(actualizado);
 
         if (!actualizadoOk) {
             throw new IllegalArgumentException("No se pudo actualizar el funcionario");
@@ -89,13 +89,13 @@ public class FuncionarioLogic {
     }
 
     public void eliminar(String id) {
-        Usuario existente = usuarioDAO.findUserById(id);
+        Usuario existente = usuarioDatos.findUserById(id);
 
         if (!(existente instanceof Funcionario)) {
             throw new IllegalArgumentException("El funcionario con id " + id + " no existe");
         }
 
-        boolean eliminado = usuarioDAO.deleteUser(id);
+        boolean eliminado = usuarioDatos.deleteUser(id);
 
         if (!eliminado) {
             throw new IllegalArgumentException("No se pudo eliminar el funcionario");

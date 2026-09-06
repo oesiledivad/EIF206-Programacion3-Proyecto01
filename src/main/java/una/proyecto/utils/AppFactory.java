@@ -6,11 +6,10 @@ import una.proyecto.datos.ReservaDatos;
 import una.proyecto.logic.CategoriaLogic;
 import una.proyecto.logic.RecursoLogic;
 import una.proyecto.logic.ReservaLogic;
-import una.proyecto.model.Reserva;
 import una.proyecto.service.CategoriaService;
 import una.proyecto.service.RecursoService;
 import una.proyecto.service.ReservaService;
-import una.proyecto.datos.UsuarioDAO;
+import una.proyecto.datos.UsuarioDatos;
 import una.proyecto.logic.FuncionarioLogic;
 import una.proyecto.service.FuncionarioService;
 
@@ -34,8 +33,8 @@ public class AppFactory {
         }
     }
     public static FuncionarioService createFuncionarioService(){
-        UsuarioDAO usuarioDAO = new UsuarioDAO();
-        FuncionarioLogic funcionarioLogic = new FuncionarioLogic(usuarioDAO);
+        UsuarioDatos usuarioDatos = new UsuarioDatos();
+        FuncionarioLogic funcionarioLogic = new FuncionarioLogic(usuarioDatos);
         return new FuncionarioService(funcionarioLogic);
     }
     public static CategoriaService createCategoriaService(){

@@ -4,7 +4,7 @@ import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Marshaller;
 import jakarta.xml.bind.Unmarshaller;
 
-import una.proyecto.datos.wrapper.Reservas;
+import una.proyecto.datos.wrapper.ListaReservas;
 import una.proyecto.model.Reserva;
 
 import java.io.File;
@@ -20,7 +20,7 @@ public class ReservaDatos {
     public ReservaDatos(String filePath) throws Exception {
         this.filepath = filePath;
         try {
-            this.ctx = JAXBContext.newInstance(Reservas.class, Reserva.class);
+            this.ctx = JAXBContext.newInstance(ListaReservas.class, Reserva.class);
         } catch (JAXBException e) {
             throw new Exception("Error al inicializar JAXBContext: " + e.getMessage(), e);
         }
@@ -32,7 +32,7 @@ public class ReservaDatos {
         try {
             Marshaller marshaller = ctx.createMarshaller();
             marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-            Reservas wrapper = new Reservas();
+            ListaReservas wrapper = new ListaReservas();
             wrapper.setReservas(reservas);
             marshaller.marshal(wrapper, new File(filepath));
         } catch (JAXBException e) {
@@ -46,7 +46,7 @@ public class ReservaDatos {
         }
         try{
             Unmarshaller unmarshaller = ctx.createUnmarshaller();
-            Reservas wrapper = (Reservas) unmarshaller.unmarshal(file);
+            ListaReservas wrapper = (ListaReservas) unmarshaller.unmarshal(file);
             List<Reserva> lista = wrapper.getReservas();
             return lista != null ? new ArrayList<>(lista) : new ArrayList<>();
         } catch (JAXBException e) {

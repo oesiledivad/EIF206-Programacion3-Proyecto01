@@ -3,7 +3,7 @@ package una.proyecto.datos;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.Marshaller;
 import jakarta.xml.bind.Unmarshaller;
-import una.proyecto.datos.wrapper.UsuarioWrapper;
+import una.proyecto.datos.wrapper.ListaUsuarios;
 import una.proyecto.model.Administrador;
 import una.proyecto.model.Funcionario;
 import una.proyecto.model.Usuario;
@@ -12,11 +12,11 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UsuarioDAO {
+public class UsuarioDatos {
 
     private static final String XML_PATH = "data/xml/usuarios.xml";
 
-    public UsuarioDAO() {
+    public UsuarioDatos() {
         verifyAndCreateDefaultFile();
     }
 
@@ -82,7 +82,7 @@ public class UsuarioDAO {
     private JAXBContext createJAXBContext() throws Exception {
 
         return JAXBContext.newInstance(
-                UsuarioWrapper.class,
+                ListaUsuarios.class,
                 Usuario.class,
                 Funcionario.class,
                 Administrador.class
@@ -109,7 +109,7 @@ public class UsuarioDAO {
 
             Unmarshaller unmarshaller = context.createUnmarshaller();
 
-            UsuarioWrapper wrapper = (UsuarioWrapper) unmarshaller.unmarshal(file);
+            ListaUsuarios wrapper = (ListaUsuarios) unmarshaller.unmarshal(file);
 
             if (wrapper == null || wrapper.getUsuarios() == null) {
                 return new ArrayList<>();
@@ -161,7 +161,7 @@ public class UsuarioDAO {
                     true
             );
 
-            UsuarioWrapper wrapper = new UsuarioWrapper();
+            ListaUsuarios wrapper = new ListaUsuarios();
 
             wrapper.setUsuarios(users);
 
