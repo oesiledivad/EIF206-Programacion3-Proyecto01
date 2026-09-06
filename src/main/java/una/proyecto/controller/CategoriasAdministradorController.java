@@ -44,6 +44,7 @@ public class CategoriasAdministradorController {
         loadCategories();
         configureSelectionListener();
         configureSearchListener();
+        clearForm();
     }
 
     private void configureTable() {
@@ -64,12 +65,12 @@ public class CategoriasAdministradorController {
 
     private void configureSelectionListener() {
         tablaCategorias.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-                    if (newValue != null) {
-                        txtID.setText(String.valueOf(newValue.getId()));
-                        txtID.setEditable(false);
-                        txtDescripcion.setText(newValue.getDescripcion());
-                    }
-                });
+            if (newValue != null) {
+                txtID.setText(String.valueOf(newValue.getId()));
+                txtID.setEditable(false);
+                txtDescripcion.setText(newValue.getDescripcion());
+            }
+        });
     }
 
     private void configureSearchListener() {
@@ -82,24 +83,31 @@ public class CategoriasAdministradorController {
 
     @FXML
     private void saveCategory() {
+        String description = txtDescripcion.getText() == null ? "" : txtDescripcion.getText().trim();
+
+        if (description.isEmpty()) {
+            showAlert("Error", "La descripción no puede estar vacía.");
+            return;
+        }
+
         try {
-            int id = Integer.parseInt(txtID.getText());
-            String description = txtDescripcion.getText().trim();
+            boolean esNueva = txtID.getText() == null || txtID.getText().isBlank();
 
-            if (description.isEmpty()) {
-                showAlert("Error","La descripción no puede estar vacía.");
-                return;
+            if (esNueva) {
+                // Crear: el id se autogenera dentro de CategoriaLogic.crear(...)
+                Categoria nueva = new Categoria(null, description);
+                categoryService.save(nueva);
+            } else {
+                // Editar una categoría ya seleccionada de la tabla
+                Categoria actualizada = new Categoria(txtID.getText(), description);
+                categoryService.update(actualizada);
             }
-
-            Categoria category = new Categoria( String.valueOf(id), description);
-
-            categoryService.save(category);
 
             loadCategories();
             clearForm();
 
-        } catch (NumberFormatException e) {
-            showAlert("Error", "El ID debe ser un número entero válido.");
+        } catch (IllegalArgumentException e) {
+            showAlert("Error", e.getMessage());
         }
     }
 
@@ -121,7 +129,7 @@ public class CategoriasAdministradorController {
     @FXML
     private void clearForm() {
         txtID.clear();
-        txtID.setEditable(true);
+        txtID.setEditable(false);
 
         txtDescripcion.clear();
         txtBuscarDescripcion.clear();
@@ -138,6 +146,7 @@ public class CategoriasAdministradorController {
 
         alert.showAndWait();
     }
+
     @FXML public void btnImprimir(){
         try {
             TablePDF nuevo = GeneradorPDFS.desdeTableView(tablaCategorias);
