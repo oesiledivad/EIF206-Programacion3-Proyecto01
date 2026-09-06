@@ -26,6 +26,9 @@ public class RecursoService {
     public List<Recurso> buscarPorFiltros(Categoria categoria, String descripcion) {
         return recursoLogica.buscarFiltro(categoria, descripcion);
     }
+    public String obtenerRecursosParaTabe(List<Categoria> categoriasSeleccionadas){
+        return recursoLogica.obtenerRecursosPorCategorias(categoriasSeleccionadas);
+    }
 
 }
 

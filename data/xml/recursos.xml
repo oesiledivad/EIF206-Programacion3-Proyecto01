@@ -3,25 +3,43 @@
     <recurso>
         <id>nueva</id>
         <numeroDeActivo>0</numeroDeActivo>
-        <idCategoria>Laptop Windows</idCategoria>
+        <idCategoria>CAT-000001</idCategoria>
         <descripcion>nueva</descripcion>
     </recurso>
     <recurso>
         <id>8888</id>
         <numeroDeActivo>0</numeroDeActivo>
-        <idCategoria>Laptop Windows</idCategoria>
+        <idCategoria>CAT-000001</idCategoria>
         <descripcion>0000</descripcion>
     </recurso>
     <recurso>
         <id>99</id>
         <numeroDeActivo>0</numeroDeActivo>
-        <idCategoria>laptops</idCategoria>
+        <idCategoria>CAT-000001</idCategoria>
         <descripcion>1000</descripcion>
     </recurso>
     <recurso>
         <id>7777</id>
         <numeroDeActivo>0</numeroDeActivo>
-        <idCategoria>nueva</idCategoria>
+        <idCategoria>CAT-000002</idCategoria>
         <descripcion>nuevorecurso</descripcion>
+    </recurso>
+    <recurso>
+        <id>777</id>
+        <numeroDeActivo>0</numeroDeActivo>
+        <idCategoria>CAT-000002</idCategoria>
+        <descripcion>nuevorecursoprueba</descripcion>
+    </recurso>
+    <recurso>
+        <id>9000</id>
+        <numeroDeActivo>0</numeroDeActivo>
+        <idCategoria>Esta categoria es de prueba</idCategoria>
+        <descripcion>ninguna</descripcion>
+    </recurso>
+    <recurso>
+        <id>90001</id>
+        <numeroDeActivo>0</numeroDeActivo>
+        <idCategoria>CAT-000003</idCategoria>
+        <descripcion>pruebas</descripcion>
     </recurso>
 </recursos>

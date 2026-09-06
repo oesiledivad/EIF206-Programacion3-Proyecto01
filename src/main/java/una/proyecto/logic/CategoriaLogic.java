@@ -2,6 +2,7 @@ package una.proyecto.logic;
 
 import una.proyecto.datos.CategoriaDatos;
 import una.proyecto.model.Categoria;
+import una.proyecto.model.Recurso;
 
 import java.util.List;
 import java.util.stream.Collectors;

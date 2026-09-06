@@ -40,8 +40,8 @@ public class ReservasController {
     @FXML private TableColumn<Reserva,EstadoReserva> columEstado;
     private ObservableList<Reserva> listaReserva= FXCollections.observableArrayList();
     private ObservableList<Categoria> listaCategoria= FXCollections.observableArrayList();
-    // En tu ReservaController (fuera de los métodos, como atributo de clase):
     private final ReservaService reservaService = AppFactory.createReservaService();
+    private final RecursoService recursoService=AppFactory.createRecursoDatos();
 
     @FXML public void initialize(){
         configurarChoiceBox();
@@ -73,14 +73,12 @@ public class ReservasController {
         columFecha.setCellValueFactory(new PropertyValueFactory<>("fecha"));
         columHora.setCellValueFactory(new PropertyValueFactory<>("horario"));
         columEstado.setCellValueFactory(new PropertyValueFactory<>("estado"));
-        /*columRecurso.setCellValueFactory(cellData -> {
-            List<String> recursos = cellData.getValue().getIdRecursosAsignados();
-            if (recursos == null || recursos.isEmpty()) {
-                return new javafx.beans.property.SimpleStringProperty("");
-            }
-            return new javafx.beans.property.SimpleStringProperty(String.join(", ", recursos));
+
+        columRecurso.setCellValueFactory(cellData -> {
+            Reserva reserva = cellData.getValue();
+            String recursos = recursoService.obtenerRecursosParaTabe(reserva.getCategoriasDeRecursos());
+            return new javafx.beans.property.SimpleStringProperty(recursos != null ? recursos : "");
         });
-        */
 
         tableviewmisreservas.setItems(listaReserva);
     }
@@ -89,7 +87,6 @@ public class ReservasController {
         listviewcategorias.setItems(listaCategoria);
     }
     // Carga las categorías existentes desde el backend al iniciar la pantalla.
-    // Ajustá "createCategoriaService()" / "findAll()" al nombre real de tu service.
     private void cargarCategorias(){
         try {
             var categoriaService = AppFactory.createCategoriaService();
@@ -99,10 +96,12 @@ public class ReservasController {
             showAlert("Error", "No se pudieron cargar las categorías: " + e.getMessage());
         }
     }
-    // Carga las reservas existentes del usuario/backend al iniciar la pantalla.
+    // Carga las reservas existentes y repuebla categoriasDeRecursos (transient),
+    // reconstruyéndolo a partir de categoriasDeRecursosIds (que sí persiste en el XML).
     private void cargarReservas(){
         try {
             listaReserva.addAll(reservaService.obtenerTodasReservas());
+            reservaService.repoblarCategoriasService(listaReserva, listaCategoria);
         } catch (Exception e) {
             e.printStackTrace();
             showAlert("Error", "No se pudieron cargar las reservas: " + e.getMessage());
@@ -118,20 +117,32 @@ public class ReservasController {
             List<Categoria> asignada = new ArrayList<>(
                     listviewcategorias.getSelectionModel().getSelectedItems()
             );
-
-            // 1. Validar que ningún campo esencial esté vacío (incluyendo la categoría seleccionada)
-            if (actividad == null || actividad.isBlank() || date == null || horaInicio == null || horaFin == null || asignada == null) {
+            try{
+                reservaService.verificarHorasService(date, horaInicio, horaFin);
+            } catch (RuntimeException e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error de validación");
+                alert.setHeaderText("Error en las horas seleccionadas");
+                alert.setContentText(e.getMessage());
+                alert.showAndWait();
+                return;
+            }
+            // Validar que ningún campo esencial esté vacío (incluyendo la categoría seleccionada).
+            // Nota: "asignada" nunca es null porque se arma con new ArrayList<>(...),
+            // por eso se valida con isEmpty() en vez de == null.
+            if (actividad == null || actividad.isBlank() || date == null || horaInicio == null
+                    || horaFin == null || asignada.isEmpty()) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Error");
                 alert.setHeaderText("Campos incompletos");
-                alert.setContentText("Por favor, complete todos los campos y seleccione una categoría antes de realizar la reserva.");
+                alert.setContentText("Por favor, complete todos los campos y seleccione al menos una categoría antes de realizar la reserva.");
                 alert.showAndWait();
                 return;
             }
 
-            // 3. Crear el objeto Reserva
-            Reserva nueva = new Reserva(actividad, date, horaInicio, horaFin, idUsuario, asignada, EstadoReserva.ACTIVA);
-            // 4. Guardar en backend y actualizar la ObservableList de la TableView
+            // Crear la Reserva a través del service, que internamente arma
+            // categoriasDeRecursos (memoria) y categoriasDeRecursosIds (persistencia)
+            Reserva nueva = reservaService.crearReserva(actividad, date, horaInicio, horaFin, idUsuario, asignada, EstadoReserva.ACTIVA);
             reservaService.save(nueva);
             listaReserva.add(nueva);
             showAlert("Éxito", "La reserva ha sido registrada exitosamente.");
@@ -178,5 +189,4 @@ public class ReservasController {
 
         alert.showAndWait();
     }
-
 }

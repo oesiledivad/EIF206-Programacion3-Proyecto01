@@ -6,7 +6,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.util.StringConverter;
-import org.apache.pdfbox.text.PDFMarkedContentExtractor;
 import una.proyecto.model.Categoria;
 import una.proyecto.model.Recurso;
 import una.proyecto.service.CategoriaService;
@@ -61,7 +60,7 @@ public class RecursosController {
 
     private final RecursoService recursoService  = AppFactory.createRecursoDatos();
     private final ObservableList<Recurso> listaObservable = FXCollections.observableArrayList();
-    private final CategoriaService categoriaService = AppFactory.createCategoriaService(); // ajusta el nombre si tu clase se llama distinto
+    private final CategoriaService categoriaService = AppFactory.createCategoriaService();
     private final ObservableList<Categoria> listaCategorias = FXCollections.observableArrayList();
 
     @FXML
@@ -75,7 +74,7 @@ public class RecursosController {
     }
 
     private void configureTable(){
-        tableColumCategoria.setCellValueFactory(new PropertyValueFactory<>("idCategoria")); // con C mayúscula
+        tableColumCategoria.setCellValueFactory(new PropertyValueFactory<>("idCategoria"));
         tableColumDescripcion.setCellValueFactory(new PropertyValueFactory<>("descripcion"));
         tableColumId.setCellValueFactory(new PropertyValueFactory<>("id"));
         tableViewRecursos.setItems(listaObservable);
@@ -87,8 +86,8 @@ public class RecursosController {
         listaObservable.setAll(recursoService.obtenerTodosRecursos());
     }
     private void configureComboBoxFiltro(){
-    comboBoxCategoriaFiltro.setItems(listaCategorias);
-    comboBoxCategoriaFiltro.setConverter(crearConverter());
+        comboBoxCategoriaFiltro.setItems(listaCategorias);
+        comboBoxCategoriaFiltro.setConverter(crearConverter());
     }
 
     private StringConverter<Categoria> crearConverter(){
@@ -104,11 +103,9 @@ public class RecursosController {
         };
     }
     private void configureComboBoxFormulario(){
-
         comboBoxCategoria.setItems(listaCategorias);
         comboBoxCategoria.setConverter(crearConverter());
     }
-// PROBANDO SI IMPRIME CORRECTAMENTE
 
     @FXML public void btnImprimir(){
         try {
@@ -117,17 +114,16 @@ public class RecursosController {
             showAlert("Éxito", "PDF generado correctamente.");
         }catch (Exception e){
             showAlert("Error"," Error al generar PDF");
-            return;
         }
     }
     @FXML public void  btnBuscarRecurso(){
-      String descripcion = txtFieldDescripcionFiltro.getText();
-      Categoria nueva = comboBoxCategoriaFiltro.getValue();
-      List<Recurso> listaRecursosEspecificos = recursoService.buscarPorFiltros(nueva, descripcion);
-      listaObservable.setAll(listaRecursosEspecificos);
+        String descripcion = txtFieldDescripcionFiltro.getText();
+        Categoria nueva = comboBoxCategoriaFiltro.getValue();
+        List<Recurso> listaRecursosEspecificos = recursoService.buscarPorFiltros(nueva, descripcion);
+        listaObservable.setAll(listaRecursosEspecificos);
     }
     @FXML public void  btnLimpiarCasilla(){
-       clearForm();
+        clearForm();
     }
     @FXML public void btnBorrarRecurso(){
         Recurso seleccionado = tableViewRecursos.getSelectionModel().getSelectedItem();
@@ -142,27 +138,30 @@ public class RecursosController {
         clearForm();
     }
     @FXML public void  btnGuardarRecurso(){
-    try{
-        String descripcion= txtFieldDescripcion.getText();
-        String id= textFieldID.getText();
-        Categoria tipoCategoria= comboBoxCategoria.getValue();
-        String categoria;
-        if(tipoCategoria!=null){categoria=tipoCategoria.getDescripcion();}else{categoria="";}
-        if(descripcion.isEmpty() || id.isEmpty() || categoria.isEmpty()){
+        String descripcion = txtFieldDescripcion.getText();
+        String id = textFieldID.getText();
+        Categoria tipoCategoria = comboBoxCategoria.getValue();
+        String idCategoria;
+        if (tipoCategoria != null) {
+            idCategoria = tipoCategoria.getId(); // corregido: antes usaba getDescripcion()
+        } else {
+            idCategoria = "";
+        }
+
+        if(descripcion.isEmpty() || id.isEmpty() || idCategoria.isEmpty()){
             showAlert("Error","La descripción no puede estar vacía.");
             return;
         }
-        //String id, String idCategoria, String descripcion
-        Recurso r1= new Recurso(id,categoria, descripcion);
-        recursoService.save(r1);
-        listaObservable.setAll(recursoService.obtenerTodosRecursos());
-    }catch(Exception e){
-        showAlert("Error","Ingrese todos los datos requeridos");
-        return;
 
-    }
-
-
+        try{
+            //String id, String idCategoria, String descripcion
+            Recurso r1 = new Recurso(id, idCategoria, descripcion);
+            recursoService.save(r1);
+            listaObservable.setAll(recursoService.obtenerTodosRecursos());
+            clearForm();
+        } catch (IllegalArgumentException e) {
+            showAlert("Error", e.getMessage());
+        }
     }
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
