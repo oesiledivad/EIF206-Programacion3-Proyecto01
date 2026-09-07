@@ -7,15 +7,6 @@ import java.time.LocalDateTime;
 
 /**
  * Representa la información general de un reporte PDF.
- * <p>
- * Puede utilizarse para reportes de:
- * - Reservas
- * - Funcionarios
- * - Categorías de recursos
- * - Recursos
- * - Calendarización
- * - Actividades
- * - Estadísticas
  */
 public class ReportePDF {
 

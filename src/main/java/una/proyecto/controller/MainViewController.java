@@ -57,6 +57,8 @@ public class MainViewController {
 
     // INYECCIÓN DE LOGICA
     private final MainLogic mainLogic  = new MainLogic();
+    @FXML
+    public Button btnChangePassword;
 
     @FXML
     public void initialize() {
@@ -279,5 +281,21 @@ public class MainViewController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    public void handleChangePassword(ActionEvent actionEvent) {
+        try {
+            ChangePasswordController controller = Navigation.openDialogAndGetController(
+                    "/una/proyecto/ui/change-password-dialog.fxml",
+                    "Cambiar Contraseña",
+                    btnChangePassword.getScene().getWindow()
+            );
+            if (controller != null && controller.isCambioExitoso()) {
+
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            showError("Error al abrir el diálogo de cambio de contraseña: " + e.getMessage());
+        }
     }
 }

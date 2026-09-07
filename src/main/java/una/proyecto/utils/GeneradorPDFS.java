@@ -33,7 +33,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GeneradorPDFS {
-    // Rutas relativas dentro de src/main/resources
     private static final String RUTA_REGULAR = "src/main/resources/fonts/JetBrainsMono.ttf";
     private static final String RUTA_BOLD = "src/main/resources/fonts/JetBrainsMono-Bold.ttf";
     private static final String RUTA_ITALIC = "src/main/resources/fonts/JetBrainsMono-Italic.ttf";

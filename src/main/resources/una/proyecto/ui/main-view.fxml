@@ -13,7 +13,7 @@
 <?import javafx.scene.shape.Circle?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<BorderPane fx:id="mainLayout" prefHeight="635.0" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="una.proyecto.controller.MainViewController">
+<BorderPane fx:id="mainLayout" prefHeight="635.0" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="una.proyecto.controller.MainViewController">
    <left>
       <VBox fx:id="sidebar" alignment="TOP_CENTER" prefHeight="600.0" styleClass="sidebar" BorderPane.alignment="TOP_CENTER">
          <children>
@@ -36,15 +36,36 @@
                               <FontIcon iconLiteral="fa-home" styleClass="icon-primary" />
                            </graphic>
                         </ToggleButton>
-                        <ToggleButton fx:id="btnReservas" alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#goToReservations" styleClass="menu-item" text="Reservas" toggleGroup="$menuGroup" />
+                        <ToggleButton fx:id="btnReservas" alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#goToReservations" styleClass="menu-item" text="Reservas" toggleGroup="$menuGroup">
+                           <graphic>
+                              <FontIcon iconLiteral="fa-edit" styleClass="icon-primary" />
+                           </graphic></ToggleButton>
                         <Separator fx:id="sepAdmin" prefWidth="200.0" />
-                        <ToggleButton fx:id="btnFuncionarios" alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#goToFuncionarios" styleClass="menu-item" text="Funcionarios" toggleGroup="$menuGroup" />
-                        <ToggleButton fx:id="btnCategorias" alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#goToCategorias" styleClass="menu-item" text="Categorias" toggleGroup="$menuGroup" />
-                        <ToggleButton fx:id="btnRecursos" alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#goToRecursos" styleClass="menu-item" text="Recursos" toggleGroup="$menuGroup" />
+                        <ToggleButton fx:id="btnFuncionarios" alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#goToFuncionarios" styleClass="menu-item" text="Funcionarios" toggleGroup="$menuGroup">
+                           <graphic>
+                              <FontIcon iconLiteral="fa-users" styleClass="icon-primary" />
+                           </graphic></ToggleButton>
+                        <ToggleButton fx:id="btnCategorias" alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#goToCategorias" styleClass="menu-item" text="Categorias" toggleGroup="$menuGroup">
+                           <graphic>
+                              <FontIcon iconLiteral="fa-gears" styleClass="icon-primary" />
+                           </graphic></ToggleButton>
+                        <ToggleButton fx:id="btnRecursos" alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#goToRecursos" styleClass="menu-item" text="Recursos" toggleGroup="$menuGroup">
+                           <graphic>
+                              <FontIcon iconLiteral="fa-server" styleClass="icon-primary" />
+                           </graphic></ToggleButton>
                         <Separator fx:id="sepGeneral" prefWidth="200.0" />
-                        <ToggleButton fx:id="btnCalendario" alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#goToCalendario" styleClass="menu-item" text="Calendario" toggleGroup="$menuGroup" />
-                        <ToggleButton fx:id="btnActividades" alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#goToActividades" styleClass="menu-item" text="Actividades" toggleGroup="$menuGroup" />
-                        <ToggleButton fx:id="btnEstadisticas" alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#goToEstadisticas" styleClass="menu-item" text="Estadisticas" toggleGroup="$menuGroup" />
+                        <ToggleButton fx:id="btnCalendario" alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#goToCalendario" styleClass="menu-item" text="Calendario" toggleGroup="$menuGroup">
+                           <graphic>
+                              <FontIcon iconLiteral="fa-calendar" styleClass="icon-primary" />
+                           </graphic></ToggleButton>
+                        <ToggleButton fx:id="btnActividades" alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#goToActividades" styleClass="menu-item" text="Actividades" toggleGroup="$menuGroup">
+                           <graphic>
+                              <FontIcon iconLiteral="fa-child" styleClass="icon-primary" />
+                           </graphic></ToggleButton>
+                        <ToggleButton fx:id="btnEstadisticas" alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#goToEstadisticas" styleClass="menu-item" text="Estadisticas" toggleGroup="$menuGroup">
+                           <graphic>
+                              <FontIcon iconLiteral="fa-bar-chart" styleClass="icon-primary" />
+                           </graphic></ToggleButton>
                      </children>
                   </VBox>
                </children>
@@ -66,6 +87,7 @@
                      </children>
                   </HBox>
                   <Button fx:id="btnLogout" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleLogout" styleClass="logout-button" text="Cerrar sesión" VBox.vgrow="ALWAYS" />
+                  <Button fx:id="btnChangePassword" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleChangePassword" styleClass="logout-button" text="Cambiar contraseña" />
                </children>
             </VBox>
          </children>
