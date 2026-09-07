@@ -3,15 +3,9 @@ package una.proyecto.utils;
 import una.proyecto.datos.CategoriaDatos;
 import una.proyecto.datos.RecursoDatos;
 import una.proyecto.datos.ReservaDatos;
-import una.proyecto.logic.CategoriaLogic;
-import una.proyecto.logic.RecursoLogic;
-import una.proyecto.logic.ReservaLogic;
-import una.proyecto.service.CategoriaService;
-import una.proyecto.service.RecursoService;
-import una.proyecto.service.ReservaService;
+import una.proyecto.logic.*;
+import una.proyecto.service.*;
 import una.proyecto.datos.UsuarioDatos;
-import una.proyecto.logic.FuncionarioLogic;
-import una.proyecto.service.FuncionarioService;
 
 public class AppFactory {
     public static RecursoService createRecursoDatos(){
@@ -44,6 +38,18 @@ public class AppFactory {
             return new CategoriaService(logicCategoria);
         } catch (Exception e) {
             throw new RuntimeException("Error al inicializar CategoriaService: " + e.getMessage(), e);
+        }
+    }
+
+    public static EstadisticasService createEstadisticasService() {
+        try {
+            ReservaDatos datosReserva = new ReservaDatos("data/xml/reservas.xml");
+            CategoriaDatos datosCategoria = new CategoriaDatos("data/xml/categorias.xml");
+
+            EstadisticasLogic logicEstadisticas = new EstadisticasLogic(datosReserva, datosCategoria);
+            return new EstadisticasService(logicEstadisticas);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al inicializar EstadisticasService: " + e.getMessage(), e);
         }
     }
 

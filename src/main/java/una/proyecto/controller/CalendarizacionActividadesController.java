@@ -8,6 +8,7 @@ import una.proyecto.model.Reserva;
 import una.proyecto.service.CalendarizacionService;
 import una.proyecto.model.EstadoReserva;
 import una.proyecto.utils.GeneradorPDFS;
+import una.proyecto.utils.ReportePDF;
 import una.proyecto.utils.TablePDF;
 
 import java.time.DayOfWeek;
@@ -317,8 +318,10 @@ public class CalendarizacionActividadesController {
                         fila.getDomingo()
                 ));
             }
+            LocalDate fechaSeleccionada = dtpicker.getValue();
 
-            GeneradorPDFS.generarPDF(nuevo, "Calendarizacion.pdf");
+            ReportePDF reporte = new ReportePDF("Reporte de actividades Calendario", nuevo);
+            GeneradorPDFS.generar(reporte, "Calendarizacion.pdf");
 
             mostrarAlerta(
                     "Éxito",

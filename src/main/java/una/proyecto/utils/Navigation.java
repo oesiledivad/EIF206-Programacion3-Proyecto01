@@ -284,7 +284,7 @@ public final class Navigation {
         if (stage.getMinWidth() <= 0) stage.setMinWidth(600);
         if (stage.getMinHeight() <= 0) stage.setMinHeight(635);
 
-        stage.centerOnScreen();
+        //stage.centerOnScreen();
         updateWindowTitle(title);
         ThemeManager.applyTheme(scene);
     }

@@ -30,6 +30,13 @@ public class CategoriaLogic {
                 .collect(Collectors.toList());
     }
 
+    public Categoria buscarPorId(String id) {
+        if (id == null || id.isBlank()) {
+            return null;
+        }
+        return categoriaDatos.leerPorId(id);
+    }
+
     public void crear(Categoria nueva) {
         if (nueva.getDescripcion() == null || nueva.getDescripcion().isBlank()) {
             throw new IllegalArgumentException("La descripción de la categoría no puede estar vacía");
@@ -70,10 +77,6 @@ public class CategoriaLogic {
         if (existente == null) {
             throw new IllegalArgumentException("La categoría con id " + id + " no existe");
         }
-
-        // TODO: si deciden con el equipo agregar la regla de "no borrar
-        // categoría con recursos asociados", va acá, preguntándole a
-        // RecursoLogic/RecursoService — no usando una lista embebida.
 
         categoriaDatos.eliminar(id);
     }

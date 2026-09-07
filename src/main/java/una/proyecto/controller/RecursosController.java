@@ -12,6 +12,7 @@ import una.proyecto.service.CategoriaService;
 import una.proyecto.service.RecursoService;
 import una.proyecto.utils.AppFactory;
 import una.proyecto.utils.GeneradorPDFS;
+import una.proyecto.utils.ReportePDF;
 import una.proyecto.utils.TablePDF;
 
 import java.util.List;
@@ -110,7 +111,8 @@ public class RecursosController {
     @FXML public void btnImprimir(){
         try {
             TablePDF nuevo = GeneradorPDFS.desdeTableView(tableViewRecursos);
-            GeneradorPDFS.generarPDF(nuevo, "Recursos.pdf");
+            ReportePDF reporte = new ReportePDF("Listado de Recursos", nuevo);
+            GeneradorPDFS.generar(reporte, "Recursos.pdf");
             showAlert("Éxito", "PDF generado correctamente.");
         }catch (Exception e){
             showAlert("Error"," Error al generar PDF");

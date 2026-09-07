@@ -149,7 +149,7 @@ public class MainViewController {
             viewContainer.getChildren().setAll(view);
 
             updateWindowTitle(title);
-            centerWindowIfNotMaximized();
+            //centerWindowIfNotMaximized();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -167,7 +167,7 @@ public class MainViewController {
             viewContainer.getChildren().setAll(result.getRoot());
 
             updateWindowTitle(title);
-            centerWindowIfNotMaximized();
+            //centerWindowIfNotMaximized();
 
         } catch (IOException e) {
             e.printStackTrace();

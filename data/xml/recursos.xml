@@ -42,4 +42,10 @@
         <idCategoria>CAT-000003</idCategoria>
         <descripcion>pruebas</descripcion>
     </recurso>
+    <recurso>
+        <id>11111</id>
+        <numeroDeActivo>0</numeroDeActivo>
+        <idCategoria>666</idCategoria>
+        <descripcion>Laptop para jugar</descripcion>
+    </recurso>
 </recursos>

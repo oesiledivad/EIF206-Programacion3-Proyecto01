@@ -14,6 +14,7 @@ import una.proyecto.service.ReservaService;
 import una.proyecto.utils.AppFactory;
 import una.proyecto.utils.SessionManager;
 import javafx.scene.control.SelectionMode;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -24,11 +25,12 @@ public class ReservasController {
     @FXML private Button btnreserva;
     @FXML private Button btncancelarreserva;
     @FXML private Button btnlimpiar;
+    @FXML private Button btnExtraer;
     @FXML private TextArea txtareafrase;
     @FXML private TextArea txtareaactividad;
     @FXML private DatePicker datapickerfecha;
-    @FXML private ChoiceBox <LocalTime>choiceboxhorainicio;
-    @FXML private ChoiceBox <LocalTime>choiceboxhorafin;
+    @FXML private ChoiceBox<LocalTime> choiceboxhorainicio;
+    @FXML private ChoiceBox<LocalTime> choiceboxhorafin;
     @FXML private ListView<Categoria> listviewcategorias;
     @FXML private TableView<Reserva> tableviewmisreservas;
 
@@ -37,37 +39,36 @@ public class ReservasController {
     @FXML private TableColumn<Reserva, LocalDate> columFecha;
     @FXML private TableColumn<Reserva, String> columHora;
     @FXML private TableColumn<Reserva, String> columRecurso;
-    @FXML private TableColumn<Reserva,EstadoReserva> columEstado;
-    private ObservableList<Reserva> listaReserva= FXCollections.observableArrayList();
-    private ObservableList<Categoria> listaCategoria= FXCollections.observableArrayList();
-    private final ReservaService reservaService = AppFactory.createReservaService();
-    private final RecursoService recursoService=AppFactory.createRecursoDatos();
+    @FXML private TableColumn<Reserva, EstadoReserva> columEstado;
 
-    @FXML public void initialize(){
+    private final ObservableList<Reserva> listaReservaUsuario = FXCollections.observableArrayList();
+    private final ObservableList<Categoria> listaCategoria = FXCollections.observableArrayList();
+
+    private final ReservaService reservaService = AppFactory.createReservaService();
+    private final RecursoService recursoService = AppFactory.createRecursoDatos();
+    private final CategoriaService categoriaService = AppFactory.createCategoriaService();
+    private final SessionManager sessionManager = SessionManager.getInstance();
+
+    @FXML
+    public void initialize() {
         configurarChoiceBox();
         configureTableView();
         configureListView();
-        cargarCategorias();
-        cargarReservas();
-        btnreserva.setOnAction(event -> handleReservaButton());
-        btnlimpiar.setOnAction(event -> handleLimpiarButton());
-        btncancelarreserva.setOnAction(event -> handleCancelarReservaButton());
-
+        configurarFechaActual();
+        cargarDatosIniciales();
+        configurarEventos();
     }
-    //Configura los choice box y le agrega todas las horas
-    private void configurarChoiceBox(){
-        ObservableList<LocalTime> listaHoraria = FXCollections.observableArrayList();
 
+    private void configurarChoiceBox() {
+        ObservableList<LocalTime> listaHoraria = FXCollections.observableArrayList();
         for (int hora = 0; hora <= 23; hora++) {
             listaHoraria.add(LocalTime.of(hora, 0));
         }
-
         choiceboxhorafin.setItems(listaHoraria);
         choiceboxhorainicio.setItems(listaHoraria);
     }
 
-    //aca busca getEstado();
-    private void configureTableView(){
+    private void configureTableView() {
         columId.setCellValueFactory(new PropertyValueFactory<>("id"));
         columActividad.setCellValueFactory(new PropertyValueFactory<>("actividad"));
         columFecha.setCellValueFactory(new PropertyValueFactory<>("fecha"));
@@ -80,113 +81,218 @@ public class ReservasController {
             return new javafx.beans.property.SimpleStringProperty(recursos != null ? recursos : "");
         });
 
-        tableviewmisreservas.setItems(listaReserva);
+        tableviewmisreservas.setItems(listaReservaUsuario);
     }
-    private void configureListView(){
+
+    private void configureListView() {
         listviewcategorias.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         listviewcategorias.setItems(listaCategoria);
     }
-    // Carga las categorías existentes desde el backend al iniciar la pantalla.
-    private void cargarCategorias(){
+
+    private void configurarFechaActual() {
+        datapickerfecha.setValue(LocalDate.now());
+    }
+
+    private void configurarEventos() {
+        btnreserva.setOnAction(event -> handleReservaButton());
+        btnlimpiar.setOnAction(event -> handleLimpiarButton());
+        btncancelarreserva.setOnAction(event -> handleCancelarReservaButton());
+        if (btnExtraer != null) {
+            btnExtraer.setOnAction(event -> handleExtraerButton());
+        }
+    }
+
+    // CARGA DE DATOS
+
+    private void cargarDatosIniciales() {
+        cargarCategorias();
+        cargarReservasUsuario();
+    }
+
+    private void cargarCategorias() {
         try {
-            var categoriaService = AppFactory.createCategoriaService();
-            listaCategoria.addAll(categoriaService.obtenerTodas());
+            listaCategoria.setAll(categoriaService.obtenerTodas());
         } catch (Exception e) {
             e.printStackTrace();
             showAlert("Error", "No se pudieron cargar las categorías: " + e.getMessage());
         }
     }
-    // Carga las reservas existentes y repuebla categoriasDeRecursos (transient),
-    // reconstruyéndolo a partir de categoriasDeRecursosIds (que sí persiste en el XML).
-    private void cargarReservas(){
+
+    /**
+     * Carga solo las reservas del usuario actual
+     */
+    private void cargarReservasUsuario() {
         try {
-            listaReserva.addAll(reservaService.obtenerTodasReservas());
-            reservaService.repoblarCategoriasService(listaReserva, listaCategoria);
+            String idUsuario = sessionManager.getId();
+            if (idUsuario == null) {
+                listaReservaUsuario.clear();
+                return;
+            }
+
+            // Obtener reservas del usuario
+            List<Reserva> reservas = reservaService.obtenerReservasPorFuncionario(idUsuario);
+            reservaService.repoblarCategoriasService(reservas, listaCategoria);
+
+            listaReservaUsuario.setAll(reservas);
+            tableviewmisreservas.refresh();
+
         } catch (Exception e) {
             e.printStackTrace();
             showAlert("Error", "No se pudieron cargar las reservas: " + e.getMessage());
         }
     }
-    private void handleReservaButton() {
-        if (SessionManager.getInstance().isAdmin()) {
-            String actividad = txtareaactividad.getText();
-            LocalDate date = datapickerfecha.getValue();
-            LocalTime horaInicio = choiceboxhorainicio.getValue();
-            LocalTime horaFin = choiceboxhorafin.getValue();
-            String idUsuario = SessionManager.getInstance().getId();
-            List<Categoria> asignada = new ArrayList<>(
-                    listviewcategorias.getSelectionModel().getSelectedItems()
-            );
-            try{
-                reservaService.verificarHorasService(date, horaInicio, horaFin);
-            } catch (RuntimeException e) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Error de validación");
-                alert.setHeaderText("Error en las horas seleccionadas");
-                alert.setContentText(e.getMessage());
-                alert.showAndWait();
-                return;
-            }
-            // Validar que ningún campo esencial esté vacío (incluyendo la categoría seleccionada).
-            // Nota: "asignada" nunca es null porque se arma con new ArrayList<>(...),
-            // por eso se valida con isEmpty() en vez de == null.
-            if (actividad == null || actividad.isBlank() || date == null || horaInicio == null
-                    || horaFin == null || asignada.isEmpty()) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Error");
-                alert.setHeaderText("Campos incompletos");
-                alert.setContentText("Por favor, complete todos los campos y seleccione al menos una categoría antes de realizar la reserva.");
-                alert.showAndWait();
-                return;
-            }
 
-            // Crear la Reserva a través del service, que internamente arma
-            // categoriasDeRecursos (memoria) y categoriasDeRecursosIds (persistencia)
-            Reserva nueva = reservaService.crearReserva(actividad, date, horaInicio, horaFin, idUsuario, asignada, EstadoReserva.ACTIVA);
-            reservaService.save(nueva);
-            listaReserva.add(nueva);
-            showAlert("Éxito", "La reserva ha sido registrada exitosamente.");
-        } else {
-            showAlert("No se pudo realizar la reserva", "El usuario no es funcionario.");
-        }
+    /**
+     * Recarga las reservas del usuario
+     */
+    private void recargarReservas() {
+        cargarReservasUsuario();
     }
-    private void handleCancelarReservaButton() {
-        // 1. Obtener la reserva seleccionada en la TableView
-        Reserva reserva = tableviewmisreservas.getSelectionModel().getSelectedItem();
 
-        // 2. Validar que el usuario haya seleccionado una fila
-        if (reserva == null) {
+    // MANEJADORES DE EVENTOS
+
+    private void handleReservaButton() {
+        // 1. Validar sesión
+        if (!sessionManager.isLoggedIn()) {
+            showAlert("Error", "Debe iniciar sesión para realizar una reserva.");
+            return;
+        }
+
+        // 2. Validar permisos
+        if (sessionManager.isAdmin()) {
+            showAlert("Error", "Solo los funcionarios pueden realizar reservas.");
+            return;
+        }
+
+        // 3. Obtener datos del formulario
+        String actividad = txtareaactividad.getText().trim();
+        LocalDate fecha = datapickerfecha.getValue();
+        LocalTime horaInicio = choiceboxhorainicio.getValue();
+        LocalTime horaFin = choiceboxhorafin.getValue();
+        String idUsuario = sessionManager.getId();
+        List<Categoria> categoriasSeleccionadas = new ArrayList<>(
+                listviewcategorias.getSelectionModel().getSelectedItems()
+        );
+
+        // 4. Validar campos
+        if (actividad.isEmpty() || fecha == null || horaInicio == null || horaFin == null || categoriasSeleccionadas.isEmpty()) {
+            showAlert("Error", "Por favor, complete todos los campos y seleccione al menos una categoría.");
+            return;
+        }
+
+        // 5. Validar horas
+        try {
+            reservaService.verificarHorasService(fecha, horaInicio, horaFin);
+        } catch (RuntimeException e) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText("No seleccionó una reserva");
-            alert.setContentText("Por favor, seleccione una reserva de la tabla para cancelar.");
+            alert.setTitle("Error de validación");
+            alert.setHeaderText("Error en las horas seleccionadas");
+            alert.setContentText(e.getMessage());
             alert.showAndWait();
             return;
         }
 
-        // 3. Eliminar la reserva del backend / servicio
-        reservaService.delete(reserva.getId());
+        // 6. Crear y guardar reserva
+        try {
+            Reserva nueva = reservaService.crearReserva(
+                    actividad,
+                    fecha,
+                    horaInicio,
+                    horaFin,
+                    idUsuario,
+                    categoriasSeleccionadas,
+                    EstadoReserva.ACTIVA
+            );
 
-        // 4. Eliminar de la ObservableList para que la tabla se actualice automáticamente
-        listaReserva.remove(reserva);
+            reservaService.save(nueva);
 
-        // 5. Mostrar mensaje de confirmación
-        showAlert("Éxito", "La reserva ha sido cancelada correctamente.");
+            recargarReservas();
+            limpiarFormulario();
+            showAlert("Éxito", "La reserva ha sido registrada exitosamente.");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Error", "No se pudo realizar la reserva: " + e.getMessage());
+        }
     }
-    private void handleLimpiarButton(){
+
+    private void handleCancelarReservaButton() {
+        // 1. Validar sesión
+        if (!sessionManager.isLoggedIn()) {
+            showAlert("Error", "Debe iniciar sesión para cancelar una reserva.");
+            return;
+        }
+
+        // 2. Obtener reserva seleccionada
+        Reserva reserva = tableviewmisreservas.getSelectionModel().getSelectedItem();
+
+        if (reserva == null) {
+            showAlert("Error", "Por favor, seleccione una reserva de la tabla para cancelar.");
+            return;
+        }
+
+        // 3. Validar propiedad
+        if (!sessionManager.getId().equals(reserva.getIdFuncionario())) {
+            showAlert("Error", "No puede cancelar una reserva que no le pertenece.");
+            return;
+        }
+
+        // 4. Confirmar cancelación
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Confirmar cancelación");
+        confirm.setHeaderText("¿Está seguro de cancelar esta reserva?");
+        confirm.setContentText("Reserva: " + reserva.getActividad() + " - " + reserva.getFecha());
+        if (confirm.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {
+            return;
+        }
+
+        // 5. Eliminar reserva
+        try {
+            reservaService.delete(reserva.getId());
+            recargarReservas();
+            showAlert("Éxito", "La reserva ha sido cancelada correctamente.");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Error", "No se pudo cancelar la reserva: " + e.getMessage());
+        }
+    }
+
+    private void handleLimpiarButton() {
         txtareafrase.clear();
         txtareaactividad.clear();
         listviewcategorias.getSelectionModel().clearSelection();
         choiceboxhorainicio.getSelectionModel().clearSelection();
         choiceboxhorafin.getSelectionModel().clearSelection();
+        datapickerfecha.setValue(LocalDate.now());
     }
+
+    private void handleExtraerButton() {
+        String frase = txtareafrase.getText().trim();
+        if (frase.isEmpty()) {
+            showAlert("Información", "Ingrese una frase para extraer información.");
+            return;
+        }
+        // TODO: Implementar extracción
+        showAlert("Extraer", "Función de extracción en desarrollo.\nFrase ingresada: " + frase);
+    }
+
+    // UTILIDADES
+
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
-
         alert.showAndWait();
+    }
+
+    private void limpiarFormulario() {
+        txtareafrase.clear();
+        txtareaactividad.clear();
+        listviewcategorias.getSelectionModel().clearSelection();
+        choiceboxhorainicio.getSelectionModel().clearSelection();
+        choiceboxhorafin.getSelectionModel().clearSelection();
+        datapickerfecha.setValue(LocalDate.now());
     }
 }

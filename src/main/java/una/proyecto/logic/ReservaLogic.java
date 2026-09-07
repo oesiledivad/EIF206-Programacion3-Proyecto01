@@ -1,4 +1,5 @@
 package una.proyecto.logic;
+
 import una.proyecto.datos.ReservaDatos;
 import una.proyecto.model.Categoria;
 import una.proyecto.model.EstadoReserva;
@@ -29,8 +30,83 @@ public class ReservaLogic {
         reservaDatos.crear(nuevaReserva);
     }
 
-    // Arma una Reserva nueva a partir de las categorías elegidas en la UI,
-    // seteando tanto categoriasDeRecursos (memoria) como categoriasDeRecursosIds (persistencia).
+    public void eliminar(String id) {
+        Reserva existente = reservaDatos.leerPorId(id);
+        if (existente == null) {
+            throw new IllegalArgumentException("La reserva con id " + id + " no existe");
+        }
+        reservaDatos.eliminar(id);
+    }
+
+    public Reserva leerPorId(String id) {
+        return reservaDatos.leerPorId(id);
+    }
+
+    public List<Reserva> obtenerTodos() {
+        return reservaDatos.obtenerTodos();
+    }
+
+    // VALIDACIONES
+
+    /**
+     * Verifica que las horas sean válidas y que no haya conflictos de horario
+     */
+    public void verificarHoras(LocalDate fecha, LocalTime horaInicio, LocalTime horaFin) {
+        // 1. Validar horas
+        if (horaInicio.isAfter(horaFin) || horaInicio.equals(horaFin)) {
+            throw new IllegalArgumentException("La hora de inicio debe ser anterior a la hora de fin");
+        }
+
+        // 2. Validar fecha pasada
+        if (fecha.isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException("No se puede reservar en una fecha pasada");
+        }
+
+        // 3. Validar hora pasada (si es hoy)
+        if (fecha.isEqual(LocalDate.now()) && horaInicio.isBefore(LocalTime.now())) {
+            throw new IllegalArgumentException("No se puede reservar en un horario que ya pasó");
+        }
+
+        // 4. Verificar superposiciones con reservas existentes
+        List<Reserva> reservas = reservaDatos.obtenerTodos();
+        for (Reserva reserva : reservas) {
+            boolean mismaFecha = fecha.isEqual(reserva.getFecha());
+            boolean seSolapan = horaInicio.isBefore(reserva.getHoraFin())
+                    && horaFin.isAfter(reserva.getHoraInicio());
+
+            if (mismaFecha && seSolapan) {
+                String recursosReservados = "";
+                if (reserva.getCategoriasDeRecursos() != null && !reserva.getCategoriasDeRecursos().isEmpty()) {
+                    recursosReservados = reserva.getCategoriasDeRecursos().stream()
+                            .map(Categoria::getDescripcion)
+                            .collect(Collectors.joining(", "));
+                }
+
+                throw new IllegalArgumentException(
+                        "La reserva se superpone con otra reserva existente.\n" +
+                                "Actividad: " + reserva.getActividad() + "\n" +
+                                "Horario: " + reserva.getHoraInicio() + " - " + reserva.getHoraFin() + "\n" +
+                                "Recursos: " + (recursosReservados.isEmpty() ? "Sin recursos" : recursosReservados)
+                );
+            }
+        }
+    }
+
+    /**
+     * Obtiene solo las reservas de un funcionario específico
+     */
+    public List<Reserva> obtenerReservasPorFuncionario(String idFuncionario) {
+        if (idFuncionario == null || idFuncionario.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        return reservaDatos.obtenerTodos().stream()
+                .filter(reserva -> idFuncionario.equals(reserva.getIdFuncionario()))
+                .collect(Collectors.toList());
+    }
+
+    // OPERACIONES CON CATEGORÍAS
+
     public Reserva crearReserva(String actividad, LocalDate fecha, LocalTime horaInicio, LocalTime horaFin,
                                 String idFuncionario, List<Categoria> categoriasSeleccionadas,
                                 EstadoReserva estado) {
@@ -48,8 +124,6 @@ public class ReservaLogic {
         return reserva;
     }
 
-    // Repuebla categoriasDeRecursos en reservas cargadas desde el XML,
-    // cruzando categoriasDeRecursosIds contra el catálogo completo de categorías.
     public void repoblarCategorias(List<Reserva> reservas, List<Categoria> catalogoCategorias) {
         if (reservas == null || catalogoCategorias == null) {
             return;
@@ -62,10 +136,6 @@ public class ReservaLogic {
                 r.setCategoriasDeRecursos(categorias);
             }
         }
-    }
-
-    public boolean existe(String id) {
-        return reservaDatos.leerPorId(id) != null;
     }
 
     public void actualizarCategoriasDeReserva(Reserva reserva, List<Categoria> nuevasCategorias) {
@@ -88,20 +158,8 @@ public class ReservaLogic {
         reserva.getCategoriasDeRecursos().removeAll(categoriasABorrar);
     }
 
-    public void eliminar(String id) {
-        Reserva existente = reservaDatos.leerPorId(id);
-        if (existente == null) {
-            throw new IllegalArgumentException("La reserva con id " + id + " no existe");
-        }
-        reservaDatos.eliminar(id);
-    }
-
-    public Reserva leerPorId(String id) {
-        return reservaDatos.leerPorId(id);
-    }
-
     public void actualizarCategoriasLogic(List<Categoria> categorias, String id) {
-        if(id.isEmpty()) {
+        if (id.isEmpty()) {
             throw new IllegalArgumentException("El id de la reserva no puede estar vacío");
         }
         if (categorias == null) {
@@ -110,32 +168,4 @@ public class ReservaLogic {
         Reserva reserva = reservaDatos.leerPorId(id);
         reserva.setCategoriasDeRecursos(categorias);
     }
-    public List<Reserva> obtenerTodos() {
-        return reservaDatos.obtenerTodos();
-    }
-    public void verificarHoras(LocalDate fecha, LocalTime horaInicio, LocalTime horaFin) {
-        if (horaInicio.isAfter(horaFin) || horaInicio.equals(horaFin)) {
-            throw new IllegalArgumentException("La hora de inicio debe ser anterior a la hora de fin");
-        }
-
-        if (fecha.isEqual(LocalDate.now()) && horaInicio.isBefore(LocalTime.now())) {
-            throw new IllegalArgumentException("No se puede reservar en un horario que ya pasó");
-        }
-
-        if (fecha.isBefore(LocalDate.now())) {
-            throw new IllegalArgumentException("No se puede reservar en una fecha pasada");
-        }
-
-        List<Reserva> reservas = reservaDatos.obtenerTodos();
-        for (Reserva reserva : reservas) {
-            boolean mismaFecha = fecha.isEqual(reserva.getFecha());
-            boolean seSolapan = horaInicio.isBefore(reserva.getHoraFin())
-                    && horaFin.isAfter(reserva.getHoraInicio());
-
-            if (mismaFecha && seSolapan) {
-                throw new IllegalArgumentException("La reserva se superpone con otra reserva existente");
-            }
-        }
-    }
-
 }
