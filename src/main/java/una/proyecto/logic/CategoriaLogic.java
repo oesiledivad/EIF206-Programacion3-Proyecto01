@@ -3,14 +3,17 @@ package una.proyecto.logic;
 import una.proyecto.datos.CategoriaDatos;
 import una.proyecto.model.Categoria;
 import una.proyecto.model.Recurso;
+import una.proyecto.service.RecursoService;
+import una.proyecto.utils.AppFactory;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class CategoriaLogic {
 
     private final CategoriaDatos categoriaDatos;
-
+    private RecursoService recursoService = AppFactory.createRecursoDatos();
     public CategoriaLogic(CategoriaDatos categoriaDatos) {
         this.categoriaDatos = categoriaDatos;
     }
@@ -91,4 +94,31 @@ public class CategoriaLogic {
 
         return String.format("CAT-%06d", maximo + 1);
     }
+    public List<Categoria> categoriasSinRecursos(List<Categoria> categoriasEscogidas) {
+        if (categoriasEscogidas == null || categoriasEscogidas.isEmpty()) {
+            return List.of();
+        }
+
+        List<Recurso> recursos = recursoService.obtenerTodosRecursos();
+
+        Set<String> idsCategoriasConRecursos = recursos.stream()
+                .map(Recurso::getIdCategoria)
+                .collect(Collectors.toSet());
+
+        return categoriasEscogidas.stream()
+                .filter(c -> !idsCategoriasConRecursos.contains(c.getId()))
+                .collect(Collectors.toList());
+    }
+    public List<Categoria> categoriaConRecursos(List<Categoria> categoriasEscogidas) {
+        List<Recurso> recursos = recursoService.obtenerTodosRecursos();
+
+        Set<String> idsCategoriasConRecursos = recursos.stream()
+                .map(Recurso::getIdCategoria)
+                .collect(Collectors.toSet());
+
+        return categoriasEscogidas.stream()
+                .filter(c -> idsCategoriasConRecursos.contains(c.getId())) // sin el "!"
+                .collect(Collectors.toList());
+    }
+
 }

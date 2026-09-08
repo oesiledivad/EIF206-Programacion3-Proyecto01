@@ -19,6 +19,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ReservasController {
 
@@ -174,13 +175,38 @@ public class ReservasController {
                 listviewcategorias.getSelectionModel().getSelectedItems()
         );
 
-        // 4. Validar campos
+        // 4. Validar campos básicos ANTES de tocar categorías/recursos
         if (actividad.isEmpty() || fecha == null || horaInicio == null || horaFin == null || categoriasSeleccionadas.isEmpty()) {
             showAlert("Error", "Por favor, complete todos los campos y seleccione al menos una categoría.");
             return;
         }
 
-        // 5. Validar horas
+        // 5. Filtrar categorías según si poseen recursos o no
+        List<Categoria> categoriasSinRecursos;
+        List<Categoria> categoriasConRecursos;
+        try {
+            categoriasSinRecursos = categoriaService.categoriaNoPoseeRecursos(categoriasSeleccionadas);
+            categoriasConRecursos = categoriaService.categoriaConRecursos(categoriasSeleccionadas);
+        } catch (RuntimeException e) {
+            showAlert("Error", e.getMessage());
+            return;
+        }
+
+        // Caso 1: ninguna categoría seleccionada tiene recursos -> cortar
+        if (categoriasSeleccionadas.size() == categoriasSinRecursos.size()) {
+            showAlert("Error", "Todas las categorías seleccionadas no poseen recursos disponibles.");
+            return;
+        }
+
+        // Caso 2: algunas no tienen recursos -> avisar, pero seguir con las que sí
+        if (!categoriasSinRecursos.isEmpty()) {
+            showAlert("Advertencia", "Las siguientes categorías no poseen recursos disponibles y no serán incluidas: "
+                    + categoriasSinRecursos.stream()
+                    .map(Categoria::getDescripcion)
+                    .collect(Collectors.joining(", ")));
+        }
+
+        // 6. Validar horas
         try {
             reservaService.verificarHorasService(fecha, horaInicio, horaFin);
         } catch (RuntimeException e) {
@@ -192,7 +218,7 @@ public class ReservasController {
             return;
         }
 
-        // 6. Crear y guardar reserva
+        // 7. Crear y guardar reserva (SOLO con las categorías que sí tienen recursos)
         try {
             Reserva nueva = reservaService.crearReserva(
                     actividad,
@@ -200,7 +226,7 @@ public class ReservasController {
                     horaInicio,
                     horaFin,
                     idUsuario,
-                    categoriasSeleccionadas,
+                    categoriasConRecursos,
                     EstadoReserva.ACTIVA
             );
 

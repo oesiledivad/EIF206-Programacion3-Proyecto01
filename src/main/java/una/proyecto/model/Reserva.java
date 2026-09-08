@@ -67,7 +67,10 @@ public class Reserva {
         }
         return horaInicio + " - " + horaFin;
     }
-
+    @Override
+    public String toString(){
+        return id;
+    }
     public String getIdFuncionario(){return this.idFuncionario;}
 
     public List<Categoria> getCategoriasDeRecursos(){return this.categoriasDeRecursos;}
