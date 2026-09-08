@@ -14,6 +14,7 @@ import una.proyecto.utils.AppFactory;
 import una.proyecto.utils.GeneradorPDFS;
 import una.proyecto.utils.ReportePDF;
 import una.proyecto.utils.TablePDF;
+import java.util.List;
 
 public class CategoriasAdministradorController {
 
@@ -39,13 +40,40 @@ public class CategoriasAdministradorController {
 
     private final ObservableList<Categoria> listaObservable = FXCollections.observableArrayList();
 
+    // Método para calcular el siguiente ID según las categorías registradas
+    // Lo hice asi para que no se mostrara el txt fiel del id ahi vacio todo feo entonces
+    // muestra el siguiente id y de una lo pone asi
+    private String obtenerSiguienteIdCategoria() {
+        List<Categoria> lista = categoryService.obtenerTodas();
+        if (lista == null || lista.isEmpty()) {
+            return "CAT-000001";
+        }
+
+        int maxId = lista.stream()
+                .map(Categoria::getId)
+                .filter(id -> id != null && id.startsWith("CAT-"))
+                .mapToInt(id -> {
+                    try {
+                        return Integer.parseInt(id.replace("CAT-", ""));
+                    } catch (NumberFormatException e) {
+                        return 0;
+                    }
+                })
+                .max()
+                .orElse(0);
+
+        return String.format("CAT-%06d", maxId + 1);
+    }
     @FXML
     public void initialize() {
-        configureTable();
+        // 1. Bloquear el campo para que solo sea de lectura
+        txtID.setEditable(false);
+
         loadCategories();
-        configureSelectionListener();
-        configureSearchListener();
-        clearForm();
+        configureTable();
+
+        // 2. Mostrar la sugerencia del siguiente ID al abrir la pantalla
+        txtID.setText(obtenerSiguienteIdCategoria());
     }
 
     private void configureTable() {
@@ -83,31 +111,29 @@ public class CategoriasAdministradorController {
     }
 
     @FXML
-    private void saveCategory() {
-        String description = txtDescripcion.getText() == null ? "" : txtDescripcion.getText().trim();
+    public void saveCategory() {
+        String descripcion = txtDescripcion.getText().trim();
+        String id = txtID.getText().trim();
 
-        if (description.isEmpty()) {
-            showAlert("Error", "La descripción no puede estar vacía.");
+        // 1. Validar que la descripción no esté vacía
+        if (descripcion.isEmpty()) {
+            showAlert("Error", "Debe ingresar una descripción para la categoría.");
             return;
         }
 
         try {
-            boolean esNueva = txtID.getText() == null || txtID.getText().isBlank();
+            // 2. Crear y guardar la categoría con el ID autogenerado que se muestra en pantalla
+            Categoria nuevaCategoria = new Categoria(id, descripcion);
+            categoryService.save(nuevaCategoria);
 
-            if (esNueva) {
-                // Crear: el id se autogenera dentro de CategoriaLogic.crear(...)
-                Categoria nueva = new Categoria(null, description);
-                categoryService.save(nueva);
-            } else {
-                // Editar una categoría ya seleccionada de la tabla
-                Categoria actualizada = new Categoria(txtID.getText(), description);
-                categoryService.update(actualizada);
-            }
-
+            // 3. Recargar la tabla con la lista actualizada
             loadCategories();
+
+            // 4. Limpiar el formulario (esto colocará automáticamente el próximo ID correlativo, ej. CAT-000005)
             clearForm();
 
-        } catch (IllegalArgumentException e) {
+            showAlert("Éxito", "Categoría guardada correctamente.");
+        } catch (Exception e) {
             showAlert("Error", e.getMessage());
         }
     }
@@ -126,18 +152,15 @@ public class CategoriasAdministradorController {
         loadCategories();
         clearForm();
     }
-
     @FXML
     private void clearForm() {
-        txtID.clear();
-        txtID.setEditable(false);
-
         txtDescripcion.clear();
         txtBuscarDescripcion.clear();
-
         tablaCategorias.getSelectionModel().clearSelection();
-    }
 
+        // Al limpiar, vuelve a mostrar el nuevo ID correlativo disponible
+        txtID.setText(obtenerSiguienteIdCategoria());
+    }
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
 

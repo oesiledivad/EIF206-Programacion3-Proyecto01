@@ -1,51 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <recursos>
     <recurso>
-        <id>nueva</id>
+        <id>1234</id>
+        <numeroDeActivo>0</numeroDeActivo>
+        <idCategoria>CAT-000004</idCategoria>
+        <descripcion>papel crepe</descripcion>
+    </recurso>
+    <recurso>
+        <id>8080</id>
         <numeroDeActivo>0</numeroDeActivo>
         <idCategoria>CAT-000001</idCategoria>
-        <descripcion>nueva</descripcion>
-    </recurso>
-    <recurso>
-        <id>8888</id>
-        <numeroDeActivo>0</numeroDeActivo>
-        <idCategoria>CAT-000001</idCategoria>
-        <descripcion>0000</descripcion>
-    </recurso>
-    <recurso>
-        <id>99</id>
-        <numeroDeActivo>0</numeroDeActivo>
-        <idCategoria>CAT-000001</idCategoria>
-        <descripcion>1000</descripcion>
-    </recurso>
-    <recurso>
-        <id>7777</id>
-        <numeroDeActivo>0</numeroDeActivo>
-        <idCategoria>CAT-000002</idCategoria>
-        <descripcion>nuevorecurso</descripcion>
-    </recurso>
-    <recurso>
-        <id>777</id>
-        <numeroDeActivo>0</numeroDeActivo>
-        <idCategoria>CAT-000002</idCategoria>
-        <descripcion>nuevorecursoprueba</descripcion>
-    </recurso>
-    <recurso>
-        <id>9000</id>
-        <numeroDeActivo>0</numeroDeActivo>
-        <idCategoria>Esta categoria es de prueba</idCategoria>
-        <descripcion>ninguna</descripcion>
-    </recurso>
-    <recurso>
-        <id>90001</id>
-        <numeroDeActivo>0</numeroDeActivo>
-        <idCategoria>CAT-000003</idCategoria>
-        <descripcion>pruebas</descripcion>
-    </recurso>
-    <recurso>
-        <id>11111</id>
-        <numeroDeActivo>0</numeroDeActivo>
-        <idCategoria>666</idCategoria>
-        <descripcion>Laptop para jugar</descripcion>
+        <descripcion>sala 1 primer piso</descripcion>
     </recurso>
 </recursos>

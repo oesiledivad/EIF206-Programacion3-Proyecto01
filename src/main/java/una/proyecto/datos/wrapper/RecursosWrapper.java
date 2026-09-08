@@ -7,7 +7,7 @@ import java.util.List;
 import una.proyecto.model.Recurso;
 
 @XmlRootElement(name="recursos")
-public class ListaRecursos {
+public class RecursosWrapper {
     private  List<Recurso> recursos =new ArrayList<>();
     @XmlElement(name="recurso")
     public   List<Recurso> getRecursos() {

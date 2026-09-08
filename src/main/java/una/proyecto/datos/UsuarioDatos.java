@@ -3,7 +3,7 @@ package una.proyecto.datos;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.Marshaller;
 import jakarta.xml.bind.Unmarshaller;
-import una.proyecto.datos.wrapper.ListaUsuarios;
+import una.proyecto.datos.wrapper.UsuariosWrapper;
 import una.proyecto.model.Administrador;
 import una.proyecto.model.Funcionario;
 import una.proyecto.model.Usuario;
@@ -82,7 +82,7 @@ public class UsuarioDatos {
     private JAXBContext createJAXBContext() throws Exception {
 
         return JAXBContext.newInstance(
-                ListaUsuarios.class,
+                UsuariosWrapper.class,
                 Usuario.class,
                 Funcionario.class,
                 Administrador.class
@@ -109,7 +109,7 @@ public class UsuarioDatos {
 
             Unmarshaller unmarshaller = context.createUnmarshaller();
 
-            ListaUsuarios wrapper = (ListaUsuarios) unmarshaller.unmarshal(file);
+            UsuariosWrapper wrapper = (UsuariosWrapper) unmarshaller.unmarshal(file);
 
             if (wrapper == null || wrapper.getUsuarios() == null) {
                 return new ArrayList<>();
@@ -161,7 +161,7 @@ public class UsuarioDatos {
                     true
             );
 
-            ListaUsuarios wrapper = new ListaUsuarios();
+            UsuariosWrapper wrapper = new UsuariosWrapper();
 
             wrapper.setUsuarios(users);
 

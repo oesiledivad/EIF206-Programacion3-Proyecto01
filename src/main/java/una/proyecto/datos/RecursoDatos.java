@@ -4,7 +4,7 @@ import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Marshaller;
 import jakarta.xml.bind.Unmarshaller;
-import una.proyecto.datos.wrapper.ListaRecursos;
+import una.proyecto.datos.wrapper.RecursosWrapper;
 import una.proyecto.model.Recurso;
 
 import java.io.File;
@@ -20,7 +20,7 @@ public class RecursoDatos {
     public RecursoDatos(String filePath) throws Exception {
         this.filePath=filePath;
         try {
-            this.ctx = JAXBContext.newInstance(ListaRecursos.class, Recurso.class);
+            this.ctx = JAXBContext.newInstance(RecursosWrapper.class, Recurso.class);
         }catch(JAXBException e){
             throw new Exception("Error al inicializar JAXBContext: " + e.getMessage(), e);
         }
@@ -30,7 +30,7 @@ public class RecursoDatos {
     try {
         Marshaller marshaller = ctx.createMarshaller();
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-        ListaRecursos wrapper = new ListaRecursos();
+        RecursosWrapper wrapper = new RecursosWrapper();
         wrapper.setRecursos(lista);
         marshaller.marshal(wrapper, new File(filePath));
     }catch(JAXBException e){
@@ -44,7 +44,7 @@ public class RecursoDatos {
         }
         try{
             Unmarshaller unmarshaller = ctx.createUnmarshaller();
-            ListaRecursos wrapper = (ListaRecursos) unmarshaller.unmarshal(file);
+            RecursosWrapper wrapper = (RecursosWrapper) unmarshaller.unmarshal(file);
             List<Recurso> lista = wrapper.getRecursos();
             return lista != null ? new ArrayList<>(lista) : new ArrayList<>();
         } catch (JAXBException e) {
