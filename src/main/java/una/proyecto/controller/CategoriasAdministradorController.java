@@ -12,6 +12,7 @@ import una.proyecto.model.Categoria;
 import una.proyecto.service.CategoriaService;
 import una.proyecto.utils.AppFactory;
 import una.proyecto.utils.GeneradorPDFS;
+import una.proyecto.utils.ReportePDF;
 import una.proyecto.utils.TablePDF;
 
 public class CategoriasAdministradorController {
@@ -150,7 +151,8 @@ public class CategoriasAdministradorController {
     @FXML public void btnImprimir(){
         try {
             TablePDF nuevo = GeneradorPDFS.desdeTableView(tablaCategorias);
-            GeneradorPDFS.generarPDF(nuevo, "Categorias.pdf");
+            ReportePDF reporte = new ReportePDF("Listado de Categorias", nuevo);
+            GeneradorPDFS.generar(reporte, "Categorias.pdf");
             showAlert("Éxito", "PDF generado correctamente.");
         }catch (Exception e){
             showAlert("Error"," Error al generar PDF");

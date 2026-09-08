@@ -49,9 +49,12 @@ public class LoginController {
     private Button btnDarkMode;
 
     @FXML
+    private Button btnCambiarContrasena;
+
+    @FXML
     private Label lblError;
 
-    private final LoginLogic LoginLogic = new LoginLogic();
+    private final LoginLogic loginLogic = new LoginLogic();
 
     @FXML
     public void initialize() {
@@ -72,6 +75,7 @@ public class LoginController {
         btnLogin.setOnAction(event -> handleLogin());
         btnSalir.setOnAction(event -> handleExitButton());
         btnDarkMode.setOnAction(event -> toggleThemeWithFade());
+        btnCambiarContrasena.setOnAction(event -> abrirDialogoCambioContrasena());
     }
 
     private void setupClock() {
@@ -151,26 +155,21 @@ public class LoginController {
         String userId = txtUserId.getText().trim();
         String password = txtPassword.getText().trim();
 
-        // Validacion basica de UI
         if (userId.isEmpty() || password.isEmpty()) {
             showError("Por favor ingrese ID y clave");
             return;
         }
 
-        // Preparar UI para proceso de autenticacion
         setUIStateForLogin(true);
 
-        // Ejecutar validacion
         PauseTransition delay = createDelay(userId, password);
-
         delay.play();
     }
 
     private PauseTransition createDelay(String userId, String password) {
         PauseTransition delay = new PauseTransition(Duration.millis(1000));
         delay.setOnFinished(event -> {
-            // DELEGAR A LA CAPA DE LOGICA
-            LoginLogic.LoginResult result = LoginLogic.validateCredentials(userId, password);
+            LoginLogic.LoginResult result = loginLogic.validateCredentials(userId, password);
 
             if (result.isSuccess()) {
                 navigateToMainScreen();
@@ -200,12 +199,35 @@ public class LoginController {
         }
     }
 
+    /**
+     * Abre el diálogo para cambiar la contraseña usando Navigation.openDialog
+     */
+    private void abrirDialogoCambioContrasena() {
+        try {
+            ChangePasswordController controller = Navigation.openDialogAndGetController(
+                    "/una/proyecto/ui/change-password-dialog.fxml",
+                    "Cambiar Contraseña",
+                    btnLogin.getScene().getWindow()
+            );
+
+            if (controller != null && controller.isCambioExitoso()) {
+                txtPassword.clear();
+                showSuccess("Contraseña cambiada exitosamente. Por favor inicie sesión con su nueva contraseña.");
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showError("Error al abrir el diálogo de cambio de contraseña: " + e.getMessage());
+        }
+    }
+
     private void setUIStateForLogin(boolean inProcess) {
         if (inProcess) {
             btnLogin.setText("Iniciando Sesión...");
             btnLogin.setDisable(true);
             btnSalir.setDisable(true);
             btnDarkMode.setDisable(true);
+            btnCambiarContrasena.setDisable(true);
             txtUserId.setDisable(true);
             txtPassword.setDisable(true);
             btnLogin.getScene().setCursor(Cursor.WAIT);
@@ -216,6 +238,7 @@ public class LoginController {
             txtUserId.setDisable(false);
             txtPassword.setDisable(false);
             btnDarkMode.setDisable(false);
+            btnCambiarContrasena.setDisable(false);
             btnLogin.getScene().setCursor(Cursor.DEFAULT);
         }
     }
@@ -223,6 +246,17 @@ public class LoginController {
     private void showError(String message) {
         lblError.setText(message);
         lblError.setVisible(true);
+        lblError.getStyleClass().setAll("text-danger");
+
+        PauseTransition pause = new PauseTransition(Duration.seconds(5));
+        pause.setOnFinished(e -> lblError.setVisible(false));
+        pause.play();
+    }
+
+    private void showSuccess(String message) {
+        lblError.setText(message);
+        lblError.setVisible(true);
+        lblError.getStyleClass().setAll("text-success");
 
         PauseTransition pause = new PauseTransition(Duration.seconds(5));
         pause.setOnFinished(e -> lblError.setVisible(false));

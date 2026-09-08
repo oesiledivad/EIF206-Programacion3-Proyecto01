@@ -11,70 +11,58 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import una.proyecto.model.EstadisticaItem;
+import una.proyecto.service.EstadisticasService;
+import una.proyecto.utils.AppFactory;
+import una.proyecto.utils.GeneradorPDFS;
+import una.proyecto.utils.ReportePDF;
+import una.proyecto.utils.TablePDF;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public class EstadisticasController {
 
-    @FXML
-    private BarChart<String, Number> barChartActividades;
-    @FXML
-    private BarChart<String, Number> barChartRecursos;
-    @FXML
-    private Button btnGenerarActividades;
-    @FXML
-    private Button btnGenerarRecursos;
-    @FXML
-    private Button btnImprimirActividades;
-    @FXML
-    private Button btnImprimirRecursos;
-    @FXML
-    private DatePicker dpActividadesDesde;
-    @FXML
-    private DatePicker dpActividadesHasta;
-    @FXML
-    private DatePicker dpRecursosDesde;
-    @FXML
-    private DatePicker dpRecursosHasta;
-    @FXML
-    private Label lblErrorActividades;
-    @FXML
-    private Label lblErrorRecursos;
-    @FXML
-    private TableView<EstadisticaItem> tableViewActividades;
-    @FXML
-    private TableView<EstadisticaItem> tableViewRecursos;
+    @FXML private BarChart<String, Number> barChartActividades;
+    @FXML private BarChart<String, Number> barChartRecursos;
+    @FXML private Button btnGenerarActividades;
+    @FXML private Button btnGenerarRecursos;
+    @FXML private Button btnImprimirActividades;
+    @FXML private Button btnImprimirRecursos;
+    @FXML private DatePicker dpActividadesDesde;
+    @FXML private DatePicker dpActividadesHasta;
+    @FXML private DatePicker dpRecursosDesde;
+    @FXML private DatePicker dpRecursosHasta;
+    @FXML private Label lblErrorActividades;
+    @FXML private Label lblErrorRecursos;
+    @FXML private TableView<EstadisticaItem> tableViewActividades;
+    @FXML private TableView<EstadisticaItem> tableViewRecursos;
 
-    private final ObservableList<EstadisticaItem> resourceData = FXCollections.observableArrayList(
-            new EstadisticaItem("Sala 10 personas", 12),
-            new EstadisticaItem("Laptop Windows 11", 8),
-            new EstadisticaItem("Proyector 4K", 5),
-            new EstadisticaItem("Sala 20 personas", 3),
-            new EstadisticaItem("Tablet Android", 7)
-    );
+    private final EstadisticasService estadisticasService = AppFactory.createEstadisticasService();
 
-    private final ObservableList<EstadisticaItem> activityData = FXCollections.observableArrayList(
-            new EstadisticaItem("Semana 31 (01-07 ago)", 4),
-            new EstadisticaItem("Semana 32 (08-14 ago)", 7),
-            new EstadisticaItem("Semana 33 (15-21 ago)", 5),
-            new EstadisticaItem("Semana 34 (22-28 ago)", 9),
-            new EstadisticaItem("Semana 35 (29-04 sep)", 3)
-    );
+    private final ObservableList<EstadisticaItem> resourceData = FXCollections.observableArrayList();
+    private final ObservableList<EstadisticaItem> activityData = FXCollections.observableArrayList();
+
+    private final XYChart.Series<String, Number> resourceSeries = new XYChart.Series<>();
+    private final XYChart.Series<String, Number> activitySeries = new XYChart.Series<>();
 
     @FXML
     public void initialize() {
-        setupDatePickers();
-        setupTables();
-        setupCharts();
-        setupButtons();
-        hideErrorMessages();
+        try {
+            setupDatePickers();
+            setupTables();
+            setupCharts();
+            setupButtons();
+            hideErrorMessages();
 
-        loadResourceData();
-        loadActivityData();
-        Platform.runLater(() -> {
-            barChartRecursos.requestLayout();
-            barChartActividades.requestLayout();
-        });
+            // Cargar datos en un hilo separado para no bloquear la UI
+            Platform.runLater(() -> {
+                loadResourceData();
+                loadActivityData();
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+            mostrarError("Error de inicialización", e.getMessage());
+        }
     }
 
     private void setupDatePickers() {
@@ -87,74 +75,57 @@ public class EstadisticasController {
 
     @SuppressWarnings("unchecked")
     private void setupTables() {
-        TableColumn<EstadisticaItem, String> colResourceCategory = new TableColumn<>("Categoría");
-        columnFactoryCell(colResourceCategory, tableViewRecursos);
+        try {
+            // Configuración Tabla Recursos
+            TableColumn<EstadisticaItem, String> colResNombre = new TableColumn<>("Categoría");
+            colResNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
 
-        TableColumn<EstadisticaItem, String> colActivityWeek = new TableColumn<>("Semana");
-        columnFactoryCell(colActivityWeek, tableViewActividades);
-    }
+            TableColumn<EstadisticaItem, Integer> colResCantidad = new TableColumn<>("Cantidad");
+            colResCantidad.setCellValueFactory(new PropertyValueFactory<>("cantidad"));
 
-    private void columnFactoryCell(TableColumn<EstadisticaItem, String> colResourceCategory, TableView<EstadisticaItem> tableViewRecursos) {
-        colResourceCategory.setCellValueFactory(new PropertyValueFactory<>("nombre"));
+            tableViewRecursos.getColumns().setAll(colResNombre, colResCantidad);
+            tableViewRecursos.setItems(resourceData);
 
-        TableColumn<EstadisticaItem, Integer> colResourceQuantity = new TableColumn<>("Cantidad");
-        colResourceQuantity.setCellValueFactory(new PropertyValueFactory<>("cantidad"));
+            // Configuración Tabla Actividades
+            TableColumn<EstadisticaItem, String> colActNombre = new TableColumn<>("Semana");
+            colActNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
 
-        tableViewRecursos.getColumns().clear();
-        tableViewRecursos.getColumns().addAll(colResourceCategory, colResourceQuantity);
+            TableColumn<EstadisticaItem, Integer> colActCantidad = new TableColumn<>("Cantidad");
+            colActCantidad.setCellValueFactory(new PropertyValueFactory<>("cantidad"));
+
+            tableViewActividades.getColumns().setAll(colActNombre, colActCantidad);
+            tableViewActividades.setItems(activityData);
+        } catch (Exception e) {
+            e.printStackTrace();
+            mostrarError("Error al configurar tablas", e.getMessage());
+        }
     }
 
     private void setupCharts() {
-        setupResourceChart();
-        setupActivityChart();
-    }
+        try {
+            // Gráfico Recursos
+            CategoryAxis xAxisRes = (CategoryAxis) barChartRecursos.getXAxis();
+            xAxisRes.setLabel("Categoría");
+            NumberAxis yAxisRes = (NumberAxis) barChartRecursos.getYAxis();
+            yAxisRes.setLabel("Cantidad de reservas");
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private void setupResourceChart() {
-        barChartRecursos.getData().clear();
+            resourceSeries.setName("Recursos Reservados");
+            barChartRecursos.getData().add(resourceSeries);
+            barChartRecursos.setLegendVisible(false);
 
-        CategoryAxis xAxis = (CategoryAxis) barChartRecursos.getXAxis();
-        xAxis.setLabel("Categoría");
+            // Gráfico Actividades
+            CategoryAxis xAxisAct = (CategoryAxis) barChartActividades.getXAxis();
+            xAxisAct.setLabel("Semana");
+            NumberAxis yAxisAct = (NumberAxis) barChartActividades.getYAxis();
+            yAxisAct.setLabel("Cantidad de actividades");
 
-        NumberAxis yAxis = (NumberAxis) barChartRecursos.getYAxis();
-        yAxis.setLabel("Cantidad de reservas");
-
-        chartSeriesMaker(resourceData);
-        barChartRecursos.setAnimated(true);
-        barChartRecursos.setLegendVisible(false);
-    }
-
-    private void chartSeriesMaker(ObservableList<EstadisticaItem> resourceData) {
-        XYChart.Series<String, Number> series = new XYChart.Series<>();
-        series.setName("Recursos Reservados");
-
-        for (EstadisticaItem item : resourceData) {
-            series.getData().add(new XYChart.Data<>(item.getNombre(), item.getCantidad()));
+            activitySeries.setName("Actividades Programadas");
+            barChartActividades.getData().add(activitySeries);
+            barChartActividades.setLegendVisible(false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            mostrarError("Error al configurar gráficos", e.getMessage());
         }
-
-        barChartRecursos.getData().add(series);
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private void setupActivityChart() {
-        barChartActividades.getData().clear();
-
-        CategoryAxis xAxis = (CategoryAxis) barChartActividades.getXAxis();
-        xAxis.setLabel("Semana");
-
-        NumberAxis yAxis = (NumberAxis) barChartActividades.getYAxis();
-        yAxis.setLabel("Cantidad de actividades");
-
-        XYChart.Series<String, Number> series = new XYChart.Series<>();
-        series.setName("Actividades Programadas");
-
-        for (EstadisticaItem item : activityData) {
-            series.getData().add(new XYChart.Data<>(item.getNombre(), item.getCantidad()));
-        }
-
-        barChartActividades.getData().add(series);
-        barChartActividades.setAnimated(true);
-        barChartActividades.setLegendVisible(false);
     }
 
     private void setupButtons() {
@@ -171,30 +142,36 @@ public class EstadisticasController {
         lblErrorActividades.setText("");
     }
 
-    // DATA LOADING
+    // ACCIONES Y LÓGICA DE CARGA
 
     private void loadResourceData() {
         try {
             LocalDate fromDate = dpRecursosDesde.getValue();
             LocalDate toDate = dpRecursosHasta.getValue();
 
-            if (fromDate == null || toDate == null) {
-                showResourceError("Seleccione ambas fechas.");
-                return;
-            }
-
-            if (fromDate.isAfter(toDate)) {
-                showResourceError("La fecha 'Desde' debe ser anterior a 'Hasta'.");
+            if (!validateDates(fromDate, toDate, true)) {
                 return;
             }
 
             hideErrorMessages();
 
-            tableViewRecursos.setItems(resourceData);
-            updateResourceChart(resourceData);
+            // Mostrar indicador de carga
+            resourceData.clear();
+
+            List<EstadisticaItem> items = estadisticasService.obtenerEstadisticasRecursos(fromDate, toDate);
+
+            if (items != null && !items.isEmpty()) {
+                resourceData.setAll(items);
+                updateChartSeries(resourceSeries, items);
+            } else {
+                showResourceError("No se encontraron datos para el período seleccionado.");
+                resourceSeries.getData().clear();
+            }
 
         } catch (Exception e) {
-            showResourceError("Error al cargar datos: " + e.getMessage());
+            e.printStackTrace();
+            showResourceError("Error al cargar recursos: " + e.getMessage());
+            resourceSeries.getData().clear();
         }
     }
 
@@ -203,72 +180,144 @@ public class EstadisticasController {
             LocalDate fromDate = dpActividadesDesde.getValue();
             LocalDate toDate = dpActividadesHasta.getValue();
 
-            if (fromDate == null || toDate == null) {
-                showActivityError("Seleccione ambas fechas.");
-                return;
-            }
-
-            if (fromDate.isAfter(toDate)) {
-                showActivityError("La fecha 'Desde' debe ser anterior a 'Hasta'.");
+            if (!validateDates(fromDate, toDate, false)) {
                 return;
             }
 
             hideErrorMessages();
 
-            tableViewActividades.setItems(activityData);
-            updateActivityChart(activityData);
+            // Mostrar indicador de carga
+            activityData.clear();
+
+            List<EstadisticaItem> items = estadisticasService.obtenerEstadisticasActividades(fromDate, toDate);
+
+            if (items != null && !items.isEmpty()) {
+                activityData.setAll(items);
+                updateChartSeries(activitySeries, items);
+            } else {
+                showActivityError("No se encontraron datos para el período seleccionado.");
+                activitySeries.getData().clear();
+            }
 
         } catch (Exception e) {
-            showActivityError("Error al cargar datos: " + e.getMessage());
+            e.printStackTrace();
+            showActivityError("Error al cargar actividades: " + e.getMessage());
+            activitySeries.getData().clear();
         }
     }
 
-    // CHART UPDATES
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private void updateResourceChart(ObservableList<EstadisticaItem> data) {
-        barChartRecursos.getData().clear();
-
-        chartSeriesMaker(data);
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private void updateActivityChart(ObservableList<EstadisticaItem> data) {
-        barChartActividades.getData().clear();
-
-        XYChart.Series<String, Number> series = new XYChart.Series<>();
-        series.setName("Actividades Programadas");
-
-        for (EstadisticaItem item : data) {
-            series.getData().add(new XYChart.Data<>(item.getNombre(), item.getCantidad()));
+    private boolean validateDates(LocalDate fromDate, LocalDate toDate, boolean isResource) {
+        if (fromDate == null || toDate == null) {
+            String msg = "Seleccione ambas fechas.";
+            if (isResource) showResourceError(msg); else showActivityError(msg);
+            return false;
         }
 
-        barChartActividades.getData().add(series);
+        if (fromDate.isAfter(toDate)) {
+            String msg = "La fecha 'Desde' debe ser anterior o igual a 'Hasta'.";
+            if (isResource) showResourceError(msg); else showActivityError(msg);
+            return false;
+        }
+
+        return true;
     }
 
-    // ERROR HANDLING
+    private void updateChartSeries(XYChart.Series<String, Number> series, List<EstadisticaItem> items) {
+        Platform.runLater(() -> {
+            series.getData().clear();
+            if (items != null) {
+                for (EstadisticaItem item : items) {
+                    if (item != null && item.getNombre() != null) {
+                        series.getData().add(new XYChart.Data<>(item.getNombre(), item.getCantidad()));
+                    }
+                }
+            }
+        });
+    }
+
+    // MANEJO DE ERRORES
 
     private void showResourceError(String message) {
-        lblErrorRecursos.setText(message);
-        lblErrorRecursos.setVisible(true);
+        Platform.runLater(() -> {
+            lblErrorRecursos.setText(message);
+            lblErrorRecursos.setVisible(true);
+        });
     }
 
     private void showActivityError(String message) {
-        lblErrorActividades.setText(message);
-        lblErrorActividades.setVisible(true);
+        Platform.runLater(() -> {
+            lblErrorActividades.setText(message);
+            lblErrorActividades.setVisible(true);
+        });
     }
 
-    // PDF REPORTS
+    private void mostrarError(String titulo, String mensaje) {
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle(titulo);
+            alert.setHeaderText(null);
+            alert.setContentText(mensaje);
+            alert.showAndWait();
+        });
+    }
+
+    // IMPRESIÓN / REPORTES PDF
 
     private void printResourceReport() {
-        System.out.println("Imprimiendo reporte de recursos...");
-        System.out.println(barChartActividades.getHeight());
-        System.out.println(barChartActividades.getWidth());
-        System.out.println(barChartRecursos.getHeight());
-        System.out.println(barChartRecursos.getWidth());
+        try {
+            if (resourceData.isEmpty()) {
+                showResourceError("No hay datos para imprimir. Genere primero las estadísticas.");
+                return;
+            }
+
+            TablePDF tabla = GeneradorPDFS.desdeTableView(tableViewRecursos);
+            ReportePDF reporte = new ReportePDF(
+                    "Estadísticas de Recursos",
+                    dpRecursosDesde.getValue(),
+                    dpRecursosHasta.getValue(),
+                    tabla,
+                    barChartRecursos
+            );
+            GeneradorPDFS.generar(reporte, "estadisticas_recursos.pdf");
+            mostrarAlertaInfo("PDF generado", "El reporte de recursos fue generado correctamente.");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showResourceError("No se pudo generar el PDF: " + e.getMessage());
+        }
     }
 
     private void printActivityReport() {
-        System.out.println("Imprimiendo reporte de actividades...");
+        try {
+            if (activityData.isEmpty()) {
+                showActivityError("No hay datos para imprimir. Genere primero las estadísticas.");
+                return;
+            }
+
+            TablePDF tabla = GeneradorPDFS.desdeTableView(tableViewActividades);
+            ReportePDF reporte = new ReportePDF(
+                    "Estadísticas de Actividades",
+                    dpActividadesDesde.getValue(),
+                    dpActividadesHasta.getValue(),
+                    tabla,
+                    barChartActividades
+            );
+            GeneradorPDFS.generar(reporte, "estadisticas_actividades.pdf");
+            mostrarAlertaInfo("PDF generado", "El reporte de actividades fue generado correctamente.");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showActivityError("No se pudo generar el PDF: " + e.getMessage());
+        }
+    }
+
+    private void mostrarAlertaInfo(String titulo, String contenido) {
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle(titulo);
+            alert.setHeaderText(null);
+            alert.setContentText(contenido);
+            alert.showAndWait();
+        });
     }
 }

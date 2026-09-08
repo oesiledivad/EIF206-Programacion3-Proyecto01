@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<BorderPane stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="una.proyecto.controller.LoginController">
+<BorderPane stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="una.proyecto.controller.LoginController">
    <center>
       <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="600.0">
          <children>
@@ -22,17 +22,19 @@
                         <Label styleClass="app-title" text="Sistema de Reservas" />
                         <Label fx:id="lblCurrentDate" styleClass="text-xs" text="Label" />
                         <FontIcon iconLiteral="fa-lock" iconSize="45" styleClass="icon-primary" />
+
                         <VBox spacing="4.0" styleClass="card-input-container">
                            <children>
-                              <Label styleClass="input-label" text="Usuario" />
+                              <Label styleClass="input-label" text="Identifiación" />
                               <HBox alignment="CENTER_LEFT" spacing="12.0">
                                  <children>
                                     <FontIcon iconLiteral="fa-user" iconSize="18" styleClass="icon-primary" />
-                                    <TextField fx:id="txtUserId" promptText="Ingresa tu usuario" HBox.hgrow="ALWAYS" />
+                                    <TextField fx:id="txtUserId" promptText="Ingresa tu identificación" HBox.hgrow="ALWAYS" />
                                  </children>
                               </HBox>
                            </children>
                         </VBox>
+
                         <VBox spacing="4.0" styleClass="card-input-container">
                            <children>
                               <Label styleClass="input-label" text="Contraseña" />
@@ -44,10 +46,18 @@
                               </HBox>
                            </children>
                         </VBox>
-                        <VBox alignment="CENTER" spacing="12.0">
+
+                        <VBox alignment="CENTER" spacing="8.0">
                            <children>
                               <Label fx:id="lblError" text="Label" />
                               <Button fx:id="btnLogin" maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="btn-primary" text="Iniciar Sesion" />
+
+                              <Button fx:id="btnCambiarContrasena" maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="btn-secondary" text="Cambiar Contraseña">
+                                 <graphic>
+                                    <FontIcon iconLiteral="fa-key" styleClass="icon-secondary" />
+                                 </graphic>
+                              </Button>
+
                               <Button fx:id="btnSalir" maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="btn-secondary" text="Salir" />
                            </children>
                         </VBox>

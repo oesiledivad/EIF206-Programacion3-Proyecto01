@@ -11,6 +11,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import una.proyecto.model.Funcionario;
 import una.proyecto.service.FuncionarioService;
 import una.proyecto.utils.GeneradorPDFS;
+import una.proyecto.utils.ReportePDF;
 import una.proyecto.utils.TablePDF;
 import una.proyecto.utils.AppFactory;
 
@@ -253,8 +254,22 @@ public class FuncionariosAdministradorController {
     }
     @FXML public void btnImprimir(){
         try {
-            TablePDF nuevo = GeneradorPDFS.desdeTableView(tblFuncionarios);
-            GeneradorPDFS.generarPDF(nuevo, "Funcionarios.pdf");
+            TablePDF tabla =
+                    GeneradorPDFS.desdeTableView(
+                            tblFuncionarios
+                    );
+
+            ReportePDF reporte =
+                    new ReportePDF(
+                            "Reporte de Funcionarios",
+                            tabla
+                    );
+
+            GeneradorPDFS.generar(
+                    reporte,
+                    "funcionarios.pdf"
+            );
+
             showAlert("Éxito", "PDF generado correctamente.");
         }catch (Exception e){
             showAlert("Error"," Error al generar PDF");
