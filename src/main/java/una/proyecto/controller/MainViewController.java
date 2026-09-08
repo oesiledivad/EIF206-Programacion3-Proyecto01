@@ -98,16 +98,27 @@ public class MainViewController {
     private void configureMenuByPermissions() {
         MenuPermissions permissions = mainLogic.getMenuPermissions();
 
-        // Visibilidad de elementos administrativos
+        // Elementos visibles SOLO para el Administrador
         boolean showAdmin = permissions.isAdmin();
 
         btnFuncionarios.setVisible(showAdmin);
         btnFuncionarios.setManaged(showAdmin);
+
         btnCategorias.setVisible(showAdmin);
         btnCategorias.setManaged(showAdmin);
+
         btnRecursos.setVisible(showAdmin);
         btnRecursos.setManaged(showAdmin);
 
+        // visibles SOLO para el Funcionario (El Admin NO debe ver Reservas)
+        boolean showFuncionario = !showAdmin;
+
+        if (btnReservas != null) {
+            btnReservas.setVisible(showFuncionario);
+            btnReservas.setManaged(showFuncionario);
+        }
+
+        // 3. Separadores visuales
         if (sepAdmin != null) {
             sepAdmin.setVisible(showAdmin);
             sepAdmin.setManaged(showAdmin);

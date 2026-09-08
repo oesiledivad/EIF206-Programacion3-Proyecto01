@@ -6,10 +6,10 @@ import java.util.ArrayList;
 import java.util.List;
 @XmlRootElement(name="reservas")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class ListaReservas {
+public class ReservasWrapper {
     @XmlElement(name="reserva")
     private List<Reserva> reservas= new ArrayList<>();
-    public ListaReservas(){}
+    public ReservasWrapper(){}
     public List<Reserva> getReservas(){return reservas;}
     public void setReservas(List<Reserva> list){this.reservas=list;}
 }

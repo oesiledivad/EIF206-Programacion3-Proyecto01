@@ -64,6 +64,7 @@ public class RecursosController {
     private final CategoriaService categoriaService = AppFactory.createCategoriaService();
     private final ObservableList<Categoria> listaCategorias = FXCollections.observableArrayList();
 
+
     @FXML
     public void initialize(){
         lblErrorFiltro.setVisible(false);
@@ -74,10 +75,26 @@ public class RecursosController {
         configureComboBoxFiltro();
     }
 
-    private void configureTable(){
-        tableColumCategoria.setCellValueFactory(new PropertyValueFactory<>("idCategoria"));
-        tableColumDescripcion.setCellValueFactory(new PropertyValueFactory<>("descripcion"));
+    private void configureTable() {
+        // Apunta exactamente a getId() en Recurso
         tableColumId.setCellValueFactory(new PropertyValueFactory<>("id"));
+
+        // Apunta exactamente a getDescripcion() en Recurso
+        tableColumDescripcion.setCellValueFactory(new PropertyValueFactory<>("descripcion"));
+
+        // Renderiza la descripción de la Categoría buscando por su idCategoria
+        tableColumCategoria.setCellValueFactory(cellData -> {
+            String catId = cellData.getValue().getIdCategoria();
+            Categoria cat = listaCategorias.stream()
+                    .filter(c -> c.getId().equals(catId))
+                    .findFirst()
+                    .orElse(null);
+            return new javafx.beans.property.SimpleStringProperty(
+                    cat != null ? cat.getDescripcion() : catId
+            );
+        });
+
+        // IMPORTANTE: Asignar la lista observable a la tabla
         tableViewRecursos.setItems(listaObservable);
     }
     private void cargarCategorias(){
@@ -139,28 +156,23 @@ public class RecursosController {
         listaObservable.setAll(recursoService.obtenerTodosRecursos());
         clearForm();
     }
-    @FXML public void  btnGuardarRecurso(){
-        String descripcion = txtFieldDescripcion.getText();
-        String id = textFieldID.getText();
+    @FXML public void btnGuardarRecurso() {
+        String idActivo = textFieldID.getText().trim();
+        String descripcion = txtFieldDescripcion.getText().trim();
         Categoria tipoCategoria = comboBoxCategoria.getValue();
-        String idCategoria;
-        if (tipoCategoria != null) {
-            idCategoria = tipoCategoria.getId(); // corregido: antes usaba getDescripcion()
-        } else {
-            idCategoria = "";
-        }
 
-        if(descripcion.isEmpty() || id.isEmpty() || idCategoria.isEmpty()){
-            showAlert("Error","La descripción no puede estar vacía.");
+        // Validar que TODOS los campos requeridos tengan datos
+        if (idActivo.isEmpty() || descripcion.isEmpty() || tipoCategoria == null) {
+            showAlert("Error", "Debe ingresar el ID (Número de Activo), la descripción y seleccionar una categoría.");
             return;
         }
 
-        try{
-            //String id, String idCategoria, String descripcion
-            Recurso r1 = new Recurso(id, idCategoria, descripcion);
+        try {
+            Recurso r1 = new Recurso(idActivo, tipoCategoria.getId(), descripcion);
             recursoService.save(r1);
             listaObservable.setAll(recursoService.obtenerTodosRecursos());
             clearForm();
+            showAlert("Éxito", "Recurso registrado correctamente.");
         } catch (IllegalArgumentException e) {
             showAlert("Error", e.getMessage());
         }
@@ -183,5 +195,6 @@ public class RecursosController {
         comboBoxCategoriaFiltro.setValue(null);
         tableViewRecursos.getSelectionModel().clearSelection();
     }
+
 
 }

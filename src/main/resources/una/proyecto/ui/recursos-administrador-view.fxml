@@ -62,7 +62,7 @@
                   <Label text="ID" />
                   <Label text="Categoría" GridPane.rowIndex="1" />
                   <Label text="Descripción" GridPane.rowIndex="2" />
-                  <TextField fx:id="textFieldID" prefHeight="30.0" GridPane.columnIndex="1" />
+                  <TextField fx:id="textFieldID"  prefHeight="30.0" GridPane.columnIndex="1" />
                   <TextField fx:id="txtFieldDescripcion" prefHeight="30.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                   <ComboBox fx:id="comboBoxCategoria" prefHeight="30.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                </children>
