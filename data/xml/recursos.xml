@@ -18,4 +18,16 @@
         <idCategoria>CAT-000001</idCategoria>
         <descripcion>sala para 10 personas</descripcion>
     </recurso>
+    <recurso>
+        <id>0000011</id>
+        <numeroDeActivo>0</numeroDeActivo>
+        <idCategoria>CAT-000002</idCategoria>
+        <descripcion>De categoria</descripcion>
+    </recurso>
+    <recurso>
+        <id>000111</id>
+        <numeroDeActivo>0</numeroDeActivo>
+        <idCategoria>CAT-000002</idCategoria>
+        <descripcion>no sale</descripcion>
+    </recurso>
 </recursos>

@@ -86,8 +86,9 @@ public class ReservasController {
 
         columRecurso.setCellValueFactory(cellData -> {
             Reserva reserva = cellData.getValue();
-            String recursos = recursoService.obtenerRecursosParaTabe(reserva.getCategoriasDeRecursos());
-            return new javafx.beans.property.SimpleStringProperty(recursos != null ? recursos : "");
+            List<String> recursos = reserva.getRecursosAsignadosIds();
+            String texto = (recursos == null || recursos.isEmpty()) ? "" : String.join(", ", recursos);
+            return new javafx.beans.property.SimpleStringProperty(texto);
         });
 
         tableviewmisreservas.setItems(listaReservaUsuario);

@@ -27,6 +27,7 @@ public class Reserva {
     private List<String> categoriasDeRecursosIds;
     @XmlTransient
     private List<Categoria> categoriasDeRecursos;
+    private List<String> recursosAsignadosIds;
     private EstadoReserva estado;
 
     public Reserva() {}
@@ -83,6 +84,13 @@ public class Reserva {
     }
     public void setCategoriasDeRecursosIds(List<String> categoriasDeRecursosIds) {
         this.categoriasDeRecursosIds = categoriasDeRecursosIds;
+    }
+
+    public List<String> getRecursosAsignadosIds() {
+        return recursosAsignadosIds;
+    }
+    public void setRecursosAsignadosIds(List<String> recursosAsignadosIds) {
+        this.recursosAsignadosIds = recursosAsignadosIds;
     }
 
     public EstadoReserva getEstado(){return this.estado;}

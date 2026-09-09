@@ -3,16 +3,22 @@ package una.proyecto.logic;
 import una.proyecto.datos.ReservaDatos;
 import una.proyecto.model.Categoria;
 import una.proyecto.model.EstadoReserva;
+import una.proyecto.model.Recurso;
 import una.proyecto.model.Reserva;
+import una.proyecto.service.RecursoService;
+import una.proyecto.utils.AppFactory;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ReservaLogic {
     private final ReservaDatos reservaDatos;
+    private final RecursoService recursoService = AppFactory.createRecursoDatos();
+
     public ReservaLogic(ReservaDatos reservaDatos) {
         this.reservaDatos = reservaDatos;
     }
@@ -49,7 +55,8 @@ public class ReservaLogic {
     // VALIDACIONES
 
     /**
-     * Verifica que las horas sean válidas y que no haya conflictos de horario
+     * Verifica que las horas sean válidas.
+     * La disponibilidad real por recurso se valida en asignarRecursosDisponibles().
      */
     public void verificarHoras(LocalDate fecha, LocalTime horaInicio, LocalTime horaFin) {
         // 1. Validar horas
@@ -66,30 +73,6 @@ public class ReservaLogic {
         if (fecha.isEqual(LocalDate.now()) && horaInicio.isBefore(LocalTime.now())) {
             throw new IllegalArgumentException("No se puede reservar en un horario que ya pasó");
         }
-
-        // 4. Verificar superposiciones con reservas existentes
-        List<Reserva> reservas = reservaDatos.obtenerTodos();
-        for (Reserva reserva : reservas) {
-            boolean mismaFecha = fecha.isEqual(reserva.getFecha());
-            boolean seSolapan = horaInicio.isBefore(reserva.getHoraFin())
-                    && horaFin.isAfter(reserva.getHoraInicio());
-
-            if (mismaFecha && seSolapan) {
-                String recursosReservados = "";
-                if (reserva.getCategoriasDeRecursos() != null && !reserva.getCategoriasDeRecursos().isEmpty()) {
-                    recursosReservados = reserva.getCategoriasDeRecursos().stream()
-                            .map(Categoria::getDescripcion)
-                            .collect(Collectors.joining(", "));
-                }
-
-                throw new IllegalArgumentException(
-                        "La reserva se superpone con otra reserva existente.\n" +
-                                "Actividad: " + reserva.getActividad() + "\n" +
-                                "Horario: " + reserva.getHoraInicio() + " - " + reserva.getHoraFin() + "\n" +
-                                "Recursos: " + (recursosReservados.isEmpty() ? "Sin recursos" : recursosReservados)
-                );
-            }
-        }
     }
 
     /**
@@ -105,7 +88,62 @@ public class ReservaLogic {
                 .collect(Collectors.toList());
     }
 
-    // OPERACIONES CON CATEGORÍAS
+    // OPERACIONES CON CATEGORÍAS Y RECURSOS
+
+    /**
+     * Busca, para cada categoría solicitada, el primer recurso disponible
+     * (sin traslape de horario) en la fecha/hora dadas.
+     * Si alguna categoría no tiene disponibilidad, lanza excepción indicando cuáles.
+     */
+    public List<String> asignarRecursosDisponibles(LocalDate fecha, LocalTime horaInicio, LocalTime horaFin,
+                                                   List<Categoria> categorias) {
+        List<String> asignados = new ArrayList<>();
+        List<Categoria> sinDisponibilidad = new ArrayList<>();
+        List<Recurso> todosRecursos = recursoService.obtenerTodosRecursos();
+        List<Reserva> reservasExistentes = reservaDatos.obtenerTodos();
+
+        for (Categoria cat : categorias) {
+            List<Recurso> recursosDeLaCategoria = todosRecursos.stream()
+                    .filter(r -> r.getIdCategoria().equals(cat.getId()))
+                    .collect(Collectors.toList());
+
+            Optional<Recurso> disponible = recursosDeLaCategoria.stream()
+                    .filter(r -> !recursoOcupado(r.getId(), fecha, horaInicio, horaFin, reservasExistentes))
+                    .findFirst();
+
+            if (disponible.isPresent()) {
+                asignados.add(disponible.get().getId());
+            } else {
+                sinDisponibilidad.add(cat);
+            }
+        }
+
+        if (!sinDisponibilidad.isEmpty()) {
+            String nombres = sinDisponibilidad.stream()
+                    .map(Categoria::getDescripcion)
+                    .collect(Collectors.joining(", "));
+            throw new IllegalArgumentException("No hay recursos disponibles para: " + nombres);
+        }
+
+        return asignados;
+    }
+
+    /**
+     * Verifica si un recurso específico ya está ocupado en la fecha/hora dadas,
+     * considerando solo reservas activas.
+     */
+    private boolean recursoOcupado(String recursoId, LocalDate fecha, LocalTime inicio, LocalTime fin,
+                                   List<Reserva> reservas) {
+        for (Reserva r : reservas) {
+            if (r.getEstado() == EstadoReserva.CANCELADA) continue;
+            if (!fecha.isEqual(r.getFecha())) continue;
+            if (r.getRecursosAsignadosIds() == null || !r.getRecursosAsignadosIds().contains(recursoId)) continue;
+
+            boolean seSolapan = inicio.isBefore(r.getHoraFin()) && fin.isAfter(r.getHoraInicio());
+            if (seSolapan) return true;
+        }
+        return false;
+    }
 
     public Reserva crearReserva(String actividad, LocalDate fecha, LocalTime horaInicio, LocalTime horaFin,
                                 String idFuncionario, List<Categoria> categoriasSeleccionadas,
@@ -120,6 +158,10 @@ public class ReservaLogic {
                 .map(Categoria::getId)
                 .collect(Collectors.toList());
         reserva.setCategoriasDeRecursosIds(ids);
+
+        // Resolver y asignar el primer recurso disponible de cada categoría
+        List<String> recursosAsignados = asignarRecursosDisponibles(fecha, horaInicio, horaFin, categoriasSeleccionadas);
+        reserva.setRecursosAsignadosIds(recursosAsignados);
 
         return reserva;
     }
