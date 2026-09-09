@@ -12,4 +12,10 @@
         <idCategoria>CAT-000001</idCategoria>
         <descripcion>sala 1 primer piso</descripcion>
     </recurso>
+    <recurso>
+        <id>7000</id>
+        <numeroDeActivo>0</numeroDeActivo>
+        <idCategoria>CAT-000001</idCategoria>
+        <descripcion>sala para 10 personas</descripcion>
+    </recurso>
 </recursos>

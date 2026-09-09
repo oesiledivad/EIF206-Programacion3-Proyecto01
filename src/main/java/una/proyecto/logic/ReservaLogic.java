@@ -21,7 +21,7 @@ public class ReservaLogic {
             throw new IllegalArgumentException("La reserva no puede ser nula");
         }
         if (nuevaReserva.getId() == null || nuevaReserva.getId().trim().isEmpty()) {
-            nuevaReserva.setId(java.util.UUID.randomUUID().toString());
+            nuevaReserva.setId(generarSiguienteIdReserva());
         }
         Reserva existente = reservaDatos.leerPorId(nuevaReserva.getId());
         if (existente != null) {
@@ -167,5 +167,15 @@ public class ReservaLogic {
         }
         Reserva reserva = reservaDatos.leerPorId(id);
         reserva.setCategoriasDeRecursos(categorias);
+    }
+    private String generarSiguienteIdReserva() {
+        int maximo = obtenerTodos().stream()
+                .map(Reserva::getId)
+                .filter(id -> id != null && id.startsWith("RES-"))
+                .mapToInt(id -> Integer.parseInt(id.substring(4)))
+                .max()
+                .orElse(0);
+
+        return String.format("RES-%06d", maximo + 1);
     }
 }

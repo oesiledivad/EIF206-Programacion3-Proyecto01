@@ -7,12 +7,13 @@ module EIF.Programacion.Proyecto {
 
     requires org.kordamp.ikonli.javafx;
     requires jakarta.xml.bind;
-
+    requires java.net.http;
     requires java.xml;
     requires org.apache.pdfbox;
     requires easytable;
     requires java.desktop;
-
+    requires jdk.jsobject;
+    requires org.json;
     opens una.proyecto.app to javafx.fxml, javafx.graphics;
     opens una.proyecto.controller to javafx.fxml;
     opens una.proyecto.model to javafx.base, jakarta.xml.bind;

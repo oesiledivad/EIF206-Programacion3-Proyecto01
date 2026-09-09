@@ -2,9 +2,11 @@ package una.proyecto.controller;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import una.proyecto.logic.ia.aiGenerator;
 import una.proyecto.model.Categoria;
 import una.proyecto.model.EstadoReserva;
 import una.proyecto.model.Reserva;
@@ -27,11 +29,15 @@ public class ReservasController {
     @FXML private Button btncancelarreserva;
     @FXML private Button btnlimpiar;
     @FXML private Button btnExtraer;
+    @FXML private Button btnImprimir;
     @FXML private TextArea txtareafrase;
     @FXML private TextArea txtareaactividad;
+
     @FXML private DatePicker datapickerfecha;
+
     @FXML private ChoiceBox<LocalTime> choiceboxhorainicio;
     @FXML private ChoiceBox<LocalTime> choiceboxhorafin;
+
     @FXML private ListView<Categoria> listviewcategorias;
     @FXML private TableView<Reserva> tableviewmisreservas;
 
@@ -41,6 +47,8 @@ public class ReservasController {
     @FXML private TableColumn<Reserva, String> columHora;
     @FXML private TableColumn<Reserva, String> columRecurso;
     @FXML private TableColumn<Reserva, EstadoReserva> columEstado;
+
+
 
     private final ObservableList<Reserva> listaReservaUsuario = FXCollections.observableArrayList();
     private final ObservableList<Categoria> listaCategoria = FXCollections.observableArrayList();
@@ -299,8 +307,36 @@ public class ReservasController {
             showAlert("Información", "Ingrese una frase para extraer información.");
             return;
         }
-        // TODO: Implementar extracción
-        showAlert("Extraer", "Función de extracción en desarrollo.\nFrase ingresada: " + frase);
+        List<Categoria> disponibles = categoriaService.obtenerTodas();
+
+        Task<Reserva> task = new Task<>() {
+            @Override
+            protected Reserva call() throws Exception {
+                return aiGenerator.extraeInformacion(frase, disponibles);
+            }
+        };
+
+        task.setOnSucceeded(event -> {
+            Reserva estraidaAI = task.getValue();
+
+            txtareaactividad.setText(estraidaAI.getActividad());
+            datapickerfecha.setValue(estraidaAI.getFecha());
+            choiceboxhorainicio.setValue(estraidaAI.getHoraInicio());
+            choiceboxhorafin.setValue(estraidaAI.getHoraFin());
+
+            List<Categoria> categoriasExtraidas = estraidaAI.getCategoriasDeRecursos();
+            listviewcategorias.getSelectionModel().clearSelection();
+            for (Categoria cat : categoriasExtraidas) {
+                listviewcategorias.getSelectionModel().select(cat);
+            }
+        });
+
+        task.setOnFailed(event -> {
+            Throwable e = task.getException();
+            showAlert("ERROR DE EXTRACCION", e.getMessage());
+        });
+
+        new Thread(task).start();
     }
 
     // UTILIDADES
@@ -321,4 +357,5 @@ public class ReservasController {
         choiceboxhorafin.getSelectionModel().clearSelection();
         datapickerfecha.setValue(LocalDate.now());
     }
+
 }
