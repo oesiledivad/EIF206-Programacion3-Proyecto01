@@ -24,14 +24,18 @@ public class Reserva {
     @XmlJavaTypeAdapter(LocalTimeAdapter.class)
     private LocalTime horaFin;
     private String idFuncionario;
+
+    private Funcionario funcionarioReserva;
     private List<String> categoriasDeRecursosIds;
     @XmlTransient
     private List<Categoria> categoriasDeRecursos;
+    private List<String> recursosAsignadosIds;
     private EstadoReserva estado;
 
     public Reserva() {}
 
-    public Reserva(String actividad, LocalDate fecha, LocalTime horaInicio, LocalTime horaFin, String idFuncionario, List<Categoria> categoriasDeRecursos, EstadoReserva estado) {
+    public Reserva(String actividad, LocalDate fecha, LocalTime horaInicio, LocalTime horaFin, String idFuncionario, List<Categoria> categoriasDeRecursos, EstadoReserva estado, Funcionario funcionario) {
+        this.funcionarioReserva=funcionario;
         this.categoriasDeRecursos=categoriasDeRecursos;
         this.actividad = actividad;
         this.fecha = fecha;
@@ -67,7 +71,10 @@ public class Reserva {
         }
         return horaInicio + " - " + horaFin;
     }
-
+    @Override
+    public String toString(){
+        return id;
+    }
     public String getIdFuncionario(){return this.idFuncionario;}
 
     public List<Categoria> getCategoriasDeRecursos(){return this.categoriasDeRecursos;}
@@ -82,5 +89,14 @@ public class Reserva {
         this.categoriasDeRecursosIds = categoriasDeRecursosIds;
     }
 
+    public List<String> getRecursosAsignadosIds() {
+        return recursosAsignadosIds;
+    }
+    public void setRecursosAsignadosIds(List<String> recursosAsignadosIds) {
+        this.recursosAsignadosIds = recursosAsignadosIds;
+    }
+    public Funcionario getFuncionarioReserva(){
+        return funcionarioReserva;
+    }
     public EstadoReserva getEstado(){return this.estado;}
 }

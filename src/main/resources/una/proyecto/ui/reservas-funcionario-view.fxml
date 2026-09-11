@@ -37,10 +37,13 @@
             <HBox alignment="CENTER_LEFT" spacing="10.0">
                <children>
                   <Label minWidth="60.0" styleClass="subtitle" text="Frase" />
-                  <TextArea fx:id="txtareafrase" prefHeight="50.0" HBox.hgrow="ALWAYS" />
-                  <Button fx:id="btnExtraer" minWidth="80.0" styleClass="btn-toggle-shadow-primary" text="Extraer">
+                  <TextArea fx:id="txtareafrase" prefHeight="54.0" prefWidth="562.0" HBox.hgrow="ALWAYS">
+                     <HBox.margin>
+                        <Insets left="6.0" />
+                     </HBox.margin></TextArea>
+                  <Button fx:id="btnExtraer" minWidth="80.0" styleClass="btn-toggle-shadow-primary" text="Extraer AI">
                      <graphic>
-                        <FontIcon iconLiteral="fa-magic" styleClass="icon-primary" />
+                        <FontIcon iconLiteral="fa-magic" styleClass="icon-primary" text="" />
                      </graphic>
                   </Button>
                </children>
@@ -103,6 +106,7 @@
                         <FontIcon iconLiteral="fa-eraser" styleClass="icon-warning" />
                      </graphic>
                   </Button>
+                  <Button mnemonicParsing="false" prefHeight="36.0" prefWidth="107.0" styleClass="btn-toggle-shadow-warning" text="Imprimir" />
                </children>
             </HBox>
          </children>

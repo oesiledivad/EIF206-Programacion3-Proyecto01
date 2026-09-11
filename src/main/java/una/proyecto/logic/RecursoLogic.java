@@ -95,4 +95,25 @@ public class RecursoLogic {
 
         return String.join(", ", idsRecursos);
     }
+    public List<Recurso> listaDeRecursosPorCategoria(String idCategoria){
+        List<Recurso> todos = obtenerTodos();
+        List<Recurso> filtrados = new ArrayList<>();
+
+        for (Recurso recurso : todos) {
+            if (recurso.getIdCategoria().equals(idCategoria)) {
+                filtrados.add(recurso);
+            }
+        }
+
+        return filtrados;
+    }
+    public Recurso buscarPorId(String id){
+        List<Recurso> recursos = obtenerTodos();
+        for(Recurso recur : recursos){
+            if(recur.getId().equals(id)){
+                return recur;
+            }
+        }
+        return null;
+    }
 }

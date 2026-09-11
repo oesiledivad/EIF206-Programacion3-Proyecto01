@@ -2,13 +2,17 @@ package una.proyecto.controller;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import una.proyecto.logic.ia.aiGenerator;
 import una.proyecto.model.Categoria;
 import una.proyecto.model.EstadoReserva;
+import una.proyecto.model.Funcionario;
 import una.proyecto.model.Reserva;
 import una.proyecto.service.CategoriaService;
+import una.proyecto.service.FuncionarioService;
 import una.proyecto.service.RecursoService;
 import una.proyecto.service.ReservaService;
 import una.proyecto.utils.AppFactory;
@@ -19,6 +23,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ReservasController {
 
@@ -26,11 +31,15 @@ public class ReservasController {
     @FXML private Button btncancelarreserva;
     @FXML private Button btnlimpiar;
     @FXML private Button btnExtraer;
+    @FXML private Button btnImprimir;
     @FXML private TextArea txtareafrase;
     @FXML private TextArea txtareaactividad;
+
     @FXML private DatePicker datapickerfecha;
+
     @FXML private ChoiceBox<LocalTime> choiceboxhorainicio;
     @FXML private ChoiceBox<LocalTime> choiceboxhorafin;
+
     @FXML private ListView<Categoria> listviewcategorias;
     @FXML private TableView<Reserva> tableviewmisreservas;
 
@@ -41,6 +50,8 @@ public class ReservasController {
     @FXML private TableColumn<Reserva, String> columRecurso;
     @FXML private TableColumn<Reserva, EstadoReserva> columEstado;
 
+
+
     private final ObservableList<Reserva> listaReservaUsuario = FXCollections.observableArrayList();
     private final ObservableList<Categoria> listaCategoria = FXCollections.observableArrayList();
 
@@ -48,7 +59,7 @@ public class ReservasController {
     private final RecursoService recursoService = AppFactory.createRecursoDatos();
     private final CategoriaService categoriaService = AppFactory.createCategoriaService();
     private final SessionManager sessionManager = SessionManager.getInstance();
-
+    private final FuncionarioService serviceFuncionario =AppFactory.createFuncionarioService();
     @FXML
     public void initialize() {
         configurarChoiceBox();
@@ -77,8 +88,9 @@ public class ReservasController {
 
         columRecurso.setCellValueFactory(cellData -> {
             Reserva reserva = cellData.getValue();
-            String recursos = recursoService.obtenerRecursosParaTabe(reserva.getCategoriasDeRecursos());
-            return new javafx.beans.property.SimpleStringProperty(recursos != null ? recursos : "");
+            List<String> recursos = reserva.getRecursosAsignadosIds();
+            String texto = (recursos == null || recursos.isEmpty()) ? "" : String.join(", ", recursos);
+            return new javafx.beans.property.SimpleStringProperty(texto);
         });
 
         tableviewmisreservas.setItems(listaReservaUsuario);
@@ -163,7 +175,8 @@ public class ReservasController {
             showAlert("Error", "Solo los funcionarios pueden realizar reservas.");
             return;
         }
-
+         String id= sessionManager.getId();
+        Funcionario funcionario = serviceFuncionario.obetenerUsuarioPorId(id);
         // 3. Obtener datos del formulario
         String actividad = txtareaactividad.getText().trim();
         LocalDate fecha = datapickerfecha.getValue();
@@ -174,13 +187,38 @@ public class ReservasController {
                 listviewcategorias.getSelectionModel().getSelectedItems()
         );
 
-        // 4. Validar campos
+        // 4. Validar campos básicos ANTES de tocar categorías/recursos
         if (actividad.isEmpty() || fecha == null || horaInicio == null || horaFin == null || categoriasSeleccionadas.isEmpty()) {
             showAlert("Error", "Por favor, complete todos los campos y seleccione al menos una categoría.");
             return;
         }
 
-        // 5. Validar horas
+        // 5. Filtrar categorías según si poseen recursos o no
+        List<Categoria> categoriasSinRecursos;
+        List<Categoria> categoriasConRecursos;
+        try {
+            categoriasSinRecursos = categoriaService.categoriaNoPoseeRecursos(categoriasSeleccionadas);
+            categoriasConRecursos = categoriaService.categoriaConRecursos(categoriasSeleccionadas);
+        } catch (RuntimeException e) {
+            showAlert("Error", e.getMessage());
+            return;
+        }
+
+        // Caso 1: ninguna categoría seleccionada tiene recursos -> cortar
+        if (categoriasSeleccionadas.size() == categoriasSinRecursos.size()) {
+            showAlert("Error", "Todas las categorías seleccionadas no poseen recursos disponibles.");
+            return;
+        }
+
+        // Caso 2: algunas no tienen recursos -> avisar, pero seguir con las que sí
+        if (!categoriasSinRecursos.isEmpty()) {
+            showAlert("Advertencia", "Las siguientes categorías no poseen recursos disponibles y no serán incluidas: "
+                    + categoriasSinRecursos.stream()
+                    .map(Categoria::getDescripcion)
+                    .collect(Collectors.joining(", ")));
+        }
+
+        // 6. Validar horas
         try {
             reservaService.verificarHorasService(fecha, horaInicio, horaFin);
         } catch (RuntimeException e) {
@@ -192,7 +230,7 @@ public class ReservasController {
             return;
         }
 
-        // 6. Crear y guardar reserva
+        // 7. Crear y guardar reserva (SOLO con las categorías que sí tienen recursos)
         try {
             Reserva nueva = reservaService.crearReserva(
                     actividad,
@@ -200,8 +238,9 @@ public class ReservasController {
                     horaInicio,
                     horaFin,
                     idUsuario,
-                    categoriasSeleccionadas,
-                    EstadoReserva.ACTIVA
+                    categoriasConRecursos,
+                    EstadoReserva.ACTIVA,
+                    funcionario
             );
 
             reservaService.save(nueva);
@@ -273,8 +312,36 @@ public class ReservasController {
             showAlert("Información", "Ingrese una frase para extraer información.");
             return;
         }
-        // TODO: Implementar extracción
-        showAlert("Extraer", "Función de extracción en desarrollo.\nFrase ingresada: " + frase);
+        List<Categoria> disponibles = categoriaService.obtenerTodas();
+
+        Task<Reserva> task = new Task<>() {
+            @Override
+            protected Reserva call() throws Exception {
+                return aiGenerator.extraeInformacion(frase, disponibles);
+            }
+        };
+
+        task.setOnSucceeded(event -> {
+            Reserva estraidaAI = task.getValue();
+
+            txtareaactividad.setText(estraidaAI.getActividad());
+            datapickerfecha.setValue(estraidaAI.getFecha());
+            choiceboxhorainicio.setValue(estraidaAI.getHoraInicio());
+            choiceboxhorafin.setValue(estraidaAI.getHoraFin());
+
+            List<Categoria> categoriasExtraidas = estraidaAI.getCategoriasDeRecursos();
+            listviewcategorias.getSelectionModel().clearSelection();
+            for (Categoria cat : categoriasExtraidas) {
+                listviewcategorias.getSelectionModel().select(cat);
+            }
+        });
+
+        task.setOnFailed(event -> {
+            Throwable e = task.getException();
+            showAlert("ERROR DE EXTRACCION", e.getMessage());
+        });
+
+        new Thread(task).start();
     }
 
     // UTILIDADES
@@ -295,4 +362,5 @@ public class ReservasController {
         choiceboxhorafin.getSelectionModel().clearSelection();
         datapickerfecha.setValue(LocalDate.now());
     }
+
 }
