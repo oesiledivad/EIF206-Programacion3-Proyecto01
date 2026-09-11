@@ -1,10 +1,7 @@
 package una.proyecto.logic;
 
 import una.proyecto.datos.ReservaDatos;
-import una.proyecto.model.Categoria;
-import una.proyecto.model.EstadoReserva;
-import una.proyecto.model.Recurso;
-import una.proyecto.model.Reserva;
+import una.proyecto.model.*;
 import una.proyecto.service.RecursoService;
 import una.proyecto.utils.AppFactory;
 
@@ -147,12 +144,12 @@ public class ReservaLogic {
 
     public Reserva crearReserva(String actividad, LocalDate fecha, LocalTime horaInicio, LocalTime horaFin,
                                 String idFuncionario, List<Categoria> categoriasSeleccionadas,
-                                EstadoReserva estado) {
+                                EstadoReserva estado, Funcionario funcionario) {
         if (categoriasSeleccionadas == null || categoriasSeleccionadas.isEmpty()) {
             throw new IllegalArgumentException("Debe seleccionar al menos una categoría");
         }
 
-        Reserva reserva = new Reserva(actividad, fecha, horaInicio, horaFin, idFuncionario, categoriasSeleccionadas, estado);
+        Reserva reserva = new Reserva(actividad, fecha, horaInicio, horaFin, idFuncionario, categoriasSeleccionadas, estado, funcionario);
 
         List<String> ids = categoriasSeleccionadas.stream()
                 .map(Categoria::getId)
@@ -220,4 +217,19 @@ public class ReservaLogic {
 
         return String.format("RES-%06d", maximo + 1);
     }
+    //aca voy a filtrar las reservas por id de categoria
+   public List<Reserva> filtrarReserva(LocalDate fecha, String idCategoria){
+           List<Reserva> reservas = obtenerTodos();
+           List<Reserva> filtradas = new ArrayList<>();
+
+           for (Reserva reserva : reservas) {
+               if (reserva.getFecha().equals(fecha)
+                       && reserva.getCategoriasDeRecursosIds().contains(idCategoria)) {
+
+                        filtradas.add(reserva);
+               }
+           }
+           return filtradas;
+       }
+
 }

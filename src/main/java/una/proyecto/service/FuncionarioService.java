@@ -36,4 +36,7 @@ public class FuncionarioService {
     public void deleteEmployee(String id) {
         funcionarioLogica.eliminar(id);
     }
+    public Funcionario obetenerUsuarioPorId(String id){
+        return funcionarioLogica.porId(id);
+    }
 }

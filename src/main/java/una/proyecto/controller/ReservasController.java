@@ -9,8 +9,10 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import una.proyecto.logic.ia.aiGenerator;
 import una.proyecto.model.Categoria;
 import una.proyecto.model.EstadoReserva;
+import una.proyecto.model.Funcionario;
 import una.proyecto.model.Reserva;
 import una.proyecto.service.CategoriaService;
+import una.proyecto.service.FuncionarioService;
 import una.proyecto.service.RecursoService;
 import una.proyecto.service.ReservaService;
 import una.proyecto.utils.AppFactory;
@@ -57,7 +59,7 @@ public class ReservasController {
     private final RecursoService recursoService = AppFactory.createRecursoDatos();
     private final CategoriaService categoriaService = AppFactory.createCategoriaService();
     private final SessionManager sessionManager = SessionManager.getInstance();
-
+    private final FuncionarioService serviceFuncionario =AppFactory.createFuncionarioService();
     @FXML
     public void initialize() {
         configurarChoiceBox();
@@ -173,7 +175,8 @@ public class ReservasController {
             showAlert("Error", "Solo los funcionarios pueden realizar reservas.");
             return;
         }
-
+         String id= sessionManager.getId();
+        Funcionario funcionario = serviceFuncionario.obetenerUsuarioPorId(id);
         // 3. Obtener datos del formulario
         String actividad = txtareaactividad.getText().trim();
         LocalDate fecha = datapickerfecha.getValue();
@@ -236,7 +239,8 @@ public class ReservasController {
                     horaFin,
                     idUsuario,
                     categoriasConRecursos,
-                    EstadoReserva.ACTIVA
+                    EstadoReserva.ACTIVA,
+                    funcionario
             );
 
             reservaService.save(nueva);
