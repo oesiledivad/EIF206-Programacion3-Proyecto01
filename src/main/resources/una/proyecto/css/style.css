@@ -121,7 +121,52 @@
     -fx-shadow-color: rgba(0, 0, 0, 0.35);
     -fx-shadow-elevated: rgba(0, 0, 0, 0.45);
 }
+/*
+   TREE TABLE VIEW - MODO OSCURO
+*/
 
+.root.dark-mode .tree-table-view {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-border-color: -fx-border-primary;
+}
+
+/* Filas */
+.root.dark-mode .tree-table-view .tree-table-row-cell {
+    -fx-background-color: -fx-bg-secondary;
+}
+
+/* Celdas */
+.root.dark-mode .tree-table-view .tree-table-cell {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-text-fill: -fx-text-primary;
+}
+
+/* Encabezado */
+.root.dark-mode .tree-table-view .column-header-background {
+    -fx-background-color: -fx-bg-tertiary;
+}
+
+.root.dark-mode .tree-table-view .column-header {
+    -fx-background-color: -fx-bg-tertiary;
+}
+
+.root.dark-mode .tree-table-view .column-header .label {
+    -fx-text-fill: -fx-text-primary;
+}
+
+/* Cuando pasas el mouse */
+.root.dark-mode .tree-table-view .tree-table-row-cell:hover {
+    -fx-background-color: -fx-bg-quaternary;
+}
+
+/* Fila seleccionada */
+.root.dark-mode .tree-table-view .tree-table-row-cell:selected {
+    -fx-background-color: -fx-accent-primary;
+}
+
+.root.dark-mode .tree-table-view .tree-table-row-cell:selected .tree-table-cell {
+    -fx-text-fill: white;
+}
 /*
    CONTENEDORES
     */

@@ -16,9 +16,9 @@
    <children>
       <VBox spacing="12.0">
          <children>
-            <Label prefHeight="21.0" prefWidth="131.0" stylesheets="@../css/style.css" text="Semana">
+            <Label styleClass="title" text="Semana" >
                <font>
-                  <Font size="24.0" />
+                  <Font size="18.0" />
                </font>
             </Label>
             <Separator prefWidth="200.0" />

@@ -25,6 +25,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import una.proyecto.utils.GeneradorPDFS;
+import una.proyecto.utils.ReportePDF;
+import una.proyecto.utils.TablePDF;
+
 public class ReservasController {
 
     @FXML private Button btnreserva;
@@ -109,6 +113,7 @@ public class ReservasController {
         btnreserva.setOnAction(event -> handleReservaButton());
         btnlimpiar.setOnAction(event -> handleLimpiarButton());
         btncancelarreserva.setOnAction(event -> handleCancelarReservaButton());
+
         if (btnExtraer != null) {
             btnExtraer.setOnAction(event -> handleExtraerButton());
         }
@@ -361,6 +366,68 @@ public class ReservasController {
         choiceboxhorainicio.getSelectionModel().clearSelection();
         choiceboxhorafin.getSelectionModel().clearSelection();
         datapickerfecha.setValue(LocalDate.now());
+    }
+    @FXML
+    public void btnImprimir() {
+        try {
+            TablePDF nuevo = new TablePDF();
+
+            // Encabezados
+            nuevo.setEncabezados(List.of(
+                    columId.getText(),
+                    columActividad.getText(),
+                    columFecha.getText(),
+                    columHora.getText(),
+                    columRecurso.getText(),
+                    columEstado.getText()
+            ));
+
+            // Filas
+            for (Reserva reserva : tableviewmisreservas.getItems()) {
+
+                String recursos = "";
+
+                if (reserva.getRecursosAsignadosIds() != null
+                        && !reserva.getRecursosAsignadosIds().isEmpty()) {
+
+                    recursos = String.join(
+                            ", ",
+                            reserva.getRecursosAsignadosIds()
+                    );
+                }
+
+                nuevo.agregarFila(List.of(
+                        reserva.getId(),
+                        reserva.getActividad(),
+                        reserva.getFecha().toString(),
+                        reserva.getHorario(),
+                        recursos,
+                        reserva.getEstado().toString()
+                ));
+            }
+
+            ReportePDF reporte =
+                    new ReportePDF("Reporte de mis reservas", nuevo);
+
+            GeneradorPDFS.generar(
+                    reporte,
+                    "MisReservas.pdf"
+            );
+
+            showAlert(
+                    "Éxito",
+                    "PDF generado correctamente."
+            );
+
+        } catch (Exception e) {
+
+            showAlert(
+                    "Error",
+                    "Error al generar PDF."
+            );
+
+            e.printStackTrace();
+        }
     }
 
 }
