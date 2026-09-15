@@ -15,57 +15,60 @@
 <?import javafx.scene.text.Font?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<VBox prefHeight="550.0" spacing="15.0" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="una.proyecto.controller.CategoriasAdministradorController">
+<VBox prefHeight="650.0" prefWidth="800.0" spacing="20.0" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="una.proyecto.controller.CategoriasAdministradorController">
 
    <padding>
-      <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+      <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
    </padding>
 
    <children>
-      <VBox spacing="8.0">
+      <VBox spacing="10.0">
          <children>
-            <Label styleClass="title" text="Búsqueda">
+            <Label styleClass="title" text="Filtrar Categorías">
                <font>
-                  <Font size="15.0" />
+                  <Font name="System Bold" size="14.0" />
                </font>
             </Label>
 
-            <HBox alignment="CENTER_LEFT" spacing="10.0">
+            <HBox alignment="CENTER_LEFT" spacing="12.0">
                <children>
-                  <Label text="Descripción" HBox.hgrow="ALWAYS" />
-                  <TextField fx:id="txtBuscarDescripcion" prefHeight="35.0" HBox.hgrow="ALWAYS" />
-                  <Button fx:id="btnBuscar" mnemonicParsing="false" prefHeight="35.0" styleClass="btn-toggle-shadow-primary" text="Buscar" wrapText="true" HBox.hgrow="ALWAYS">
+                  <Label text="Descripción:" />
+                  <TextField fx:id="txtBuscarDescripcion" prefHeight="35.0" promptText="Buscar por descripción..." HBox.hgrow="ALWAYS" />
+
+                  <Button fx:id="btnBuscar" defaultButton="true" mnemonicParsing="false" prefHeight="35.0" styleClass="btn-toggle-shadow-primary" text="Buscar">
                      <graphic>
-                        <FontIcon iconColor="#1000c0" iconLiteral="fa-search" />
+                        <FontIcon iconColor="WHITE" iconLiteral="fa-search" iconSize="14" styleClass="icon-primary" />
                      </graphic>
                      <padding>
-                        <Insets right="20.0" top="20.0" />
+                        <Insets left="12.0" right="15.0" />
                      </padding>
                   </Button>
-                  <Button fx:id="btnImprimir" mnemonicParsing="false" onAction="#btnImprimir" prefHeight="35.0" styleClass="btn-toggle-shadow-primary" text="Imprimir" wrapText="true" HBox.hgrow="ALWAYS">
+                  <Button fx:id="btnImprimir" mnemonicParsing="false" onAction="#btnImprimir" prefHeight="35.0" styleClass="btn-toggle-shadow-primary" text="Imprimir">
                      <graphic>
-                        <FontIcon iconColor="#800202" iconLiteral="fa-print" iconSize="18" />
+                        <FontIcon iconLiteral="fa-print" iconSize="15" styleClass="icon-primary" />
                      </graphic>
                      <padding>
-                        <Insets right="20.0" top="20.0" />
+                        <Insets left="12.0" right="15.0" />
                      </padding>
                   </Button>
                </children>
             </HBox>
          </children>
       </VBox>
+
       <Separator prefWidth="200.0" />
-      <VBox spacing="10.0">
+
+      <VBox spacing="12.0">
          <children>
-            <Label styleClass="section-title" text="Categoría">
+            <Label styleClass="section-title" text="Gestión de Categoría">
                <font>
-                  <Font size="15.0" />
+                  <Font name="System Bold" size="14.0" />
                </font>
             </Label>
-            <GridPane hgap="10.0" vgap="10.0">
+            <GridPane hgap="15.0" vgap="12.0">
                <columnConstraints>
-                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="100.0" minWidth="75.0" prefWidth="90.0" />
-                  <ColumnConstraints hgrow="ALWAYS" maxWidth="300.0" minWidth="150.0" prefWidth="220.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="100.0" minWidth="80.0" prefWidth="90.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="350.0" minWidth="200.0" prefWidth="280.0" />
                   <ColumnConstraints hgrow="ALWAYS" />
                </columnConstraints>
                <rowConstraints>
@@ -73,53 +76,60 @@
                   <RowConstraints vgrow="SOMETIMES" />
                </rowConstraints>
                <children>
-                  <Label text="ID" />
-                  <TextField fx:id="txtID" prefHeight="30.0" GridPane.columnIndex="1" />
+                  <Label text="ID:" />
+                  <TextField fx:id="txtID" editable="false" prefHeight="35.0" promptText="Autogenerado" GridPane.columnIndex="1" />
 
-                  <Label text="Descripción" GridPane.rowIndex="1" />
-                  <TextField fx:id="txtDescripcion" prefHeight="30.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <Label text="Descripción:" GridPane.rowIndex="1" />
+                  <TextField fx:id="txtDescripcion" prefHeight="35.0" promptText="Ej. Sala para 10 personas, Laptop..." GridPane.columnIndex="1" GridPane.rowIndex="1" />
                </children>
             </GridPane>
-            <HBox alignment="CENTER_LEFT" spacing="10.0">
+
+            <HBox alignment="CENTER_LEFT" spacing="12.0">
                <children>
-                  <Button fx:id="btnGuardar" mnemonicParsing="false" onAction="#saveCategory" prefHeight="35.0" styleClass="btn-toggle-shadow-success" text="Guardar" wrapText="true" HBox.hgrow="ALWAYS">
+                  <Button fx:id="btnGuardar" mnemonicParsing="false" onAction="#saveCategory" prefHeight="35.0" styleClass="btn-toggle-shadow-success" text="Guardar">
                      <graphic>
-                        <FontIcon iconColor="#1b00a1" iconLiteral="fa-save" iconSize="15" styleClass="btn-toggle-shadow-primary" />
+                        <FontIcon iconColor="WHITE" iconLiteral="fa-save" iconSize="15" styleClass="icon-success" />
                      </graphic>
                      <padding>
-                        <Insets right="20.0" top="20.0" />
+                        <Insets left="12.0" right="15.0" />
                      </padding>
                   </Button>
-                  <Button fx:id="btnBorrar" mnemonicParsing="false" onAction="#deleteCategory" prefHeight="35.0" styleClass="btn-toggle-shadow-danger" text="Borrar" wrapText="true" HBox.hgrow="ALWAYS">
+                  <Button fx:id="btnBorrar" mnemonicParsing="false" onAction="#deleteCategory" prefHeight="35.0" styleClass="btn-toggle-shadow-danger" text="Eliminar">
                      <graphic>
-                        <FontIcon iconColor="#5e5e5e" iconLiteral="fa-trash" iconSize="15" />
+                        <FontIcon iconColor="WHITE" iconLiteral="fa-trash" iconSize="15" styleClass="icon-danger" />
                      </graphic>
                      <padding>
-                        <Insets right="20.0" top="20.0" />
+                        <Insets left="12.0" right="15.0" />
                      </padding>
                   </Button>
-                  <Button fx:id="btnLimpiar" mnemonicParsing="false" onAction="#clearForm" prefHeight="35.0" styleClass="btn-toggle-shadow-warning" text="Limpiar" wrapText="true" HBox.hgrow="ALWAYS">
+                  <Button fx:id="btnLimpiar" mnemonicParsing="false" onAction="#clearForm" prefHeight="35.0" styleClass="btn-toggle-shadow-warning" text="Limpiar">
                      <graphic>
-                        <FontIcon iconColor="#800000" iconLiteral="fa-ban" iconSize="15" />
+                        <FontIcon iconLiteral="fa-ban" iconSize="15" styleClass="icon-danger" />
                      </graphic>
                      <padding>
-                        <Insets right="20.0" top="20.0" />
+                        <Insets left="12.0" right="15.0" />
                      </padding>
                   </Button>
                </children>
             </HBox>
          </children>
       </VBox>
+
       <Separator prefWidth="200.0" />
-      <VBox fx:id="vboxTabla" spacing="5.0" VBox.vgrow="ALWAYS">
+
+      <VBox fx:id="vboxTabla" spacing="8.0" VBox.vgrow="ALWAYS">
          <children>
-            <Label styleClass="section-title" text="Listado" />
+            <Label styleClass="section-title" text="Listado de Categorías">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+            </Label>
             <HBox alignment="CENTER" VBox.vgrow="ALWAYS">
                <children>
                   <TableView fx:id="tablaCategorias" editable="true" nodeOrientation="LEFT_TO_RIGHT" HBox.hgrow="ALWAYS">
                      <columns>
-                        <TableColumn fx:id="colID" minWidth="50.0" prefWidth="50.0" text="ID" />
-                        <TableColumn fx:id="colDescripcion" text="Descripción" />
+                        <TableColumn fx:id="colID" minWidth="80.0" prefWidth="100.0" text="ID" />
+                        <TableColumn fx:id="colDescripcion" minWidth="250.0" prefWidth="400.0" text="Descripción" />
                      </columns>
                      <columnResizePolicy>
                         <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />

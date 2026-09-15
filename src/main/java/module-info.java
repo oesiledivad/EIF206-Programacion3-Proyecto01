@@ -12,7 +12,7 @@ module EIF.Programacion.Proyecto {
     requires org.apache.pdfbox;
     requires easytable;
     requires java.desktop;
-    requires jdk.jsobject;
+    //requires jdk.jsonbject;
     requires org.json;
     opens una.proyecto.app to javafx.fxml, javafx.graphics;
     opens una.proyecto.controller to javafx.fxml;

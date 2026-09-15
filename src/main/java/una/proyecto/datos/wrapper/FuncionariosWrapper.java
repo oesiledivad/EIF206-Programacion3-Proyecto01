@@ -1,18 +1,19 @@
-package una.proyecto.model;
+package una.proyecto.datos.wrapper;
 
 import jakarta.xml.bind.annotation.*;
+import una.proyecto.model.Funcionario;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @XmlRootElement(name = "funcionarios")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class ListaFuncionarios {
+public class FuncionariosWrapper {
 
     @XmlElement(name = "funcionario")
     private List<Funcionario> funcionarios = new ArrayList<>();
 
-    public ListaFuncionarios() {
+    public FuncionariosWrapper() {
     }
 
     public List<Funcionario> getFuncionarios() {
