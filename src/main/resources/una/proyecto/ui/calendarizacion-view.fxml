@@ -1,11 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<VBox prefHeight="513.0" prefWidth="798.0" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="una.proyecto.controller.CalendarizacionController">
+<VBox prefHeight="513.0" prefWidth="798.0" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="una.proyecto.controller.CalendarizacionController">
     <children>
 
         <!-- VBox 1: Título "Filtros" -->
@@ -51,7 +58,7 @@
                      <font>
                         <Font size="20.0" />
                      </font></Button>
-                        <Button fx:id="btnimprimir" mnemonicParsing="false" prefHeight="42.0" prefWidth="128.0" styleClass="toggle-button" text="Imprimir ">
+                        <Button fx:id="btnImprimir" mnemonicParsing="false" onAction="#btnImprimir" prefHeight="42.0" prefWidth="128.0" styleClass="toggle-button" text="Imprimir ">
                      <HBox.margin>
                         <Insets right="20.0" />
                      </HBox.margin>

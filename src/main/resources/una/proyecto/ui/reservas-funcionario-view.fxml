@@ -106,7 +106,10 @@
                         <FontIcon iconLiteral="fa-eraser" styleClass="icon-warning" />
                      </graphic>
                   </Button>
-                  <Button mnemonicParsing="false" prefHeight="36.0" prefWidth="107.0" styleClass="btn-toggle-shadow-warning" text="Imprimir" />
+                  <Button fx:id="btnImprimir" mnemonicParsing="false" onAction="#btnImprimir" prefHeight="39.0" prefWidth="117.0" styleClass="btn-toggle-shadow-warning" text="Imprimir">
+                     <graphic>
+                        <FontIcon iconColor="#910202" iconLiteral="fa-print" />
+                     </graphic></Button>
                </children>
             </HBox>
          </children>

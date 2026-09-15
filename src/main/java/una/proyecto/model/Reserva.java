@@ -98,5 +98,10 @@ public class Reserva {
     public Funcionario getFuncionarioReserva(){
         return funcionarioReserva;
     }
+
     public EstadoReserva getEstado(){return this.estado;}
+
+    public String getNombreFuncionario() {
+        return funcionarioReserva.getName();
+    }
 }

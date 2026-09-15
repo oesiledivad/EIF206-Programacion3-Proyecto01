@@ -3,19 +3,15 @@ package una.proyecto.controller;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.DatePicker;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import una.proyecto.model.Categoria;
+import una.proyecto.model.FilaCalendarizacion;
 import una.proyecto.model.Recurso;
 import una.proyecto.model.Reserva;
 import una.proyecto.service.CategoriaService;
 import una.proyecto.service.RecursoService;
 import una.proyecto.service.ReservaService;
-import una.proyecto.utils.AppFactory;
-import una.proyecto.utils.HoraRow;
+import una.proyecto.utils.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -28,7 +24,7 @@ public class CalendarizacionController {
     @FXML
     private Button btncargar;
     @FXML
-    private Button btnimprimir;
+    private Button btnImprimir;
     @FXML
     private ChoiceBox<Categoria> choiceboxcategoria;
     @FXML
@@ -78,10 +74,6 @@ public class CalendarizacionController {
 
     private void configurarEventos() {
         btncargar.setOnAction(event -> handleButtonCargar());
-        btnimprimir.setOnAction(event -> handleButtonImprimir());
-    }
-
-    private void handleButtonImprimir() {
     }
 
     private void handleButtonCargar() {
@@ -173,5 +165,53 @@ public class CalendarizacionController {
         return filas.stream()
                 .filter(f -> f.getHora().equals(horaTexto))
                 .findFirst();
+    }
+    private void showAlert(String title, String message) {
+
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+
+        alert.showAndWait();
+    }
+
+    @FXML
+    public void btnImprimir() {
+        try {
+            TablePDF nuevo = new TablePDF();
+
+            // Encabezados
+            nuevo.setEncabezados(List.of(
+                    colHoras.getText()
+            ));
+
+            // Filas;
+            for (HoraRow fila : tableView.getItems()) {
+
+                nuevo.agregarFila(List.of(
+                        fila.getHora()
+                ));
+            }
+            System.out.println("PDF preparado");
+            LocalDate fechaSeleccionada = datepicker.getValue();
+
+            ReportePDF reporte = new ReportePDF("Reporte de actividades Calendario", nuevo);
+            GeneradorPDFS.generar(reporte, "Calendarizacion.pdf");
+
+            showAlert(
+                    "Éxito",
+                    "PDF generado correctamente."
+            );
+
+        } catch (Exception e) {
+            showAlert(
+                    "Error",
+                    "Error al generar PDF."
+            );
+
+            e.printStackTrace();
+        }
     }
 }

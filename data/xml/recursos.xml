@@ -24,10 +24,4 @@
         <idCategoria>CAT-000002</idCategoria>
         <descripcion>De categoria</descripcion>
     </recurso>
-    <recurso>
-        <id>000111</id>
-        <numeroDeActivo>0</numeroDeActivo>
-        <idCategoria>CAT-000002</idCategoria>
-        <descripcion>no sale</descripcion>
-    </recurso>
 </recursos>
