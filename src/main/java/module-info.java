@@ -14,6 +14,7 @@ module EIF.Programacion.Proyecto {
     requires java.desktop;
     //requires jdk.jsonbject;
     requires org.json;
+    requires io.github.cdimascio.dotenv.java;
     opens una.proyecto.app to javafx.fxml, javafx.graphics;
     opens una.proyecto.controller to javafx.fxml;
     opens una.proyecto.model to javafx.base, jakarta.xml.bind;

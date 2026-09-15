@@ -1,8 +1,8 @@
 package una.proyecto.logic.ia;
 
+import io.github.cdimascio.dotenv.Dotenv;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 
 import una.proyecto.model.Categoria;
 import una.proyecto.model.Reserva;
@@ -21,15 +21,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class aiGenerator {
-    //Este es el api key de OpenAI que usaremos en nuestro proyecto.
-    private static final String API_KEY = "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"; // Reemplaza con tu clave de API de OpenAI
-    private static String URL="https://api.groq.com/openai/v1/chat/completions";
-    public static Reserva extraeInformacion(String frase, List<Categoria> categoriasDisponibles)throws Exception{
-    //Vamos a extraer la fecha del dia actual.
-    String hoy = LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE);
-    String prompt = "Hoy es " + hoy + ". A partir de la siguiente frase de un funcionario que quiere "
+
+    // Cargar las variables de entorno desde el archivo .env
+    private static final Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
+
+    private static final String API_KEY = dotenv.get("GROQ_API_KEY");
+    private static final String URL = dotenv.get("GROQ_URL", "https://api.groq.com/openai/v1/chat/completions");
+
+    public static Reserva extraeInformacion(String frase, List<Categoria> categoriasDisponibles) throws Exception {
+
+        if (API_KEY == null || API_KEY.isBlank()) {
+            throw new Exception("La API Key de Groq no está configurada en el archivo .env");
+        }
+
+        String hoy = LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE);
+        String prompt = "Hoy es " + hoy + ". A partir de la siguiente frase de un funcionario que quiere "
                 + "hacer una reserva de recursos, extrae los datos. "
-            +"El campo \"actividad\" debe ser un titulo corto y descriptivo de la actividad"
+                + "El campo \"actividad\" debe ser un titulo corto y descriptivo de la actividad. "
                 + "Responde SOLO con un JSON válido, sin texto adicional, con esta forma exacta: "
                 + "{\"actividad\": \"...\", \"fecha\": \"YYYY-MM-DD\", "
                 + "\"horaInicio\": \"HH:mm\", \"horaFin\": \"HH:mm\", "
@@ -39,7 +47,7 @@ public class aiGenerator {
                 + categoriasDisponibles + ". "
                 + "Frase del funcionario: \"" + frase + "\"";
 
-    JSONObject body = new JSONObject();
+        JSONObject body = new JSONObject();
         body.put("model", "qwen/qwen3.6-27b");
         body.put("response_format", new JSONObject().put("type", "json_object"));
         body.put("reasoning_effort", "none");
@@ -48,6 +56,7 @@ public class aiGenerator {
         body.put("messages", new Object[]{
                 new JSONObject().put("role", "user").put("content", prompt)
         });
+
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(URL))
@@ -61,11 +70,7 @@ public class aiGenerator {
         if (response.statusCode() != 200) {
             throw new Exception("Error IA (" + response.statusCode() + "): " + response.body());
         }
-        /*
-        La respuesta completa (response.body()) es un JSON, pero es "metadata de la API"
-       Cuando llamas a la API de IA, ella te devuelve un JSON con información sobre la llamada en sí:
-        qué modelo respondió, cuántos tokens usó, si hubo error, etc. Algo así
-        */
+
         JSONObject respuesta = new JSONObject(response.body());
         String contenido = respuesta.getJSONArray("choices")
                 .getJSONObject(0)
@@ -73,8 +78,9 @@ public class aiGenerator {
                 .getString("content");
 
         JSONObject datos = new JSONObject(contenido);
-        Reserva reservaGeneradaPorelAI= new Reserva();
+        Reserva reservaGeneradaPorelAI = new Reserva();
         reservaGeneradaPorelAI.setActividad(datos.optString("actividad", ""));
+
         String fechaTxt = datos.optString("fecha", null);
         if (fechaTxt != null && !fechaTxt.isBlank()) {
             reservaGeneradaPorelAI.setFecha(LocalDate.parse(fechaTxt));
@@ -89,10 +95,11 @@ public class aiGenerator {
         if (horaFinTxt != null && !horaFinTxt.isBlank()) {
             reservaGeneradaPorelAI.setHoraFin(LocalTime.parse(normalizarHora(horaFinTxt)));
         }
-        CategoriaService categoriaService= AppFactory.createCategoriaService();
+
+        CategoriaService categoriaService = AppFactory.createCategoriaService();
         List<Categoria> categorias = new ArrayList<>();
-        List<Categoria> todasCategorias= categoriaService.obtenerTodas();
         JSONArray arr = datos.optJSONArray("categorias");
+
         if (arr != null) {
             for (int i = 0; i < arr.length(); i++) {
                 String descripcionCategoria = arr.getString(i);
@@ -107,8 +114,8 @@ public class aiGenerator {
         reservaGeneradaPorelAI.setCategoriasDeRecursos(categorias);
 
         return reservaGeneradaPorelAI;
+    }
 
-}
     private static String normalizarHora(String hora) {
         String[] partes = hora.split(":");
         String hh = partes[0].length() == 1 ? "0" + partes[0] : partes[0];

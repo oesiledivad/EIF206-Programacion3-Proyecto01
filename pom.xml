@@ -89,7 +89,12 @@
     <dependency>
       <groupId>com.github.vandeseer</groupId>
       <artifactId>easytable</artifactId>
-      <version>1.0.2</version> <!-- Asegúrate de usar la última versión estable -->
+      <version>1.0.2</version>
+    </dependency>
+    <dependency>
+      <groupId>io.github.cdimascio</groupId>
+      <artifactId>dotenv-java</artifactId>
+      <version>3.2.0</version>
     </dependency>
   </dependencies>
 
@@ -113,7 +118,7 @@
             <!-- Default configuration for running with: mvn clean javafx:run -->
             <id>default-cli</id>
             <configuration>
-              <mainClass>org.example.javafx_test/org.example.javafx_test.InicioController</mainClass>
+              <mainClass>una.proyecto.app.MainApp</mainClass>
               <launcher>app</launcher>
               <jlinkZipName>app</jlinkZipName>
               <jlinkImageName>app</jlinkImageName>
