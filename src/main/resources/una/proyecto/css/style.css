@@ -1873,6 +1873,12 @@ Text.heading-3 {
     -fx-cursor: hand;
     -fx-alignment: CENTER_LEFT;
     -fx-graphic-text-gap: 12px;
+
+    -fx-background-insets: 0;
+}
+
+.menu-item > * {
+    -fx-fill: -fx-text-secondary;
 }
 
 .menu-item:hover {
@@ -1880,12 +1886,31 @@ Text.heading-3 {
     -fx-text-fill: -fx-text-primary;
 }
 
+.menu-item:hover > * {
+    -fx-fill: -fx-text-primary;
+}
+
 .menu-item:selected {
     -fx-background-color: -fx-accent-light;
     -fx-text-fill: -fx-accent-primary;
 }
 
-.menu-item:selected .text {
+.menu-item:selected > * {
+    -fx-fill: -fx-accent-primary;
+}
+
+.menu-item:focused {
+    -fx-background-insets: 0;
+    -fx-faint-focus-color: transparent;
+    -fx-focus-color: transparent;
+}
+
+.menu-item:selected:focused {
+    -fx-background-color: -fx-accent-light;
+    -fx-text-fill: -fx-accent-primary;
+}
+
+.menu-item:selected:focused > * {
     -fx-fill: -fx-accent-primary;
 }
 
@@ -1897,7 +1922,6 @@ Text.heading-3 {
     -fx-spacing: 8px;
     -fx-alignment: CENTER_LEFT;
 }
-
 
 .separator-admin {
     -fx-padding: 4px 0;
@@ -1938,6 +1962,7 @@ Text.heading-3 {
     -fx-border-color: transparent;
     -fx-alignment: CENTER_LEFT;
     -fx-graphic-text-gap: 8px;
+    -fx-background-insets: 0;
 }
 
 .logout-button:hover {
@@ -1949,6 +1974,11 @@ Text.heading-3 {
     -fx-background-color: derive(-fx-danger-light, -10%);
 }
 
+.logout-button:focused {
+    -fx-faint-focus-color: transparent;
+    -fx-focus-color: transparent;
+}
+
 /*  CONTENEDOR DE VISTAS  */
 .view-container {
     -fx-background-color: -fx-bg-primary;
@@ -1958,28 +1988,9 @@ Text.heading-3 {
 /*
    DARK MODE - SIDEBAR
 */
-
 .root.dark-mode .sidebar {
     -fx-background-color: -fx-bg-secondary;
     -fx-border-color: transparent -fx-border-primary transparent transparent;
-}
-
-.root.dark-mode .menu-item:hover {
-    -fx-background-color: -fx-bg-tertiary;
-}
-
-.root.dark-mode .menu-item:selected {
-    -fx-background-color: -fx-accent-light;
-    -fx-text-fill: -fx-accent-primary;
-}
-
-.root.dark-mode .sidebar-footer {
-    -fx-border-color: -fx-border-primary transparent transparent transparent;
-}
-
-.root.dark-mode .logout-button:hover {
-    -fx-background-color: -fx-danger-light;
-    -fx-text-fill: -fx-danger;
 }
 
 .root.dark-mode .view-container {
