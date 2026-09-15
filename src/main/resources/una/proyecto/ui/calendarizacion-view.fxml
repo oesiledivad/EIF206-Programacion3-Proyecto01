@@ -91,7 +91,7 @@
                   <Font size="15.0" />
                </font></Label>
 
-                <TableView fx:id="tableView" prefHeight="20.0" prefWidth="80.0" styleClass="list-view" VBox.vgrow="ALWAYS">
+                <TableView fx:id="tableView" prefHeight="330.0" prefWidth="696.0" styleClass="list-view" VBox.vgrow="ALWAYS">
                     <columns>
                         <TableColumn fx:id="colHoras" prefWidth="93.6" text="Horas" />
                     </columns>
