@@ -27,6 +27,7 @@ public class aiGenerator {
 
     private static final String API_KEY = dotenv.get("GROQ_API_KEY");
     private static final String URL = dotenv.get("GROQ_URL", "https://api.groq.com/openai/v1/chat/completions");
+    private static final String MODEL = dotenv.get("GROQ_MODEL", "qwen/qwen3.8-27b"); // Valor por defecto si no existe
 
     public static Reserva extraeInformacion(String frase, List<Categoria> categoriasDisponibles) throws Exception {
 
@@ -48,7 +49,7 @@ public class aiGenerator {
                 + "Frase del funcionario: \"" + frase + "\"";
 
         JSONObject body = new JSONObject();
-        body.put("model", "qwen/qwen3.6-27b");
+        body.put("model", MODEL);
         body.put("response_format", new JSONObject().put("type", "json_object"));
         body.put("reasoning_effort", "none");
         body.put("reasoning_format", "hidden");
