@@ -101,4 +101,16 @@ public class FuncionarioLogic {
             throw new IllegalArgumentException("No se pudo eliminar el funcionario");
         }
     }
+
+    public Funcionario porId(String id) {
+        List<Funcionario> funcionarios = obtenerTodos();
+        for (Funcionario fun : funcionarios) {
+            if (fun.getId().equals(id)) {
+                return fun;
+            }
+        }
+        return null;
+    }
+
+
 }

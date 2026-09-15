@@ -12,7 +12,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox prefHeight="513.0" prefWidth="798.0" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="una.proyecto.controller.CalendarizacionController">
+<VBox prefHeight="513.0" prefWidth="798.0" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="una.proyecto.controller.CalendarizacionController">
     <children>
 
         <!-- VBox 1: Título "Filtros" -->
@@ -30,9 +30,9 @@
         </VBox>
 
         <!-- Separator 1 -->
-        <Separator prefHeight="3.0" prefWidth="710.0">
+        <Separator prefHeight="1.0" prefWidth="718.0">
             <VBox.margin>
-                <Insets left="35.0" />
+                <Insets left="40.0" right="35.0" />
             </VBox.margin>
         </Separator>
 
@@ -44,16 +44,31 @@
                         <Insets left="37.0" top="20.0" />
                     </padding>
                     <children>
-                        <Label prefHeight="22.0" prefWidth="63.0" styleClass="btn-secondary" text="Fecha" />
-                        <DatePicker prefHeight="42.0" prefWidth="136.0" />
-                        <Label prefHeight="22.0" prefWidth="95.0" styleClass="btn-secondary" text="Categoria" />
-                        <ChoiceBox fx:id="choiceboxcategoria" prefHeight="42.0" prefWidth="136.0" />
-                        <Button fx:id="btncargar" mnemonicParsing="false" prefHeight="42.0" prefWidth="112.0" styleClass="toggle-button" text="Cargar" />
-                        <Button fx:id="btnimprimir" mnemonicParsing="false" prefHeight="42.0" prefWidth="123.0" styleClass="toggle-button" text="Imprimir ">
+                        <Label prefHeight="22.0" prefWidth="85.0" styleClass="btn-secondary" text="Fecha">
+                     <font>
+                        <Font name="System Italic" size="15.0" />
+                     </font></Label>
+                        <DatePicker fx:id="datepicker" prefHeight="43.0" prefWidth="110.0" />
+                        <Label prefHeight="22.0" prefWidth="98.0" styleClass="btn-secondary" text="Categoria">
+                     <font>
+                        <Font size="15.0" />
+                     </font></Label>
+                        <ChoiceBox fx:id="choiceboxcategoria" prefHeight="36.0" prefWidth="114.0" />
+                        <Button fx:id="btncargar" mnemonicParsing="false" prefHeight="42.0" prefWidth="112.0" styleClass="toggle-button" text="Cargar">
+                     <font>
+                        <Font size="20.0" />
+                     </font></Button>
+                        <Button fx:id="btnImprimir" mnemonicParsing="false" onAction="#btnImprimir" prefHeight="42.0" prefWidth="128.0" styleClass="toggle-button" text="Imprimir ">
                      <HBox.margin>
                         <Insets right="20.0" />
-                     </HBox.margin></Button>
+                     </HBox.margin>
+                     <font>
+                        <Font name="System Italic" size="20.0" />
+                     </font></Button>
                     </children>
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
                 </HBox>
             </children>
         </VBox>
@@ -66,18 +81,19 @@
             <children>
       
               <!-- Separator 2 -->
-              <Separator prefHeight="3.0" prefWidth="710.0">
+              <Separator prefHeight="3.0" prefWidth="770.0">
                   <VBox.margin>
                       <Insets right="35.0" />
                   </VBox.margin>
               </Separator>
-                <Label prefHeight="33.0" prefWidth="736.0" styleClass="btn-secondary" text="Calendarización" />
+                <Label prefHeight="22.0" prefWidth="145.0" styleClass="btn-secondary" text="Calendarización">
+               <font>
+                  <Font size="15.0" />
+               </font></Label>
 
-                <TableView fx:id="tableviewcalendarizacion_view" prefHeight="284.0" prefWidth="784.0" styleClass="list-view" VBox.vgrow="ALWAYS">
+                <TableView fx:id="tableView" prefHeight="20.0" prefWidth="80.0" styleClass="list-view" VBox.vgrow="ALWAYS">
                     <columns>
-                        <TableColumn fx:id="tableviewcalenderizacion" prefWidth="93.6" text="Horas" />
-                        <TableColumn prefWidth="166.4" text="C2" />
-                        <TableColumn prefWidth="236.8" text="Column X" />
+                        <TableColumn fx:id="colHoras" prefWidth="93.6" text="Horas" />
                     </columns>
                     <columnResizePolicy>
                         <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />

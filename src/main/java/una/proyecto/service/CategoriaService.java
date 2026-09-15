@@ -32,4 +32,10 @@ public class CategoriaService {
     public void delete(String id) {
         categoriaLogica.eliminar(id);
     }
+    public List<Categoria> categoriaNoPoseeRecursos (List<Categoria> categoriasEscogidas){
+        return categoriaLogica.categoriasSinRecursos(categoriasEscogidas);
+    }
+    public List<Categoria> categoriaConRecursos (List<Categoria> categoriasEscogidas){
+        return categoriaLogica.categoriaConRecursos(categoriasEscogidas);
+    }
 }

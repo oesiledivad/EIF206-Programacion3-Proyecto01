@@ -29,7 +29,12 @@ public class RecursoService {
     public String obtenerRecursosParaTabe(List<Categoria> categoriasSeleccionadas){
         return recursoLogica.obtenerRecursosPorCategorias(categoriasSeleccionadas);
     }
-
+    public Recurso recurPorId(String id){
+        return recursoLogica.buscarPorId(id);
+    }
+    public List<Recurso> recursosPorCategoria(String id){
+        return recursoLogica.listaDeRecursosPorCategoria(id);
+    }
 }
 
 

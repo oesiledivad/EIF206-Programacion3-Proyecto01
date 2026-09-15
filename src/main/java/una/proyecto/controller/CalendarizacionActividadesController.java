@@ -10,6 +10,9 @@ import una.proyecto.model.EstadoReserva;
 import una.proyecto.utils.GeneradorPDFS;
 import una.proyecto.utils.ReportePDF;
 import una.proyecto.utils.TablePDF;
+import una.proyecto.model.Funcionario;
+import una.proyecto.service.FuncionarioService;
+import una.proyecto.utils.AppFactory;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -60,6 +63,9 @@ public class CalendarizacionActividadesController {
 
     private final DateTimeFormatter formatoHora =
             DateTimeFormatter.ofPattern("HH:mm");
+
+    private final FuncionarioService funcionarioService =
+            AppFactory.createFuncionarioService();
 
     @FXML
     public void initialize() {
@@ -186,10 +192,21 @@ public class CalendarizacionActividadesController {
                 if (!horaActual.isBefore(reserva.getHoraInicio())
                         && horaActual.isBefore(reserva.getHoraFin())) {
 
+                    Funcionario funcionario =
+                            funcionarioService.obetenerUsuarioPorId(
+                                    reserva.getIdFuncionario()
+                            );
+
+                    String nombreFuncionario = "";
+
+                    if (funcionario != null) {
+                        nombreFuncionario = funcionario.getName();
+                    }
+
                     String informacion =
                             reserva.getActividad()
-                                    + "\nFuncionario: "
-                                    + reserva.getIdFuncionario();
+                                    + "\nEncargado: "
+                                    + nombreFuncionario;
 
                     int diferenciaDias =
                             (int) (

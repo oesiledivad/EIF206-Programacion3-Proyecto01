@@ -3,6 +3,7 @@ package una.proyecto.service;
 import una.proyecto.logic.ReservaLogic;
 import una.proyecto.model.Categoria;
 import una.proyecto.model.EstadoReserva;
+import una.proyecto.model.Funcionario;
 import una.proyecto.model.Reserva;
 
 import java.time.LocalDate;
@@ -56,11 +57,14 @@ public class ReservaService {
 
     public Reserva crearReserva(String actividad, LocalDate fecha, LocalTime horaInicio, LocalTime horaFin,
                                 String idFuncionario, List<Categoria> categoriasSeleccionadas,
-                                EstadoReserva estado) {
-        return reservaLogica.crearReserva(actividad, fecha, horaInicio, horaFin, idFuncionario, categoriasSeleccionadas, estado);
+                                EstadoReserva estado, Funcionario funcionario) {
+        return reservaLogica.crearReserva(actividad, fecha, horaInicio, horaFin, idFuncionario, categoriasSeleccionadas, estado, funcionario);
     }
 
     public void repoblarCategoriasService(List<Reserva> reservas, List<Categoria> catalogoCategorias) {
         reservaLogica.repoblarCategorias(reservas, catalogoCategorias);
+    }
+    public List <Reserva>filtrarReservasService(LocalDate fecha, String id){
+        return reservaLogica.filtrarReserva(fecha, id);
     }
 }
