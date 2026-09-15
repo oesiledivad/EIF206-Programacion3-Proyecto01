@@ -186,12 +186,19 @@ public class LoginController {
     private void navigateToMainScreen() {
         try {
             Stage stage = (Stage) btnLogin.getScene().getWindow();
+
+            stage.resizableProperty().setValue(Boolean.TRUE);
+            stage.setResizable(true);
+            stage.setMaximized(false);
+            stage.setFullScreen(false);
             Navigation.navigateToWithController(
                     stage,
                     "/una/proyecto/ui/main-view.fxml",
                     "Sistema de Reserva - Panel Principal"
             );
+
             Navigation.enableMaximizeButton();
+
         } catch (IOException e) {
             e.printStackTrace();
             showError("Error al cargar la aplicación");

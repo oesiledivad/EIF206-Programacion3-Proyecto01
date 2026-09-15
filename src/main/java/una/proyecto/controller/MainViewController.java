@@ -13,6 +13,7 @@ import una.proyecto.logic.MainLogic.UserSessionInfo;
 import una.proyecto.logic.MainLogic.MenuPermissions;
 import una.proyecto.utils.Navigation;
 import una.proyecto.utils.SessionManager;
+import una.proyecto.utils.WindowHelper;
 
 import java.io.IOException;
 
@@ -263,18 +264,29 @@ public class MainViewController {
         confirm.setContentText("Se cerrará la sesión actual.");
 
         if (confirm.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
-            // Usar logica para logout
             mainLogic.logoutUser();
 
             try {
                 Stage stage = (Stage) btnLogout.getScene().getWindow();
+
+                if (stage.isFullScreen()) {
+                    stage.setFullScreen(false);
+                }
+                if (stage.isMaximized()) {
+                    stage.setMaximized(false);
+                }
+                stage.setResizable(true);
+                stage.centerOnScreen();
+
                 Navigation.navigateTo(stage, "/una/proyecto/ui/login-view.fxml", "Sistema de Reserva - Login");
                 Navigation.disableMaximizeButton();
-                stage.setHeight(600);
-                stage.setWidth(635);
 
                 if (Navigation.getTitleBarController() != null) {
-                    Navigation.getTitleBarController().setDraggable(false);
+                    //WindowHelper.disableDraggable(Navigation.getTitleBarController().getTitleBar());
+                    stage.centerOnScreen();
+                    stage.resizableProperty().setValue(Boolean.FALSE);
+                    stage.setHeight(600);
+                    stage.setWidth(635);
                 }
 
             } catch (IOException e) {

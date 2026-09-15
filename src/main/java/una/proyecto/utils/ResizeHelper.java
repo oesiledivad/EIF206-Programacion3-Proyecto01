@@ -65,6 +65,9 @@ public class ResizeHelper {
                 scene.setCursor(cursorEvent);
             } else if (MouseEvent.MOUSE_PRESSED.equals(mouseEventType)) {
                 if (cursorEvent != Cursor.DEFAULT) {
+                    if (stage.isMaximized()) {
+                        stage.setMaximized(false);
+                    }
                     resizing = true;
                     startX = mouseEvent.getScreenX();
                     startY = mouseEvent.getScreenY();
