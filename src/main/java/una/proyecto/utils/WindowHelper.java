@@ -174,4 +174,20 @@ public class WindowHelper {
             });
         }
     }
+
+    /**
+     * Monitorea el Stage para que si está maximizado y cambia de tamaño de forma manual,
+     * se desmaximize automáticamente.
+     */
+    public static void setupAutoUnmaximizeOnResize(Stage stage, Runnable onMaximizeChanged) {
+        if (stage == null) return;
+        stage.widthProperty().addListener((obs, oldVal, newVal) -> {
+            if (stage.isMaximized() && !stage.isFullScreen()) {
+                stage.setMaximized(false);
+                if (onMaximizeChanged != null) {
+                    onMaximizeChanged.run();
+                }
+            }
+        });
+    }
 }

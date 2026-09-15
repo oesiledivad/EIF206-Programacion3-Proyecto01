@@ -36,7 +36,13 @@ public class TitleBarController {
      * Aplica el comportamiento según el estado de isDraggable.
      */
     public void applyWindowBehavior() {
-        if (isDraggable) {
+        if (titleBar != null && titleBar.getScene() != null) {
+            Stage stage = (Stage) titleBar.getScene().getWindow();
+            if (stage != null) {
+                WindowHelper.setupAutoUnmaximizeOnResize(stage, this::updateMaximizeIcon);
+            }
+        }
+        if (isDraggable && titleBar != null) {
             WindowHelper.makeWindowDraggable(titleBar, btnMinimize, btnMaximize, btnClose, this::updateMaximizeIcon);
         } else {
             WindowHelper.makeWindowStatic(titleBar, btnMinimize, btnMaximize, btnClose, this::updateMaximizeIcon);
@@ -67,6 +73,10 @@ public class TitleBarController {
         if (lblWindowTitle != null) {
             lblWindowTitle.setText(title);
         }
+    }
+
+    public StackPane getTitleBar() {
+        return titleBar;
     }
 
     public void disableMinimizeButton() {

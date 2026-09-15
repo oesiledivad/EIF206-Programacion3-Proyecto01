@@ -121,52 +121,7 @@
     -fx-shadow-color: rgba(0, 0, 0, 0.35);
     -fx-shadow-elevated: rgba(0, 0, 0, 0.45);
 }
-/*
-   TREE TABLE VIEW - MODO OSCURO
-*/
 
-.root.dark-mode .tree-table-view {
-    -fx-background-color: -fx-bg-secondary;
-    -fx-border-color: -fx-border-primary;
-}
-
-/* Filas */
-.root.dark-mode .tree-table-view .tree-table-row-cell {
-    -fx-background-color: -fx-bg-secondary;
-}
-
-/* Celdas */
-.root.dark-mode .tree-table-view .tree-table-cell {
-    -fx-background-color: -fx-bg-secondary;
-    -fx-text-fill: -fx-text-primary;
-}
-
-/* Encabezado */
-.root.dark-mode .tree-table-view .column-header-background {
-    -fx-background-color: -fx-bg-tertiary;
-}
-
-.root.dark-mode .tree-table-view .column-header {
-    -fx-background-color: -fx-bg-tertiary;
-}
-
-.root.dark-mode .tree-table-view .column-header .label {
-    -fx-text-fill: -fx-text-primary;
-}
-
-/* Cuando pasas el mouse */
-.root.dark-mode .tree-table-view .tree-table-row-cell:hover {
-    -fx-background-color: -fx-bg-quaternary;
-}
-
-/* Fila seleccionada */
-.root.dark-mode .tree-table-view .tree-table-row-cell:selected {
-    -fx-background-color: -fx-accent-primary;
-}
-
-.root.dark-mode .tree-table-view .tree-table-row-cell:selected .tree-table-cell {
-    -fx-text-fill: white;
-}
 /*
    CONTENEDORES
     */
@@ -1425,6 +1380,73 @@ Text.heading-3 {
 }
 
 .table-view .table-cell {
+    -fx-padding: 10px 14px;
+    -fx-text-fill: -fx-text-primary;
+    -fx-font-size: 11px;
+}
+
+
+/*
+   TREE TABLE VIEW - Estilo idéntico al TableView normal
+*/
+
+.tree-table-view {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-border-color: -fx-border-primary;
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-padding: 0;
+}
+
+.tree-table-view .column-header-background {
+    -fx-background-color: -fx-bg-tertiary;
+    -fx-background-radius: 12px 12px 0 0;
+    -fx-padding: 0;
+}
+
+.tree-table-view .column-header {
+    -fx-background-color: transparent;
+    -fx-padding: 10px 14px;
+    -fx-border-color: transparent transparent -fx-border-primary transparent;
+    -fx-border-width: 1px;
+}
+
+.tree-table-view .column-header .label {
+    -fx-text-fill: -fx-text-secondary;
+    -fx-font-weight: 600;
+    -fx-font-size: 12px;
+    -fx-text-transform: uppercase;
+    -fx-letter-spacing: 0.3px;
+}
+
+.tree-table-view .filler {
+    -fx-background-color: -fx-bg-tertiary;
+}
+
+.tree-table-row-cell {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-border-color: transparent transparent -fx-border-primary transparent;
+    -fx-border-width: 1px;
+    -fx-padding: 2px 0;
+}
+
+.tree-table-row-cell .text {
+    -fx-fill: -fx-text-primary;
+}
+
+.tree-table-row-cell:hover {
+    -fx-background-color: -fx-bg-tertiator; /* o -fx-bg-tertiary */
+}
+
+.tree-table-row-cell:selected {
+    -fx-background-color: -fx-accent-light;
+}
+
+.tree-table-row-cell:selected .text {
+    -fx-fill: -fx-accent-primary;
+}
+
+.tree-table-view .tree-table-cell {
     -fx-padding: 10px 14px;
     -fx-text-fill: -fx-text-primary;
     -fx-font-size: 11px;

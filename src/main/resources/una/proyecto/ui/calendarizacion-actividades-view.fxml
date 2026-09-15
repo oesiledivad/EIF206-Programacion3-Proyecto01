@@ -9,71 +9,67 @@
 <?import javafx.scene.control.TreeTableView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
 <VBox spacing="12.0" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="una.proyecto.controller.CalendarizacionActividadesController">
+   <padding>
+      <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+   </padding>
+
    <children>
-      <VBox spacing="12.0">
+      <VBox spacing="4.0">
          <children>
-            <Label styleClass="title" text="Semana" >
-               <font>
-                  <Font size="18.0" />
-               </font>
-            </Label>
-            <Separator prefWidth="200.0" />
+            <Label styleClass="title" text="Semana" />
+            <Label styleClass="section-title" text="Seleccione una fecha de referencia para visualizar las actividades semanales" />
+         </children>
+      </VBox>
+
+      <Separator />
+
+      <VBox spacing="8.0">
+         <children>
             <HBox alignment="CENTER_LEFT" spacing="12.0">
                <children>
-                  <Label lineSpacing="10.0" prefHeight="17.0" prefWidth="111.0" stylesheets="@../css/style.css" text="Fecha de referencia" HBox.hgrow="ALWAYS" />
-                  <DatePicker fx:id="dtpicker" prefHeight="26.0" prefWidth="140.0" />
-                  <Button fx:id="btnCargar" lineSpacing="10.0" mnemonicParsing="false" onAction="#cargarSemana" prefHeight="39.0" prefWidth="108.0" styleClass="btn-toggle-shadow-success" stylesheets="@../css/style.css" text="Cargar">
+                  <Label minWidth="130.0" styleClass="subtitle" text="Fecha de referencia" />
+                  <DatePicker fx:id="dtpicker" prefHeight="32.0" prefWidth="160.0" />
+
+                  <Button fx:id="btnCargar" mnemonicParsing="false" onAction="#cargarSemana" prefHeight="32.0" styleClass="btn-toggle-shadow-success" text="Cargar">
                      <graphic>
-                        <FontIcon iconColor="#008036" iconLiteral="fa-check" />
+                        <FontIcon iconLiteral="fa-check" styleClass="icon-success" />
                      </graphic>
                   </Button>
-                  <Button fx:id="btnImprimir" lineSpacing="5.0" mnemonicParsing="false" onAction="#btnImprimir" prefHeight="39.0" prefWidth="145.0" styleClass="btn-toggle-shadow-primary" stylesheets="@../css/style.css" text="Imprimir PDF">
+
+                  <Button fx:id="btnImprimir" mnemonicParsing="false" onAction="#btnImprimir" prefHeight="32.0" styleClass="btn-toggle-shadow-primary" text="Imprimir PDF">
                      <graphic>
-                        <FontIcon iconColor="#6e0000" iconLiteral="fa-print" />
+                        <FontIcon iconLiteral="fa-print" styleClass="icon-primary" />
                      </graphic>
                   </Button>
                </children>
             </HBox>
          </children>
       </VBox>
-      <Separator prefWidth="200.0" />
-      <VBox VBox.vgrow="ALWAYS">
+
+      <Separator />
+
+      <VBox spacing="5.0" VBox.vgrow="ALWAYS">
          <children>
-            <Label prefHeight="21.0" prefWidth="131.0" stylesheets="@../css/style.css" text="Actividades Semanales">
-               <font>
-                  <Font size="20.0" />
-               </font>
-            </Label>
-            <TreeTableView fx:id="tblActividades" styleClass="table-view" VBox.vgrow="ALWAYS">
+            <Label styleClass="section-title" text="Actividades Semanales" />
+            <TreeTableView fx:id="tblActividades" VBox.vgrow="ALWAYS">
                <columnResizePolicy>
                   <TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                </columnResizePolicy>
                <columns>
                   <TreeTableColumn fx:id="tblColumHora" minWidth="60.0" prefWidth="70.0" text="Hora" />
-
                   <TreeTableColumn fx:id="tblColumLunes" minWidth="90.0" prefWidth="100.0" text="Lunes" />
-
                   <TreeTableColumn fx:id="tblColumMartes" minWidth="90.0" prefWidth="100.0" text="Martes" />
-
                   <TreeTableColumn fx:id="tblColumMiercoles" minWidth="95.0" prefWidth="110.0" text="Miércoles" />
-
                   <TreeTableColumn fx:id="tblColumJueves" minWidth="90.0" prefWidth="100.0" text="Jueves" />
-
                   <TreeTableColumn fx:id="tblColumViernes" minWidth="90.0" prefWidth="100.0" text="Viernes" />
-
                   <TreeTableColumn fx:id="tblColumSabado" minWidth="90.0" prefWidth="100.0" text="Sábado" />
-
                   <TreeTableColumn fx:id="tblColumDomingo" minWidth="95.0" prefWidth="105.0" text="Domingo" />
                </columns>
             </TreeTableView>
          </children>
       </VBox>
    </children>
-   <padding>
-      <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-   </padding>
 </VBox>

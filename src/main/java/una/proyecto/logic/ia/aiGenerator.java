@@ -1,6 +1,5 @@
 package una.proyecto.logic.ia;
 
-import netscape.javascript.JSObject;
 import org.json.JSONArray;
 import org.json.JSONObject;
 

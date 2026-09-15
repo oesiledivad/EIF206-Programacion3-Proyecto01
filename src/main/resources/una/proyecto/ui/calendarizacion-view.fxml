@@ -10,100 +10,63 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<VBox prefHeight="513.0" prefWidth="798.0" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="una.proyecto.controller.CalendarizacionController">
+<VBox spacing="12.0" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="una.proyecto.controller.CalendarizacionController">
+    <padding>
+        <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+    </padding>
+
     <children>
-
-        <!-- VBox 1: Título "Filtros" -->
-        <VBox prefHeight="25.0" prefWidth="781.0">
-            <padding>
-                <Insets left="35.0" top="14.0" />
-            </padding>
+        <VBox spacing="4.0">
             <children>
-                <Label prefHeight="80.0" prefWidth="236.0" text="Filtros">
-                    <font>
-                        <Font size="32.0" />
-                    </font>
-                </Label>
+                <Label styleClass="title" text="Calendarización" />
+                <Label styleClass="section-title" text="Seleccione una fecha y categoría para visualizar la disponibilidad de recursos" />
             </children>
         </VBox>
 
-        <!-- Separator 1 -->
-        <Separator prefHeight="1.0" prefWidth="718.0">
-            <VBox.margin>
-                <Insets left="40.0" right="35.0" />
-            </VBox.margin>
-        </Separator>
+        <Separator />
 
-        <!-- VBox 2: Fila de filtros -->
-        <VBox>
+        <VBox spacing="8.0">
             <children>
-                <HBox prefHeight="89.0" prefWidth="798.0" spacing="30.0">
-                    <padding>
-                        <Insets left="37.0" top="20.0" />
-                    </padding>
+                <HBox alignment="CENTER_LEFT" spacing="15.0">
                     <children>
-                        <Label prefHeight="22.0" prefWidth="85.0" styleClass="btn-secondary" text="Fecha">
-                     <font>
-                        <Font name="System Italic" size="15.0" />
-                     </font></Label>
-                        <DatePicker fx:id="datepicker" prefHeight="43.0" prefWidth="110.0" />
-                        <Label prefHeight="22.0" prefWidth="98.0" styleClass="btn-secondary" text="Categoria">
-                     <font>
-                        <Font size="15.0" />
-                     </font></Label>
-                        <ChoiceBox fx:id="choiceboxcategoria" prefHeight="36.0" prefWidth="114.0" />
-                        <Button fx:id="btncargar" mnemonicParsing="false" prefHeight="42.0" prefWidth="112.0" styleClass="toggle-button" text="Cargar">
-                     <font>
-                        <Font size="20.0" />
-                     </font></Button>
-                        <Button fx:id="btnImprimir" mnemonicParsing="false" onAction="#btnImprimir" prefHeight="42.0" prefWidth="128.0" styleClass="toggle-button" text="Imprimir ">
-                     <HBox.margin>
-                        <Insets right="20.0" />
-                     </HBox.margin>
-                     <font>
-                        <Font name="System Italic" size="20.0" />
-                     </font></Button>
+                        <Label minWidth="50.0" styleClass="subtitle" text="Fecha" />
+                        <DatePicker fx:id="datepicker" prefHeight="32.0" prefWidth="160.0" />
+
+                        <Label minWidth="70.0" styleClass="subtitle" text="Categoría" />
+                        <ChoiceBox fx:id="choiceboxcategoria" prefHeight="32.0" prefWidth="180.0" />
+
+                        <Button fx:id="btncargar" prefHeight="32.0" styleClass="btn-toggle-shadow-primary" text="Cargar">
+                            <graphic>
+                                <FontIcon iconLiteral="fa-search" styleClass="icon-primary" />
+                            </graphic>
+                        </Button>
+
+                        <Button fx:id="btnImprimir" mnemonicParsing="false" onAction="#btnImprimir" prefHeight="32.0" styleClass="btn-toggle-shadow-warning" text="Imprimir">
+                            <graphic>
+                                <FontIcon iconColor="#910202" iconLiteral="fa-print" />
+                            </graphic>
+                        </Button>
                     </children>
-               <VBox.margin>
-                  <Insets />
-               </VBox.margin>
                 </HBox>
             </children>
         </VBox>
 
-        <!-- VBox 3: Título "Calendarización" + Tabla -->
-        <VBox VBox.vgrow="ALWAYS">
-            <padding>
-                <Insets left="40.0" />
-            </padding>
-            <children>
-      
-              <!-- Separator 2 -->
-              <Separator prefHeight="3.0" prefWidth="770.0">
-                  <VBox.margin>
-                      <Insets right="35.0" />
-                  </VBox.margin>
-              </Separator>
-                <Label prefHeight="22.0" prefWidth="145.0" styleClass="btn-secondary" text="Calendarización">
-               <font>
-                  <Font size="15.0" />
-               </font></Label>
+        <Separator />
 
-                <TableView fx:id="tableView" prefHeight="330.0" prefWidth="696.0" styleClass="list-view" VBox.vgrow="ALWAYS">
+        <VBox spacing="5.0" VBox.vgrow="ALWAYS">
+            <children>
+                <Label styleClass="section-title" text="Matriz de Disponibilidad" />
+                <TableView fx:id="tableView" VBox.vgrow="ALWAYS">
                     <columns>
-                        <TableColumn fx:id="colHoras" prefWidth="93.6" text="Horas" />
+                        <TableColumn fx:id="colHoras" prefWidth="100.0" text="Horas" />
                     </columns>
                     <columnResizePolicy>
                         <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                     </columnResizePolicy>
-               <VBox.margin>
-                  <Insets right="20.0" />
-               </VBox.margin>
                 </TableView>
             </children>
         </VBox>
-
     </children>
 </VBox>

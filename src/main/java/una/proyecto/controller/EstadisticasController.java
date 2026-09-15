@@ -258,6 +258,12 @@ public class EstadisticasController {
             alert.setHeaderText(null);
             alert.setContentText(mensaje);
             alert.showAndWait();
+
+            if (tableViewRecursos != null && tableViewRecursos.getScene() != null) {
+                if (tableViewRecursos.getScene().getRoot() != null) {
+                    tableViewRecursos.getScene().getRoot().requestLayout();
+                }
+            }
         });
     }
 
@@ -318,6 +324,12 @@ public class EstadisticasController {
             alert.setHeaderText(null);
             alert.setContentText(contenido);
             alert.showAndWait();
+
+            if (tableViewRecursos != null && tableViewRecursos.getScene() != null) {
+                if (tableViewRecursos.getScene().getRoot() != null) {
+                    tableViewRecursos.getScene().getRoot().requestLayout();
+                }
+            }
         });
     }
 }
