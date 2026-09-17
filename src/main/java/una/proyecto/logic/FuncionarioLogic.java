@@ -48,11 +48,25 @@ public class FuncionarioLogic {
         if (nuevo.getId() == null || nuevo.getId().isBlank()) {
             throw new IllegalArgumentException("El id del funcionario no puede estar vacío");
         }
+
+        if (!nuevo.getId().matches("^\\d{9}$")) {
+            throw new IllegalArgumentException("La cédula debe tener exactamente 9 dígitos");
+        }
+
         if (nuevo.getName() == null || nuevo.getName().isBlank()) {
             throw new IllegalArgumentException("El nombre del funcionario no puede estar vacío");
         }
+
+        if (!nuevo.getName().matches("^[\\p{L} ]+$")) {
+            throw new IllegalArgumentException("El nombre solo puede contener letras y espacios");
+        }
+
         if (nuevo.getPhone() == null || nuevo.getPhone().isBlank()) {
             throw new IllegalArgumentException("El teléfono del funcionario no puede estar vacío");
+        }
+
+        if (!nuevo.getPhone().matches("^\\d+$")) {
+            throw new IllegalArgumentException("El teléfono solo puede contener números");
         }
 
         // Regla de negocio (funcionalidad 3): la clave inicial queda igual al id
@@ -69,6 +83,26 @@ public class FuncionarioLogic {
     public void actualizar(Funcionario actualizado) {
         if (actualizado.getId() == null || actualizado.getId().isBlank()) {
             throw new IllegalArgumentException("El id del funcionario no puede estar vacío");
+        }
+
+        if (!actualizado.getId().matches("^\\d{9}$")) {
+            throw new IllegalArgumentException("La cédula debe tener exactamente 9 dígitos");
+        }
+
+        if (actualizado.getName() == null || actualizado.getName().isBlank()) {
+            throw new IllegalArgumentException("El nombre del funcionario no puede estar vacío");
+        }
+
+        if (!actualizado.getName().matches("^[\\p{L} ]+$")) {
+            throw new IllegalArgumentException("El nombre solo puede contener letras y espacios");
+        }
+
+        if (actualizado.getPhone() == null || actualizado.getPhone().isBlank()) {
+            throw new IllegalArgumentException("El teléfono del funcionario no puede estar vacío");
+        }
+
+        if (!actualizado.getPhone().matches("^\\d+$")) {
+            throw new IllegalArgumentException("El teléfono solo puede contener números");
         }
 
         Usuario existente = usuarioDatos.findUserById(actualizado.getId());

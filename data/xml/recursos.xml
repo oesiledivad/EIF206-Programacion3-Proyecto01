@@ -30,4 +30,10 @@
         <idCategoria>CAT-000001</idCategoria>
         <descripcion>dsadsadasd</descripcion>
     </recurso>
+    <recurso>
+        <id>23456</id>
+        <numeroDeActivo>0</numeroDeActivo>
+        <idCategoria>CAT-000003</idCategoria>
+        <descripcion>calculadora</descripcion>
+    </recurso>
 </recursos>
