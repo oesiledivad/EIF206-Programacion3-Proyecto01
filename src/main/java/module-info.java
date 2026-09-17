@@ -22,5 +22,9 @@ module EIF.Programacion.Proyecto {
 
     exports una.proyecto.app;
     exports una.proyecto.utils to org.glassfish.jaxb.core, org.glassfish.jaxb.runtime;
+    exports una.proyecto.datos;
+    exports una.proyecto.logic;
+    exports una.proyecto.model;
+    exports una.proyecto.service;
     opens una.proyecto.datos.wrapper to jakarta.xml.bind, javafx.base;
 }
