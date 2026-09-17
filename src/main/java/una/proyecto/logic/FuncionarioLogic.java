@@ -137,6 +137,7 @@ public class FuncionarioLogic {
     }
 
     public Funcionario porId(String id) {
+        if (id == null) return null;
         List<Funcionario> funcionarios = obtenerTodos();
         for (Funcionario fun : funcionarios) {
             if (fun.getId().equals(id)) {

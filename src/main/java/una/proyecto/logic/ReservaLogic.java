@@ -14,10 +14,16 @@ import java.util.stream.Collectors;
 
 public class ReservaLogic {
     private final ReservaDatos reservaDatos;
-    private final RecursoService recursoService = AppFactory.createRecursoDatos();
+    private final RecursoService recursoService;
 
     public ReservaLogic(ReservaDatos reservaDatos) {
         this.reservaDatos = reservaDatos;
+        this.recursoService = AppFactory.createRecursoDatos();
+    }
+
+    public ReservaLogic(ReservaDatos reservaDatos, RecursoService recursoService) {
+        this.reservaDatos = reservaDatos;
+        this.recursoService = recursoService;
     }
     public void crear(Reserva nuevaReserva) {
         if (nuevaReserva == null) {

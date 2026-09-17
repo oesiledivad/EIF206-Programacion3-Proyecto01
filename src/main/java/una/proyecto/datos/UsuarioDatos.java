@@ -14,9 +14,15 @@ import java.util.List;
 
 public class UsuarioDatos {
 
-    private static final String XML_PATH = "data/xml/usuarios.xml";
+    private final String XML_PATH;
 
     public UsuarioDatos() {
+        this.XML_PATH = "data/xml/usuarios.xml";
+        verifyAndCreateDefaultFile();
+    }
+
+    public UsuarioDatos(String xmlPath) {
+        this.XML_PATH = xmlPath;
         verifyAndCreateDefaultFile();
     }
 
