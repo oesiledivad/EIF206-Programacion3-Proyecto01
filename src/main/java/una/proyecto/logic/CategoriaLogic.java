@@ -13,9 +13,16 @@ import java.util.stream.Collectors;
 public class CategoriaLogic {
 
     private final CategoriaDatos categoriaDatos;
-    private RecursoService recursoService = AppFactory.createRecursoDatos();
+    private RecursoService recursoService;
+
     public CategoriaLogic(CategoriaDatos categoriaDatos) {
         this.categoriaDatos = categoriaDatos;
+        this.recursoService = AppFactory.createRecursoDatos();
+    }
+
+    public CategoriaLogic(CategoriaDatos categoriaDatos, RecursoService recursoService) {
+        this.categoriaDatos = categoriaDatos;
+        this.recursoService = recursoService;
     }
 
     public List<Categoria> obtenerTodos() {
