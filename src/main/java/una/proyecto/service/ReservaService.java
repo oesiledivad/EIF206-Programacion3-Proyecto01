@@ -40,12 +40,12 @@ public class ReservaService {
     public void verificarHorasService(LocalDate fecha, LocalTime horaInicio, LocalTime horaFin) {
         reservaLogica.verificarHoras(fecha, horaInicio, horaFin);
     }
-
-    // OPERACIONES CON CATEGORÍAS
-
     public void actualizarCategoriasDeReservaService(Reserva reserva, List<Categoria> nuevasCategorias) {
         reservaLogica.actualizarCategoriasDeReserva(reserva, nuevasCategorias);
     }
+
+    // OPERACIONES CON CATEGORÍAS
+
 
     public void borrarCategoriasDeReservaService(Reserva reserva, List<Categoria> categoriasABorrar) {
         reservaLogica.borrarCategoriasDeReserva(reserva, categoriasABorrar);
@@ -66,5 +66,8 @@ public class ReservaService {
     }
     public List <Reserva>filtrarReservasService(LocalDate fecha, String id){
         return reservaLogica.filtrarReserva(fecha, id);
+    }
+    public void crearReserva(Reserva nueva){
+        reservaLogica.crear(nueva);
     }
 }

@@ -135,7 +135,7 @@ public class ReservaLogic {
      * Verifica si un recurso específico ya está ocupado en la fecha/hora dadas,
      * considerando solo reservas activas.
      */
-    private boolean recursoOcupado(String recursoId, LocalDate fecha, LocalTime inicio, LocalTime fin,
+    public boolean recursoOcupado(String recursoId, LocalDate fecha, LocalTime inicio, LocalTime fin,
                                    List<Reserva> reservas) {
         for (Reserva r : reservas) {
             if (r.getEstado() == EstadoReserva.CANCELADA) continue;
