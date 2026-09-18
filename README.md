@@ -28,63 +28,132 @@ Celdas muestran actividad + funcionario responsable
 Rango de fechas para actividades → semanas + cantidad de actividades + gráfico de barras
 
 ## Arquitectura por capas
+El sistema utiliza una arquitectura por capas que separa la interfaz gráfica, la lógica de negocio, el acceso a los datos y las entidades del dominio. Esta separación facilita el mantenimiento, las pruebas y la reutilización del código.
 
-### Capa Modelo (entidades / dominio)
-
-```
-Usuario (abstracta)
- ├─ id: String
- ├─ clave: String
- ├─ rol: RolEnum {ADMIN, FUNCIONARIO}
- ├─ cambiarClave(claveActual, claveNueva)
- └─ validar()
-
- ├── Administrador extends Usuario
- └── Funcionario extends Usuario
-      ├─ nombre: String
-      ├─ telefono: String
-      └─ (relación 1..N con Reserva)
-
-CategoriaRecurso
- ├─ id: String (autogenerado, ej. CAT-000001)
- ├─ descripcion: String
- └─ getters/setters + validar()
-
-Recurso
- ├─ id: String (número de activo)
- ├─ categoria: CategoriaRecurso
- ├─ descripcion: String
- └─ validar()
-
-Reserva
- ├─ id: String (ej. RES-000001)
- ├─ funcionario: Funcionario
- ├─ actividad: String
- ├─ fecha: LocalDate
- ├─ horaInicio: LocalTime
- ├─ horaFin: LocalTime
- ├─ estado: EstadoReserva {ACTIVA, CANCELADA}
- ├─ recursosAsignados: List<Recurso>
- └─ cancelar()
-```
-
-### Capa Persistencia / DAO (acceso a XML)
+### Estructura general: 
+Se agregan las funciones principales, se omiten algunas que no se consideran tan relevantes.
 
 ```
-DAOGenerico<T> (interfaz)
- ├─ guardar(T objeto)
- ├─ buscarPorId(String id)
- ├─ listarTodos(): List<T>
- ├─ modificar(T objeto)
- └─ eliminar(String id)
+UI: Vistas de la interfaz gráfica con fxml  
 
- ├── FuncionarioDAO
- ├── CategoriaRecursoDAO
- ├── RecursoDAO
- └── ReservaDAO
+ ├── calendarizacion-actividades-view.fxml
+ ├── calendarizacion-view.fxml
+ ├── categorias-administrador-view.fxml
+ ├── estadisticas-view.fxml
+ ├── funcionarios-administrador-view.fxml
+ ├── login-view.fxml
+ ├── main-view.fxml
+ ├── recursos-administrador-view.fxml
+ ├── reservas-funcionario-view.fxml
 
-XMLManager (utilitaria)
- ├─ leerXML(String archivo): Document
- ├─ escribirXML(Document doc, String archivo)
- └─ usa JAXB o DOM para (de)serializar cada entidad
+                 │
+                 ▼
+
+Controller: Gestiona eventos e interacción con UI
+
+ ├── CalendarizacionActividadesController
+ ├── CalendarizacionController
+ ├── CategoriasAdministradorController
+ ├── EstadisticasController
+ ├── FuncionariosAdministradorController
+ ├── LoginController
+ ├── MainViewController
+ ├── RecursosController
+ ├── ReservasController
+                  │
+                  ▼
+
+Service: Expone las operaciones de la aplicacion y conecta la logica con el controller sin que estos conocezcan.
+
+ ├── AuthService
+ ├── CalendarizacionService
+ ├── CategoriaService
+ ├── EstadisticasService
+ ├── FuncionarioService
+ ├── RecursoService
+ ├── ReservaService
+
+                  │
+                  ▼
+
+Logic: Reglas y lógica de negocio
+
+Dentro de este aparatado tambien está el aiGenerator dentro de la carpeta ia
+
+ ├── CategoriaLogic
+ ├── EstadisticasLogic 
+ ├── FuncionarioLogic
+ ├── LoginLogic
+ ├── MainLogic
+ ├── RecursoLogic
+ ├── ReservaLogic
+ ├── UsuarioLogic
+
+                 │
+                 ▼
+Datos: Aqui se encuentra el CRUD (create, read, update, delete) para los archivos xml.
+Cada uno con su respectivo Wrapper para facilitar la serialización de colecciones mediante JAXB.
+
+ ├── CategoriaDatos
+ ├── RecursoDatos
+ ├── ReservaDatos
+ ├── UsuarioDatos
+
+                 │
+                 ▼
+Model: Contiene las entidades y objetos que representan la información utilizada por el sistema.
+Lo principal: constructores, getters, setters, toString
+
+ ├── Administrador
+ ├── Categoria
+ ├── Funcionario
+ ├── Recurso
+ ├── Reserva
+ ├── Usuario
+
+Capa de utilidades: Contiene componentes reutilizables que proporcionan funcionalidades de apoyo a diferentes partes del sistema.
+
+AppFactory: construcción y configuración de las dependencias de la aplicación.
+Navigation: navegación entre las diferentes vistas.
+SessionManager: administración de la sesión del usuario.
+ThemeManager: gestión del tema visual.
+WindowHelper y ResizeHelper: manejo de ventanas.
+GeneradorPDFS, ReportePDF y TablePDF: generación de reportes PDF.
+XmlUtil: operaciones auxiliares relacionadas con XML.
+LocalDateAdapter y LocalTimeAdapter: adaptación de fechas y horas para JAXB.
+
 ```
+
+### Organización del proyecto
+
+```text
+src/
+├── main/
+│   ├── java/
+│   │   └── una/proyecto/
+│   │       ├── app/
+│   │       ├── controller/
+│   │       ├── datos/
+│   │       │   └── wrapper/
+│   │       ├── logic/
+│   │       │   └── ia/
+│   │       ├── model/
+│   │       ├── service/
+│   │       └── utils/
+│   │
+│   └── resources/
+│       └── una/proyecto/
+│           ├── css/
+│           ├── datos/
+│           ├── fonts/
+│           └── ui/
+│
+└── test/
+    └── java/
+        ├── Integration/
+        └── Unit/
+```
+
+
+
+
