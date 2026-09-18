@@ -7,12 +7,8 @@ import una.proyecto.datos.RecursoDatos;
 import una.proyecto.logic.RecursoLogic;
 import una.proyecto.model.Recurso;
 import una.proyecto.service.RecursoService;
-
-
 import java.io.File;
-
 import static org.junit.jupiter.api.Assertions.*;
-
 public class RecursosIntegracionIT {
 
     private static final String XML_TEST = "target/test-it-recursos.xml";
@@ -48,7 +44,6 @@ public class RecursosIntegracionIT {
         assertEquals("RE-101", r2.getId());
         assertEquals(2, service.obtenerTodosRecursos().size());
     }
-
     @Test
     void crear_recurso_valido(){
         service.save(new Recurso("RE-100", "CAT-100", "Sala"));
