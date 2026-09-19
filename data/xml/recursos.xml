@@ -36,4 +36,10 @@
         <idCategoria>CAT-000003</idCategoria>
         <descripcion>calculadora</descripcion>
     </recurso>
+    <recurso>
+        <id>2114</id>
+        <numeroDeActivo>0</numeroDeActivo>
+        <idCategoria>CAT-000001</idCategoria>
+        <descripcion>Sala 2 piso</descripcion>
+    </recurso>
 </recursos>
