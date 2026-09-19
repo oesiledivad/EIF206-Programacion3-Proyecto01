@@ -12,7 +12,9 @@ public class UsuarioLogic {
     public UsuarioLogic() {
         this.usuarioDatos = new UsuarioDatos();
     }
-
+    public UsuarioLogic(UsuarioDatos usuarioDatos) {
+        this.usuarioDatos = usuarioDatos;
+    }
     /**
      * Cambia la contraseña de un usuario
      * @param id ID del usuario

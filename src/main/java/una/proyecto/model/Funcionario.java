@@ -24,6 +24,10 @@ public class Funcionario extends Usuario {
         this.phone = phone;
     }
 
+    public Funcionario(String id, String funcionario, String nombreTest) {
+        super(id, funcionario, nombreTest);
+    }
+
     @Override
     public void changePassword(String password) {
         setPassword(password);
