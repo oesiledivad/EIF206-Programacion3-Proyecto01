@@ -12,6 +12,10 @@ public class AuthService {
     public AuthService() {
         this.usuarioDatos = new UsuarioDatos();
     }
+    // constructor para tests
+    public AuthService(UsuarioDatos usuarioDatos) {
+        this.usuarioDatos = usuarioDatos;
+    }
 
     public Usuario authenticate(String id, String password) {
 

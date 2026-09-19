@@ -80,6 +80,12 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-params</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.json</groupId>
       <artifactId>json</artifactId>
       <version>20240303</version>
@@ -123,6 +129,8 @@
           </includes>
           <argLine>
             -Dnet.bytebuddy.experimental=true
+            --add-exports org.junit.platform.commons/org.junit.platform.commons.util=ALL-UNNAMED
+            --add-exports org.junit.platform.commons/org.junit.platform.commons.logging=ALL-UNNAMED
             --add-exports EIF.Programacion.Proyecto/Unit=org.junit.platform.commons
             --add-opens EIF.Programacion.Proyecto/Unit=org.junit.platform.commons
             --add-reads EIF.Programacion.Proyecto=org.junit.jupiter.api
@@ -139,6 +147,8 @@
             <include>Integration/**/*IT.java</include>
           </includes>
           <argLine>
+            --add-exports org.junit.platform.commons/org.junit.platform.commons.util=ALL-UNNAMED
+            --add-exports org.junit.platform.commons/org.junit.platform.commons.logging=ALL-UNNAMED
             --add-exports EIF.Programacion.Proyecto/Integration=org.junit.platform.commons
             --add-opens EIF.Programacion.Proyecto/Integration=org.junit.platform.commons
             --add-reads EIF.Programacion.Proyecto=org.junit.jupiter.api

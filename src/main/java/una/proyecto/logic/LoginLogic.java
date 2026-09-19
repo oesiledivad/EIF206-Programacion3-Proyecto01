@@ -11,6 +11,10 @@ public class LoginLogic {
     public LoginLogic() {
         this.authService = new AuthService();
     }
+    // constructor para tests
+    public LoginLogic(AuthService authService) {
+        this.authService = authService;
+    }
 
     /**
      * Valida las credenciales del usuario según reglas de negocio
