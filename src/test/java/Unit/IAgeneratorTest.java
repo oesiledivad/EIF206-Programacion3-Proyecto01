@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import una.proyecto.logic.ia.aiGenerator;
 import una.proyecto.model.Categoria;
 import una.proyecto.model.Reserva;
-// import una.proyecto....IAgenerator;
 
 import java.io.IOException;
 import java.time.format.DateTimeParseException;
@@ -18,11 +17,12 @@ import static org.junit.jupiter.api.Assertions.*;
 public class IAgeneratorTest {
 
     private enum Fallo {
-        SIN_API_KEY,          // falta GROQ_API_KEY en el .env
-        ERROR_API,            // Groq respondió con status != 200
-        JSON_INVALIDO,        // la IA devolvió algo que no es JSON válido
-        FECHA_HORA_INVALIDA,  // fecha u hora con formato incorrecto
-        RED_O_TIMEOUT,        // sin conexión, timeout o hilo interrumpido
+        SIN_API_KEY,             // falta GROQ_API_KEY en el .env
+        FRASE_RECHAZADA_POR_IA,  // 400 json_validate_failed: la IA no pudo extraer datos
+        ERROR_API,               // Groq respondió con otro status != 200
+        JSON_INVALIDO,           // la IA devolvió algo que no es JSON válido
+        FECHA_HORA_INVALIDA,     // fecha u hora con formato incorrecto
+        RED_O_TIMEOUT,           // sin conexión, timeout o hilo interrumpido
         OTRO
     }
 
@@ -54,17 +54,27 @@ public class IAgeneratorTest {
             Thread.currentThread().interrupt();
             return Fallo.RED_O_TIMEOUT;
         }
-        if (e instanceof IOException) { // incluye HttpTimeoutException y ConnectException
+        if (e instanceof IOException) {
             return Fallo.RED_O_TIMEOUT;
         }
         String msg = e.getMessage() == null ? "" : e.getMessage();
         if (msg.contains("API Key")) {
             return Fallo.SIN_API_KEY;
         }
+        if (msg.startsWith("Error IA (400)") && msg.contains("json_validate_failed")) {
+            return Fallo.FRASE_RECHAZADA_POR_IA;
+        }
         if (msg.startsWith("Error IA")) {
             return Fallo.ERROR_API;
         }
         return Fallo.OTRO;
+    }
+
+    /** Excepciones que son una respuesta legítima de la IA ante una frase que no sirve. */
+    private boolean esRespuestaMalaDeLaIA(Fallo fallo) {
+        return fallo == Fallo.FRASE_RECHAZADA_POR_IA
+                || fallo == Fallo.JSON_INVALIDO
+                || fallo == Fallo.FECHA_HORA_INVALIDA;
     }
 
     @Test
@@ -84,12 +94,13 @@ public class IAgeneratorTest {
             System.out.println("Excepción atrapada: " + fallo + " -> " + e.getMessage());
 
             switch (fallo) {
-
+                // Respuestas de la IA que el método reporta correctamente: el test las acepta
+                case FRASE_RECHAZADA_POR_IA:
                 case JSON_INVALIDO:
                 case FECHA_HORA_INVALIDA:
                     break;
 
-                // Estas son problemas de entorno o del método: el test debe fallar
+                // Problemas de entorno o del método: el test debe fallar
                 case SIN_API_KEY:
                     fail("Falta GROQ_API_KEY en el .env: " + e.getMessage());
                     break;
@@ -113,7 +124,7 @@ public class IAgeneratorTest {
             assertTrue(reserva.getCategoriasDeRecursos().isEmpty());
         } catch (Exception e) {
             Fallo fallo = clasificar(e);
-            assertTrue(fallo == Fallo.JSON_INVALIDO || fallo == Fallo.FECHA_HORA_INVALIDA,
+            assertTrue(esRespuestaMalaDeLaIA(fallo),
                     "Excepción no esperada (" + fallo + "): " + e.getMessage());
         }
     }
@@ -127,7 +138,7 @@ public class IAgeneratorTest {
             assertTrue(reserva.getCategoriasDeRecursos().isEmpty());
         } catch (Exception e) {
             Fallo fallo = clasificar(e);
-            assertTrue(fallo == Fallo.JSON_INVALIDO || fallo == Fallo.FECHA_HORA_INVALIDA,
+            assertTrue(esRespuestaMalaDeLaIA(fallo),
                     "Excepción no esperada (" + fallo + "): " + e.getMessage());
         }
     }
