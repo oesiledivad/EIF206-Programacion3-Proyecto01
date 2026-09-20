@@ -10,6 +10,7 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.VBox;
 import una.proyecto.model.EstadisticaItem;
 import una.proyecto.service.EstadisticasService;
 import una.proyecto.utils.AppFactory;
@@ -22,20 +23,44 @@ import java.util.List;
 
 public class EstadisticasController {
 
-    @FXML private BarChart<String, Number> barChartActividades;
-    @FXML private BarChart<String, Number> barChartRecursos;
-    @FXML private Button btnGenerarActividades;
-    @FXML private Button btnGenerarRecursos;
-    @FXML private Button btnImprimirActividades;
-    @FXML private Button btnImprimirRecursos;
-    @FXML private DatePicker dpActividadesDesde;
-    @FXML private DatePicker dpActividadesHasta;
-    @FXML private DatePicker dpRecursosDesde;
-    @FXML private DatePicker dpRecursosHasta;
-    @FXML private Label lblErrorActividades;
-    @FXML private Label lblErrorRecursos;
-    @FXML private TableView<EstadisticaItem> tableViewActividades;
-    @FXML private TableView<EstadisticaItem> tableViewRecursos;
+    @FXML
+    private BarChart<String, Number> barChartActividades;
+    @FXML
+    private BarChart<String, Number> barChartRecursos;
+    @FXML
+    private Button btnGenerarActividades;
+    @FXML
+    private Button btnGenerarRecursos;
+    @FXML
+    private Button btnImprimirActividades;
+    @FXML
+    private Button btnImprimirRecursos;
+
+    @FXML
+    private Button btnTabRecursos;
+    @FXML
+    private Button btnTabActividades;
+
+    @FXML
+    private DatePicker dpActividadesDesde;
+    @FXML
+    private DatePicker dpActividadesHasta;
+    @FXML
+    private DatePicker dpRecursosDesde;
+    @FXML
+    private DatePicker dpRecursosHasta;
+    @FXML
+    private Label lblErrorActividades;
+    @FXML
+    private Label lblErrorRecursos;
+    @FXML
+    private TableView<EstadisticaItem> tableViewActividades;
+    @FXML
+    private TableView<EstadisticaItem> tableViewRecursos;
+    @FXML
+    private VBox vboxEstadisticasRecursos;
+    @FXML
+    private VBox vboxEstadisticasActividades;
 
     private final EstadisticasService estadisticasService = AppFactory.createEstadisticasService();
 
@@ -54,7 +79,8 @@ public class EstadisticasController {
             setupButtons();
             hideErrorMessages();
 
-            // Cargar datos en un hilo separado para no bloquear la UI
+            actualizarEstadoPestanas(true);
+
             Platform.runLater(() -> {
                 loadResourceData();
                 loadActivityData();
@@ -62,6 +88,55 @@ public class EstadisticasController {
         } catch (Exception e) {
             e.printStackTrace();
             mostrarError("Error de inicialización", e.getMessage());
+        }
+    }
+
+
+    @FXML
+    private void handleTabRecursos() {
+        vboxEstadisticasRecursos.setVisible(true);
+        vboxEstadisticasRecursos.setManaged(true);
+
+        vboxEstadisticasActividades.setVisible(false);
+        vboxEstadisticasActividades.setManaged(false);
+
+        actualizarEstadoPestanas(true);
+    }
+
+    @FXML
+    private void handleTabActividades() {
+        vboxEstadisticasRecursos.setVisible(false);
+        vboxEstadisticasRecursos.setManaged(false);
+
+        vboxEstadisticasActividades.setVisible(true);
+        vboxEstadisticasActividades.setManaged(true);
+
+        actualizarEstadoPestanas(false);
+    }
+
+    private void actualizarEstadoPestanas(boolean recursosActivo) {
+        if (btnTabRecursos != null && btnTabActividades != null) {
+            if (recursosActivo) {
+                btnTabRecursos.getStyleClass().remove("tab-inactive");
+                if (!btnTabRecursos.getStyleClass().contains("tab-active")) {
+                    btnTabRecursos.getStyleClass().add("tab-active");
+                }
+
+                btnTabActividades.getStyleClass().remove("tab-active");
+                if (!btnTabActividades.getStyleClass().contains("tab-inactive")) {
+                    btnTabActividades.getStyleClass().add("tab-inactive");
+                }
+            } else {
+                btnTabActividades.getStyleClass().remove("tab-inactive");
+                if (!btnTabActividades.getStyleClass().contains("tab-active")) {
+                    btnTabActividades.getStyleClass().add("tab-active");
+                }
+
+                btnTabRecursos.getStyleClass().remove("tab-active");
+                if (!btnTabRecursos.getStyleClass().contains("tab-inactive")) {
+                    btnTabRecursos.getStyleClass().add("tab-inactive");
+                }
+            }
         }
     }
 
@@ -155,7 +230,6 @@ public class EstadisticasController {
 
             hideErrorMessages();
 
-            // Mostrar indicador de carga
             resourceData.clear();
 
             List<EstadisticaItem> items = estadisticasService.obtenerEstadisticasRecursos(fromDate, toDate);
@@ -186,7 +260,6 @@ public class EstadisticasController {
 
             hideErrorMessages();
 
-            // Mostrar indicador de carga
             activityData.clear();
 
             List<EstadisticaItem> items = estadisticasService.obtenerEstadisticasActividades(fromDate, toDate);
