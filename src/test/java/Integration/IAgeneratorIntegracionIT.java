@@ -9,7 +9,6 @@ import una.proyecto.logic.ia.aiGenerator;
 import una.proyecto.model.Categoria;
 import una.proyecto.model.Reserva;
 
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -30,6 +29,8 @@ public class IAgeneratorIntegracionIT {
 
     @BeforeEach
     void setUp() {
+        aiGenerator.setHttpClient(null);
+
         categorias = new ArrayList<>();
         categorias.add(crearCategoria("Proyector"));
         categorias.add(crearCategoria("Sala de reuniones"));
@@ -52,7 +53,7 @@ public class IAgeneratorIntegracionIT {
 
     @Test
     void frase_valida_extrae_todos_los_datos() throws Exception {
-        Reserva reserva =aiGenerator.extraeInformacion(
+        Reserva reserva = aiGenerator.extraeInformacion(
                 "Necesito un proyector mañana de 9:00 a 10:00 para una reunión de equipo",
                 categorias);
 
@@ -66,7 +67,7 @@ public class IAgeneratorIntegracionIT {
 
     @Test
     void frase_con_varias_categorias() throws Exception {
-        Reserva reserva =aiGenerator.extraeInformacion(
+        Reserva reserva = aiGenerator.extraeInformacion(
                 "Reservar la sala de reuniones y un proyector mañana de 14:00 a 16:00",
                 categorias);
 
