@@ -25,6 +25,7 @@ public class Reserva {
     private LocalTime horaFin;
     private String idFuncionario;
 
+    @XmlTransient
     private Funcionario funcionarioReserva;
     private List<String> categoriasDeRecursosIds;
     @XmlTransient

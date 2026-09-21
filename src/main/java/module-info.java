@@ -6,15 +6,17 @@ module EIF.Programacion.Proyecto {
     requires javafx.graphics;
 
     requires org.kordamp.ikonli.javafx;
+    requires org.kordamp.ikonli.fontawesome;
+
     requires jakarta.xml.bind;
     requires java.net.http;
     requires java.xml;
     requires org.apache.pdfbox;
     requires easytable;
     requires java.desktop;
-    //requires jdk.jsonbject;
     requires org.json;
     requires io.github.cdimascio.dotenv.java;
+
     opens una.proyecto.app to javafx.fxml, javafx.graphics;
     opens una.proyecto.controller to javafx.fxml;
     opens una.proyecto.model to javafx.base, jakarta.xml.bind;
@@ -26,5 +28,6 @@ module EIF.Programacion.Proyecto {
     exports una.proyecto.logic;
     exports una.proyecto.model;
     exports una.proyecto.service;
+
     opens una.proyecto.datos.wrapper to jakarta.xml.bind, javafx.base;
 }

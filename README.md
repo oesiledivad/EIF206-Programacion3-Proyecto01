@@ -1,159 +1,236 @@
-# EIF206-Programacion3-Proyecto01 (2026-II)
-## Sistema De Reserva De Recursos
-## Descripcion:
-- Sistema de escritorio en Java que gestiona las reservas de recursos para la realizacion de trabajo de sus funcionarios.
-- Funcionario ingresa al ingresar al sistema: fecha, hora de inicio, hora de finalizacion y va seleccionando las categorias de recursos (sala, computadora, proyector, etc). Se indica si tuvo exito (habia disponibilidad de al menos una unidad de cada recurso necesitado) o si no tuvo exito. Si hubo exito la reserva se hara con el primer recurso disponible, sino el usuario hara los cambios en la reserva actual e intentara de nuevo.
-- El usuario puede llenar los datos usando IA, describiendo: actividad, recursos y demas. El sistema usando (LLM), extraera los datos y llenara el formulario. El usuario los puede modificar antes de aplicarlos.
-- Interfaz grafica, formato de archivos: XML, arquitectura por capaz, la interfaz debe ajustarse al (MVC), dos tipos de usuario: administrador y funcionario cada uno  con id, clave y rol.
-## Funcionalidades:
-Todas deben incluir la opcion de *generar reporte PDF*.
+<div align="center">
 
-**1.Log In:** Los usuarios podran ingresar al sistema usando su id y clave. Pueden cambiar su clave en cualquier momento.
+# 📅 Sistema de Reserva de Recursos
 
-**2.Reservas:** Un funcionario podra ver sus reservas, crear o cancelar reservas futuras. Solo lo puede hacer el funcionario.
+### EIF206 — Programación III · Proyecto 01
 
-**3.Lista de Funcionarios:** Busqueda de funcionarios por id o nombre, inclusion, consulta, modificacion y borrado de funcionarios. De cada funcionario se requiere: informacion como usuario, nombre y telefono. Al agregar su clave y id quedaran, luego el usuario puede cambiarla. Para cambiarla solo lo puede hacer un administrador.
+Sistema de escritorio para la **gestión integral de reservas de recursos institucionales**, desarrollado con Java y JavaFX. Incluye autenticación y roles, gestión de reservas y recursos, persistencia XML, generación de reportes PDF, pruebas automatizadas e integración con **Inteligencia Artificial (LLM)** mediante la API de Groq.
 
-**4.Lista de categorias de recursos:** Buscar categorias por descripcion, inclusion, consulta, modificacion y borrado. Se requiere id y descripcion.
+<p>
+  <img src="https://img.shields.io/badge/Java-17%2B-orange?logo=openjdk&logoColor=white" alt="Java 17+">
+  <img src="https://img.shields.io/badge/JavaFX-21.0.6-2f73c9?logo=java&logoColor=white" alt="JavaFX 21">
+  <img src="https://img.shields.io/badge/Maven-3.x-C71A36?logo=apachemaven&logoColor=white" alt="Maven">
+  <img src="https://img.shields.io/badge/JUnit-5-25A162?logo=junit5&logoColor=white" alt="JUnit 5">
+  <img src="https://img.shields.io/badge/Mockito-5.x-78C257" alt="Mockito">
+  <img src="https://img.shields.io/badge/AI-Groq-00A67E" alt="Groq">
+</p>
 
-**5.Lista de Recursos:** Filtrar por categoria, CRUD completo, cada recurso: id/número de activo, categoría (FK), descripción
+<p>
+  <img src="https://img.shields.io/github/last-commit/oesiledivad/EIF206-Programacion3-Proyecto01?logo=github" alt="Último commit">
+  <img src="https://img.shields.io/github/commit-activity/m/oesiledivad/EIF206-Programacion3-Proyecto01?logo=github" alt="Actividad del repositorio">
+  <img src="https://img.shields.io/github/repo-size/oesiledivad/EIF206-Programacion3-Proyecto01?logo=github" alt="Tamaño del repositorio">
+</p>
 
-**6.Calendarizacion de Recursos:** Selecciona fecha + categoría → matriz (filas = horas, columnas = recursos de esa categoría)
-Celdas muestran si está reservado (actividad + funcionario o administrador)
+<p>
+  🎓 <strong>Proyecto académico — Universidad Nacional de Costa Rica</strong>
+</p>
 
-**7.Programacion de actividades:** Para una semana → matriz (filas = horas, columnas = días de la semana)
-Celdas muestran actividad + funcionario responsable
+</div>
 
-**8.Estadisticas:** Rango de fechas para recursos → categorías reservadas + cantidad + gráfico de barras
-Rango de fechas para actividades → semanas + cantidad de actividades + gráfico de barras
+---
 
-## Arquitectura por capas
-El sistema utiliza una arquitectura por capas que separa la interfaz gráfica, la lógica de negocio, el acceso a los datos y las entidades del dominio. Esta separación facilita el mantenimiento, las pruebas y la reutilización del código.
+## Características Principales
 
-### Estructura general: 
-Se agregan las funciones principales, se omiten algunas que no se consideran tan relevantes.
+### 🔐 Autenticación y Gestión de Usuarios
+- **Autenticación segura:** Inicio de sesión mediante credenciales de acceso.
+- **Gestión de roles:** Soporte estructurado para perfiles de **Administrador** y **Funcionario**.
+- **Gestión de sesiones:** Control dinámico de la sesión activa y restricciones según los privilegios del usuario.
+- **Cambio de contraseña:** Opción segura para la actualización de credenciales.
 
-```
-UI: Vistas de la interfaz gráfica con fxml  
+### 📅 Gestión de Reservas
+- **Creación de reservas:** Registro asistido de nuevos apartados de recursos institucionales.
+- **Consulta de reservas:** Visualización en tiempo real y filtrado de reservas vigentes o pasadas.
+- **Cancelación:** Opción exclusiva para que los funcionarios cancelen reservas futuras.
+- **Validación de disponibilidad:** Control automático de conflictos e interbloqueos de recursos antes de confirmar.
+- **Asignación inteligente:** Selección automatizada del primer recurso disponible que cumpla con los requisitos.
 
- ├── calendarizacion-actividades-view.fxml
- ├── calendarizacion-view.fxml
- ├── categorias-administrador-view.fxml
- ├── estadisticas-view.fxml
- ├── funcionarios-administrador-view.fxml
- ├── login-view.fxml
- ├── main-view.fxml
- ├── recursos-administrador-view.fxml
- ├── reservas-funcionario-view.fxml
+### 🤖 Asistente de Inteligencia Artificial (LLM)
+- **Procesamiento de lenguaje natural:** Capacidad de describir actividades usando lenguaje cotidiano y descriptivo.
+- **Generación automática:** Interpretación de solicitudes para rellenar de forma inteligente los formularios de reserva.
+- **Extracción de recursos:** Identificación precisa de categorías y componentes solicitados en texto libre.
+- **Integración con Groq:** Enlace directo con modelos LLM de alto rendimiento a través de la API de Groq.
 
-                 │
-                 ▼
+### 🏢 Mantenimiento del Sistema (CRUD)
+Operaciones completas de alta, consulta, modificación y baja para:
+- **Funcionarios:** Información de usuario, nombre completo y número de teléfono.
+- **Categorías de recursos:** Identificadores y descripciones generales.
+- **Recursos físicos:** Control de números de activo, asociación por llave foránea (FK) y descripciones detalladas.
 
-Controller: Gestiona eventos e interacción con UI
+### 🗓️ Calendarización y Programación
+- **Matriz de recursos:** Selección por fecha y categoría, visualizando filas de horarios y columnas de recursos físicos.
+- **Programación semanal:** Vista matricial por horas y días de la semana con el detalle de los responsables y actividades.
 
- ├── CalendarizacionActividadesController
- ├── CalendarizacionController
- ├── CategoriasAdministradorController
- ├── EstadisticasController
- ├── FuncionariosAdministradorController
- ├── LoginController
- ├── MainViewController
- ├── RecursosController
- ├── ReservasController
-                  │
-                  ▼
+### 📊 Estadísticas y Reportes PDF
+- **Estadísticas dinámicas:** Rangos de fechas para recursos (categorías, cantidades) y actividades con gráficos de barras interactivos.
+- **Reportes profesionales:** Generación automatizada de reportes en PDF integrados en todas las vistas principales del sistema.
 
-Service: Expone las operaciones de la aplicacion y conecta la logica con el controller sin que estos conocezcan.
+### 💾 Persistencia y Calidad
+- **Persistencia XML y JAXB:** Almacenamiento estructurado mediante wrappers especializados y adaptadores de fecha/hora.
+- **Pruebas Automatizadas:** Suite completa de pruebas unitarias (JUnit 5) e integración (Mockito).
 
- ├── AuthService
- ├── CalendarizacionService
- ├── CategoriaService
- ├── EstadisticasService
- ├── FuncionarioService
- ├── RecursoService
- ├── ReservaService
+---
 
-                  │
-                  ▼
+## Credenciales Iniciales
+Para acceder al sistema por primera vez, utiliza el usuario administrador predeterminado:
+- **ID:** `admin`
+- **Clave:** `admin`
 
-Logic: Reglas y lógica de negocio
+---
 
-Dentro de este aparatado tambien está el aiGenerator dentro de la carpeta ia
+## Arquitectura del Sistema
 
- ├── CategoriaLogic
- ├── EstadisticasLogic 
- ├── FuncionarioLogic
- ├── LoginLogic
- ├── MainLogic
- ├── RecursoLogic
- ├── ReservaLogic
- ├── UsuarioLogic
-
-                 │
-                 ▼
-Datos: Aqui se encuentra el CRUD (create, read, update, delete) para los archivos xml.
-Cada uno con su respectivo Wrapper para facilitar la serialización de colecciones mediante JAXB.
-
- ├── CategoriaDatos
- ├── RecursoDatos
- ├── ReservaDatos
- ├── UsuarioDatos
-
-                 │
-                 ▼
-Model: Contiene las entidades y objetos que representan la información utilizada por el sistema.
-Lo principal: constructores, getters, setters, toString
-
- ├── Administrador
- ├── Categoria
- ├── Funcionario
- ├── Recurso
- ├── Reserva
- ├── Usuario
-
-Capa de utilidades: Contiene componentes reutilizables que proporcionan funcionalidades de apoyo a diferentes partes del sistema.
-
-AppFactory: construcción y configuración de las dependencias de la aplicación.
-Navigation: navegación entre las diferentes vistas.
-SessionManager: administración de la sesión del usuario.
-ThemeManager: gestión del tema visual.
-WindowHelper y ResizeHelper: manejo de ventanas.
-GeneradorPDFS, ReportePDF y TablePDF: generación de reportes PDF.
-XmlUtil: operaciones auxiliares relacionadas con XML.
-LocalDateAdapter y LocalTimeAdapter: adaptación de fechas y horas para JAXB.
-
-```
-
-### Organización del proyecto
+El proyecto sigue una estricta **arquitectura por capas**, garantizando el desacoplamiento entre la interfaz gráfica, la lógica de negocio, el acceso a datos y las entidades de dominio.
 
 ```text
+┌─────────────────────────────────────────────┐
+│           INTERFAZ DE USUARIO               │
+│          JavaFX · FXML · CSS                │
+│            Views + Controllers               │
+└──────────────────────┬──────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────┐
+│                 SERVICIOS                   │
+│      Autenticación · Reservas · Sesiones    │
+│       Usuarios · Recursos · Reportes        │
+└──────────────────────┬──────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────┐
+│              LÓGICA DE NEGOCIO              │
+│     Validaciones · Reglas · Disponibilidad  │
+│              Integración con IA             │
+└──────────────────────┬──────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────┐
+│                   DATOS                     │
+│        XML · JAXB · Wrappers · Adaptadores  │
+└──────────────────────┬──────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────┐
+│              MODELOS / DTO                  │
+│       Entidades y objetos de transferencia  │
+└─────────────────────────────────────────────┘
+
+```
+
+### Organización por Capas
+
+| Capa | Responsabilidad |
+| --- | --- |
+| **Interfaz de Usuario** | Vistas JavaFX, archivos FXML, hojas de estilo CSS y controladores de eventos. |
+| **Servicios** | Orquestación de operaciones de la aplicación y conexión lógica con controladores. |
+| **Lógica** | Reglas de negocio, validaciones de disponibilidad y submódulo de IA (`aiGenerator`). |
+| **Datos** | Operaciones CRUD y serialización JAXB sobre archivos XML estructurados. |
+| **Modelos** | Clases de dominio principales (`Administrador`, `Categoria`, `Funcionario`, `Recurso`, `Reserva`, `Usuario`). |
+
+### Tecnologías e Integraciones Clave
+
+* 🤖 **Groq API:** Procesamiento e inferencia mediante modelos LLM avanzados.
+* 💾 **Jakarta JAXB:** Mapeo y persistencia de objetos en formato XML.
+* 📄 **Apache PDFBox + EasyTable:** Renderizado y exportación de reportes institucionales en PDF.
+* 🔐 **Dotenv Java:** Manejo seguro de configuraciones y variables de entorno.
+
+---
+
+## Configuración del Archivo `.env`
+
+Para habilitar la funcionalidad del asistente de Inteligencia Artificial, debes crear un archivo llamado **`.env`** en la raíz absoluta del proyecto (junto al archivo `pom.xml`).
+
+El archivo debe tener la siguiente estructura exacta:
+
+```env
+GROQ_API_KEY=tu_api_key_de_groq_aqui
+GROQ_URL=[https://api.groq.com/openai/v1/chat/completions](https://api.groq.com/openai/v1/chat/completions)
+GROQ_MODEL=nombre_del_modelo_qwen
+```
+
+### Descripción de Variables
+
+* **`GROQ_API_KEY`**: Clave de autenticación personal obtenida en la plataforma de Groq.
+* **`GROQ_URL`**: Endpoint oficial de la API de Groq consumido por la aplicación.
+* **`GROQ_MODEL`**: Identificador del modelo de lenguaje utilizado por el sistema.
+
+> **Nota Importante:** Se recomienda emplear modelos de la familia **Qwen** disponibles en Groq por su excelente desempeño en la extracción estructurada de datos. Como los catálogos cambian con el tiempo, verifica el modelo activo en tu cuenta de Groq antes de ejecutar. El archivo `.env` está protegido por defecto y **nunca debe subirse al control de versiones**.
+
+---
+
+
+## Requisitos Previos e Instalación de Maven
+
+Asegúrate de tener instalado en tu entorno de desarrollo:
+
+1. **Java Development Kit (JDK) 17 o superior** (se recomienda fuertemente JDK 21).
+2. **Apache Maven** para la compilación y gestión de dependencias.
+
+### ¿Cómo instalar Maven?
+
+* **En Linux (Ubuntu/Debian):**
+```bash
+sudo apt update
+sudo apt install maven
+```
+
+
+* **En macOS (usando Homebrew):**
+```bash
+brew install maven
+```
+
+
+* **En Windows:**
+1. Descarga el binario comprimido de Maven desde el [sitio web oficial](https://maven.apache.org/download.cgi?utm_source=gemini).
+2. Extrae el contenido en una ruta de tu preferencia (ej. `C:\Program Files\Apache\maven`).
+3. Añade la ruta de la carpeta `bin` a las **Variables de Entorno** del sistema (`PATH`).
+4. Verifica la instalación ejecutando en tu terminal:
+```bash
+mvn -version
+```
+---
+
+## Estructura del Proyecto
+
+```text
+data/                           # Archivos XML base para la persistencia
 src/
 ├── main/
 │   ├── java/
 │   │   └── una/proyecto/
-│   │       ├── app/
-│   │       ├── controller/
-│   │       ├── datos/
-│   │       │   └── wrapper/
-│   │       ├── logic/
-│   │       │   └── ia/
-│   │       ├── model/
-│   │       ├── service/
-│   │       └── utils/
+│   │       ├── app/            # Configuración y MainApp
+│   │       ├── controller/     # Controladores de vistas JavaFX
+│   │       ├── datos/          # Capa de datos y Wrappers JAXB para XML
+│   │       ├── logic/          # Lógica de negocio y módulo IA (aiGenerator)
+│   │       ├── model/          # Entidades del dominio del sistema
+│   │       ├── service/        # Servicios de aplicación y autenticación
+│   │       └── utils/          # Utilidades (Navegación, PDF, Sesión, Adaptadores)
 │   │
 │   └── resources/
 │       └── una/proyecto/
-│           ├── css/
-│           ├── datos/
-│           ├── fonts/
-│           └── ui/
+│           ├── css/            # Estilos visuales de la interfaz
+│           ├── fonts/          # Recursos tipográficos
+│           └── ui/             # Diseños FXML de las pantallas
 │
 └── test/
     └── java/
-        ├── Integration/
-        └── Unit/
+        ├── Integration/        # Pruebas de integración del sistema
+        └── Unit/               # Pruebas unitarias de componentes
+```
+
+---
+
+## Compilación y Ejecución
+
+Para compilar el proyecto, ejecutar la suite de pruebas automatizadas y arrancar la aplicación de escritorio mediante el plugin de Maven, abre tu terminal en la raíz del proyecto y utiliza los siguientes comandos:
+
+1. **Compilar código y ejecutar pruebas unitarias/integración:**
+```bash
+mvn clean test
 ```
 
 
-
-
+2. **Ejecutar la interfaz gráfica con JavaFX:**
+```bash
+mvn javafx:run
+```
