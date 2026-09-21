@@ -143,7 +143,7 @@ El archivo debe tener la siguiente estructura exacta:
 
 ```env
 GROQ_API_KEY=tu_api_key_de_groq_aqui
-GROQ_URL=[https://api.groq.com/openai/v1/chat/completions](https://api.groq.com/openai/v1/chat/completions)
+GROQ_URL=https://api.groq.com/openai/v1/chat/completions
 GROQ_MODEL=nombre_del_modelo_qwen
 ```
 
@@ -181,7 +181,7 @@ brew install maven
 
 
 * **En Windows:**
-1. Descarga el binario comprimido de Maven desde el [sitio web oficial](https://maven.apache.org/download.cgi?utm_source=gemini).
+1. Descarga el binario comprimido de Maven desde el [sitio web oficial](https://maven.apache.org/download.cgi).
 2. Extrae el contenido en una ruta de tu preferencia (ej. `C:\Program Files\Apache\maven`).
 3. Añade la ruta de la carpeta `bin` a las **Variables de Entorno** del sistema (`PATH`).
 4. Verifica la instalación ejecutando en tu terminal:
@@ -222,15 +222,24 @@ src/
 
 ## Compilación y Ejecución
 
-Para compilar el proyecto, ejecutar la suite de pruebas automatizadas y arrancar la aplicación de escritorio mediante el plugin de Maven, abre tu terminal en la raíz del proyecto y utiliza los siguientes comandos:
+Si deseas clonar el repositorio desde cero, compilar el código, ejecutar la suite de pruebas automatizadas y arrancar la aplicación de escritorio mediante Maven, sigue estos pasos en tu terminal:
 
-1. **Compilar código y ejecutar pruebas unitarias/integración:**
+1. **Clonar el repositorio y acceder a la carpeta del proyecto:**
+
+```bash
+git clone https://github.com/oesiledivad/EIF206-Programacion3-Proyecto01.git
+cd EIF206-Programacion3-Proyecto01
+```
+
+2. **Compilar el código y ejecutar todas las pruebas automatizadas (Unitarias e Integración):**
+
 ```bash
 mvn clean test
 ```
 
+3. **Ejecutar la interfaz gráfica con JavaFX:**
 
-2. **Ejecutar la interfaz gráfica con JavaFX:**
 ```bash
 mvn javafx:run
 ```
+
