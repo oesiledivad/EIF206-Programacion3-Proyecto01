@@ -1,45 +1,63 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <recursos>
     <recurso>
-        <id>1234</id>
-        <numeroDeActivo>0</numeroDeActivo>
-        <idCategoria>CAT-000004</idCategoria>
-        <descripcion>papel crepe</descripcion>
-    </recurso>
-    <recurso>
-        <id>8080</id>
+        <id>0001</id>
         <numeroDeActivo>0</numeroDeActivo>
         <idCategoria>CAT-000001</idCategoria>
-        <descripcion>sala 1 primer piso</descripcion>
+        <descripcion>Salon 13 primer piso</descripcion>
     </recurso>
     <recurso>
-        <id>7000</id>
-        <numeroDeActivo>0</numeroDeActivo>
-        <idCategoria>CAT-000001</idCategoria>
-        <descripcion>sala para 10 personas</descripcion>
-    </recurso>
-    <recurso>
-        <id>0000011</id>
+        <id>0002</id>
         <numeroDeActivo>0</numeroDeActivo>
         <idCategoria>CAT-000002</idCategoria>
-        <descripcion>De categoria</descripcion>
+        <descripcion>Laptop Lenovo 1</descripcion>
     </recurso>
     <recurso>
-        <id>14444</id>
-        <numeroDeActivo>0</numeroDeActivo>
-        <idCategoria>CAT-000001</idCategoria>
-        <descripcion>dsadsadasd</descripcion>
-    </recurso>
-    <recurso>
-        <id>23456</id>
+        <id>0003</id>
         <numeroDeActivo>0</numeroDeActivo>
         <idCategoria>CAT-000003</idCategoria>
-        <descripcion>calculadora</descripcion>
+        <descripcion>Calculadora Casio fx-570ES PLUS</descripcion>
     </recurso>
     <recurso>
-        <id>2114</id>
+        <id>0004</id>
         <numeroDeActivo>0</numeroDeActivo>
-        <idCategoria>CAT-000001</idCategoria>
-        <descripcion>Sala 2 piso</descripcion>
+        <idCategoria>CAT-000004</idCategoria>
+        <descripcion>Silla de oficina</descripcion>
+    </recurso>
+    <recurso>
+        <id>0005</id>
+        <numeroDeActivo>0</numeroDeActivo>
+        <idCategoria>CAT-000005</idCategoria>
+        <descripcion>Proyector Epson</descripcion>
+    </recurso>
+    <recurso>
+        <id>0006</id>
+        <numeroDeActivo>0</numeroDeActivo>
+        <idCategoria>CAT-000006</idCategoria>
+        <descripcion>Pintura acrilica</descripcion>
+    </recurso>
+    <recurso>
+        <id>0007</id>
+        <numeroDeActivo>0</numeroDeActivo>
+        <idCategoria>CAT-000007</idCategoria>
+        <descripcion>Mesa para 4 personas</descripcion>
+    </recurso>
+    <recurso>
+        <id>0008</id>
+        <numeroDeActivo>0</numeroDeActivo>
+        <idCategoria>CAT-000008</idCategoria>
+        <descripcion>Impresora Epson</descripcion>
+    </recurso>
+    <recurso>
+        <id>0009</id>
+        <numeroDeActivo>0</numeroDeActivo>
+        <idCategoria>CAT-000009</idCategoria>
+        <descripcion>Pizarra blanca</descripcion>
+    </recurso>
+    <recurso>
+        <id>00010</id>
+        <numeroDeActivo>0</numeroDeActivo>
+        <idCategoria>CAT-000010</idCategoria>
+        <descripcion>Paquete de pilots azules</descripcion>
     </recurso>
 </recursos>
