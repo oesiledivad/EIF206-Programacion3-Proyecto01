@@ -35,7 +35,7 @@
                   <Label text="Descripción:" />
                   <TextField fx:id="txtBuscarDescripcion" prefHeight="35.0" promptText="Buscar por descripción..." HBox.hgrow="ALWAYS" />
 
-                  <Button fx:id="btnBuscar" defaultButton="true" mnemonicParsing="false" prefHeight="35.0" styleClass="btn-toggle-shadow-primary" text="Buscar">
+                  <Button fx:id="btnBuscar" defaultButton="true" mnemonicParsing="false" onAction="#buscarCategoria" prefHeight="35.0" styleClass="btn-toggle-shadow-primary" text="Buscar">
                      <graphic>
                         <FontIcon iconColor="WHITE" iconLiteral="fa-search" iconSize="14" styleClass="icon-primary" />
                      </graphic>
