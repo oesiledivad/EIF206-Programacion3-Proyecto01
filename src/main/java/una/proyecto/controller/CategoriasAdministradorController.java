@@ -66,14 +66,17 @@ public class CategoriasAdministradorController {
     }
     @FXML
     public void initialize() {
-        // 1. Bloquear el campo para que solo sea de lectura
         txtID.setEditable(false);
-
         loadCategories();
         configureTable();
-
-        // 2. Mostrar la sugerencia del siguiente ID al abrir la pantalla
+        configureSelectionListener();
+        configureSearchListener();
         txtID.setText(obtenerSiguienteIdCategoria());
+    }
+
+    @FXML
+    private void buscarCategoria() {
+        searchCategories(txtBuscarDescripcion.getText().trim());
     }
 
     private void configureTable() {
