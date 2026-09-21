@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<usuarios>
+    <usuario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="administrador">
+        <id>admin</id>
+        <role>ADMIN</role>
+        <password>admin</password>
+        <name>Administrador</name>
+    </usuario>
+    <usuario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="funcionario">
+        <id>123456789</id>
+        <role>FUNCIONARIO</role>
+        <password>123456789</password>
+        <name>Pedro</name>
+        <phone>87517369</phone>
+    </usuario>
+</usuarios>
