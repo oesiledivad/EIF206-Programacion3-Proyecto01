@@ -223,7 +223,6 @@ src/
 ## Compilación y Ejecución
 
 Si deseas clonar el repositorio desde cero, compilar el código, ejecutar la suite de pruebas automatizadas y arrancar la aplicación de escritorio mediante Maven, sigue estos pasos en tu terminal:
-
 1. **Clonar el repositorio y acceder a la carpeta del proyecto:**
 
 ```bash
@@ -231,13 +230,17 @@ git clone https://github.com/oesiledivad/EIF206-Programacion3-Proyecto01.git
 cd EIF206-Programacion3-Proyecto01
 ```
 
-2. **Compilar el código y ejecutar todas las pruebas automatizadas (Unitarias e Integración):**
+2. **Configurar el entorno:**
+* Asegúrate de crear y configurar el archivo `.env` en la raíz del proyecto siguiendo las instrucciones detalladas en el archivo `README`. *(Nota: El comando del siguiente paso fallará si este archivo no está configurado correctamente).*
+
+
+3. **Compilar el código y ejecutar todas las pruebas automatizadas (Unitarias e Integración):**
 
 ```bash
 mvn clean test
 ```
 
-3. **Ejecutar la interfaz gráfica con JavaFX:**
+4. **Ejecutar la interfaz gráfica con JavaFX:**
 
 ```bash
 mvn javafx:run
