@@ -22,12 +22,21 @@ import java.util.List;
 
 public class aiGenerator {
 
-    // Cargar las variables de entorno desde el archivo .env
     private static final Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
 
     private static final String API_KEY = dotenv.get("GROQ_API_KEY");
     private static final String URL = dotenv.get("GROQ_URL", "https://api.groq.com/openai/v1/chat/completions");
     private static final String MODEL = dotenv.get("GROQ_MODEL", "qwen/qwen3.8-27b"); // Valor por defecto si no existe
+
+    private static HttpClient httpClientOverride = null;
+
+    public static void setHttpClient(HttpClient client) {
+        httpClientOverride = client;
+    }
+
+    private static HttpClient getClient() {
+        return httpClientOverride != null ? httpClientOverride : HttpClient.newHttpClient();
+    }
 
     public static Reserva extraeInformacion(String frase, List<Categoria> categoriasDisponibles) throws Exception {
 
@@ -58,7 +67,8 @@ public class aiGenerator {
                 new JSONObject().put("role", "user").put("content", prompt)
         });
 
-        HttpClient client = HttpClient.newHttpClient();
+        // Usamos el cliente inyectable o el predeterminado
+        HttpClient client = getClient();
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(URL))
                 .timeout(Duration.ofSeconds(20))
