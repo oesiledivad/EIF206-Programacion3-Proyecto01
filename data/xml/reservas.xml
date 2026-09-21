@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<reservas>
+    <reserva>
+        <id>RES-000003</id>
+        <actividad>examen de matematicas</actividad>
+        <fecha>2026-09-21</fecha>
+        <horaInicio>02:00</horaInicio>
+        <horaFin>04:30</horaFin>
+        <idFuncionario>432156789</idFuncionario>
+        <funcionarioReserva>
+            <id>432156789</id>
+            <role>FUNCIONARIO</role>
+            <password>432156789</password>
+            <name>Jose</name>
+            <phone>83481785</phone>
+        </funcionarioReserva>
+        <categoriasDeRecursosIds>CAT-000003</categoriasDeRecursosIds>
+        <recursosAsignadosIds>0003</recursosAsignadosIds>
+        <estado>ACTIVA</estado>
+    </reserva>
+</reservas>
