@@ -172,7 +172,7 @@
           <execution>
             <id>default-cli</id>
             <configuration>
-              <mainClass>una.proyecto.app.MainApp</mainClass>
+              <mainClass>EIF.Programacion.Proyecto/una.proyecto.app.MainApp</mainClass>
               <launcher>app</launcher>
               <jlinkZipName>app</jlinkZipName>
               <jlinkImageName>app</jlinkImageName>
