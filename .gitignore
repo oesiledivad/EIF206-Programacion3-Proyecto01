@@ -42,5 +42,4 @@ build/
 .DS_Store
 
 ### Proyecto - Datos XML ###
-data/
 pdfs/
