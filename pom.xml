@@ -1,60 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
   <groupId>una.proyecto</groupId>
-  <artifactId>EIF206-Programacion3-Proyecto01</artifactId>
+  <artifactId>sistema-reservas</artifactId>
   <version>1.0-SNAPSHOT</version>
-
+  <packaging>pom</packaging>
+  <modules>
+    <module>common</module>
+    <module>backend</module>
+    <module>frontend</module>
+  </modules>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.release>17</maven.compiler.release>
     <junit.version>5.12.1</junit.version>
   </properties>
-
   <dependencies>
-    <dependency>
-      <groupId>org.openjfx</groupId>
-      <artifactId>javafx-controls</artifactId>
-      <version>21.0.6</version>
-    </dependency>
-    <dependency>
-      <groupId>org.openjfx</groupId>
-      <artifactId>javafx-fxml</artifactId>
-      <version>21.0.6</version>
-    </dependency>
-    <dependency>
-      <groupId>com.dlsc.formsfx</groupId>
-      <artifactId>formsfx-core</artifactId>
-      <version>11.6.0</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.openjfx</groupId>
-          <artifactId>*</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.kordamp.ikonli</groupId>
-      <artifactId>ikonli-javafx</artifactId>
-      <version>12.3.1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.kordamp.ikonli</groupId>
-      <artifactId>ikonli-fontawesome-pack</artifactId>
-      <version>12.3.1</version>
-    </dependency>
-    <dependency>
-      <groupId>jakarta.xml.bind</groupId>
-      <artifactId>jakarta.xml.bind-api</artifactId>
-      <version>4.0.2</version>
-    </dependency>
-    <dependency>
-      <groupId>org.glassfish.jaxb</groupId>
-      <artifactId>jaxb-runtime</artifactId>
-      <version>4.0.5</version>
-    </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
@@ -85,74 +46,36 @@
       <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.json</groupId>
-      <artifactId>json</artifactId>
-      <version>20240303</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.pdfbox</groupId>
-      <artifactId>pdfbox</artifactId>
-      <version>3.0.8</version>
-    </dependency>
-    <dependency>
-      <groupId>com.github.vandeseer</groupId>
-      <artifactId>easytable</artifactId>
-      <version>1.0.2</version>
-    </dependency>
-    <dependency>
-      <groupId>io.github.cdimascio</groupId>
-      <artifactId>dotenv-java</artifactId>
-      <version>3.2.0</version>
-    </dependency>
   </dependencies>
-
   <build>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.13.0</version>
-        <configuration>
-          <source>17</source>
-          <target>17</target>
-        </configuration>
       </plugin>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.2.5</version>
         <configuration>
           <includes>
-            <include>Unit/**/*Test.java</include>
+            <include>**/*Test.java</include>
           </includes>
-          <argLine>
-            -Dnet.bytebuddy.experimental=true
-            --add-exports org.junit.platform.commons/org.junit.platform.commons.util=ALL-UNNAMED
-            --add-exports org.junit.platform.commons/org.junit.platform.commons.logging=ALL-UNNAMED
-            --add-exports EIF.Programacion.Proyecto/Unit=org.junit.platform.commons
-            --add-opens EIF.Programacion.Proyecto/Unit=org.junit.platform.commons
-            --add-reads EIF.Programacion.Proyecto=org.junit.jupiter.api
-          </argLine>
+          <useModulePath>false</useModulePath>
+          <workingDirectory>${maven.multiModuleProjectDirectory}</workingDirectory>
         </configuration>
       </plugin>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
         <version>3.2.5</version>
         <configuration>
           <includes>
-            <include>Integration/**/*IT.java</include>
+            <include>**/*IT.java</include>
           </includes>
-          <argLine>
-            --add-exports org.junit.platform.commons/org.junit.platform.commons.util=ALL-UNNAMED
-            --add-exports org.junit.platform.commons/org.junit.platform.commons.logging=ALL-UNNAMED
-            --add-exports EIF.Programacion.Proyecto/Integration=org.junit.platform.commons
-            --add-opens EIF.Programacion.Proyecto/Integration=org.junit.platform.commons
-            --add-reads EIF.Programacion.Proyecto=org.junit.jupiter.api
-          </argLine>
+          <useModulePath>false</useModulePath>
+          <workingDirectory>${maven.multiModuleProjectDirectory}</workingDirectory>
         </configuration>
         <executions>
           <execution>
@@ -185,5 +108,4 @@
       </plugin>
     </plugins>
   </build>
-
 </project>

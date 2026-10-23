@@ -2,7 +2,7 @@
 
 # 📅 Sistema de Reserva de Recursos
 
-### EIF206 — Programación III · Proyecto 01
+### EIF206 — Programación III · Proyectos 01 y 02
 
 Sistema de escritorio para la **gestión integral de reservas de recursos institucionales**, desarrollado con Java y JavaFX. Incluye autenticación y roles, gestión de reservas y recursos, persistencia XML, generación de reportes PDF, pruebas automatizadas e integración con **Inteligencia Artificial (LLM)** mediante la API de Groq.
 
@@ -26,6 +26,20 @@ Sistema de escritorio para la **gestión integral de reservas de recursos instit
 </p>
 
 </div>
+
+---
+
+## Módulos del repositorio
+
+| Módulo | Documentación |
+| --- | --- |
+| Frontend | [Interfaz JavaFX, configuración y ejecución](frontend/README.md) |
+| Backend | [Servicios, datos y pruebas](backend/README.md) |
+| Common | [Modelos y serialización compartidos](common/README.md) |
+| Base de datos | [MER y scripts MySQL](database/README.md) |
+
+Consulta la [guía de arquitectura](docs/organizacion-proyecto-02.md) para conocer
+las dependencias entre módulos y los comandos del proyecto.
 
 ---
 
@@ -79,7 +93,7 @@ Para acceder al sistema por primera vez, utiliza el usuario administrador predet
 
 ## Arquitectura del Sistema
 
-El proyecto sigue una estricta **arquitectura por capas**, garantizando el desacoplamiento entre la interfaz gráfica, la lógica de negocio, el acceso a datos y las entidades de dominio.
+El proyecto organiza sus capas en módulos Maven. La interfaz pertenece a `frontend`, los servicios, la lógica y el acceso a datos a `backend`, y los modelos compartidos a `common`. La aplicación de escritorio invoca los servicios localmente y utiliza persistencia XML. El diseño relacional y los scripts MySQL se encuentran en `database/`.
 
 ```text
 ┌─────────────────────────────────────────────┐
@@ -118,13 +132,13 @@ El proyecto sigue una estricta **arquitectura por capas**, garantizando el desac
 
 ### Organización por Capas
 
-| Capa | Responsabilidad |
-| --- | --- |
-| **Interfaz de Usuario** | Vistas JavaFX, archivos FXML, hojas de estilo CSS y controladores de eventos. |
-| **Servicios** | Orquestación de operaciones de la aplicación y conexión lógica con controladores. |
-| **Lógica** | Reglas de negocio, validaciones de disponibilidad y submódulo de IA (`aiGenerator`). |
-| **Datos** | Operaciones CRUD y serialización JAXB sobre archivos XML estructurados. |
-| **Modelos** | Clases de dominio principales (`Administrador`, `Categoria`, `Funcionario`, `Recurso`, `Reserva`, `Usuario`). |
+| Capa                    | Responsabilidad                                                                                               |
+|-------------------------|---------------------------------------------------------------------------------------------------------------|
+| **Interfaz de Usuario** | Vistas JavaFX, archivos FXML, hojas de estilo CSS y controladores de eventos.                                 |
+| **Servicios**           | Orquestación de operaciones de la aplicación y conexión lógica con controladores.                             |
+| **Lógica**              | Reglas de negocio, validaciones de disponibilidad y submódulo de IA (`aiGenerator`).                          |
+| **Datos**               | Operaciones CRUD y serialización JAXB sobre archivos XML estructurados.                                       |
+| **Modelos**             | Clases de dominio principales (`Administrador`, `Categoria`, `Funcionario`, `Recurso`, `Reserva`, `Usuario`). |
 
 ### Tecnologías e Integraciones Clave
 
@@ -193,29 +207,23 @@ mvn -version
 ## Estructura del Proyecto
 
 ```text
-data/                           # Archivos XML base para la persistencia
-src/
-├── main/
-│   ├── java/
-│   │   └── una/proyecto/
-│   │       ├── app/            # Configuración y MainApp
-│   │       ├── controller/     # Controladores de vistas JavaFX
-│   │       ├── datos/          # Capa de datos y Wrappers JAXB para XML
-│   │       ├── logic/          # Lógica de negocio y módulo IA (aiGenerator)
-│   │       ├── model/          # Entidades del dominio del sistema
-│   │       ├── service/        # Servicios de aplicación y autenticación
-│   │       └── utils/          # Utilidades (Navegación, PDF, Sesión, Adaptadores)
-│   │
-│   └── resources/
-│       └── una/proyecto/
-│           ├── css/            # Estilos visuales de la interfaz
-│           ├── fonts/          # Recursos tipográficos
-│           └── ui/             # Diseños FXML de las pantallas
-│
-└── test/
-    └── java/
-        ├── Integration/        # Pruebas de integración del sistema
-        └── Unit/               # Pruebas unitarias de componentes
+pom.xml                         # POM padre: agrega los tres módulos
+common/
+├── pom.xml
+└── src/main/java/              # Modelos y adaptadores compartidos
+backend/
+├── pom.xml
+└── src/
+    ├── main/                   # Servicios, lógica, IA y datos XML
+    └── test/                   # Pruebas de negocio y persistencia
+frontend/
+├── pom.xml
+└── src/
+    ├── main/                   # JavaFX, presentación y reportes PDF
+    └── test/                   # Pruebas de login y lógica de presentación
+database/                       # MER DBML, esquema MySQL y catálogo de ejemplo
+docs/                           # Documentación de arquitectura
+data/xml/                       # Datos locales actuales, ignorados por Git
 ```
 
 ---
@@ -237,12 +245,13 @@ cd EIF206-Programacion3-Proyecto01
 3. **Compilar el código y ejecutar todas las pruebas automatizadas (Unitarias e Integración):**
 
 ```bash
-mvn clean test
+mvn clean verify
 ```
 
 4. **Ejecutar la interfaz gráfica con JavaFX:**
 
 ```bash
-mvn javafx:run
+mvn install -DskipTests
+mvn -pl frontend javafx:run
 ```
 
