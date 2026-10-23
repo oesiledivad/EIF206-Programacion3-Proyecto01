@@ -10,4 +10,5 @@ module una.proyecto.backend {
     exports una.proyecto.bootstrap;
     exports una.proyecto.datos;
     opens una.proyecto.datos.wrapper to jakarta.xml.bind;
+    requires java.sql;
 }

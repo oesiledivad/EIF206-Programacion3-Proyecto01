@@ -18,6 +18,13 @@
       <artifactId>jakarta.xml.bind-api</artifactId>
       <version>4.0.2</version>
     </dependency>
+
+    <dependency>
+      <groupId>com.mysql</groupId>
+      <artifactId>mysql-connector-j</artifactId>
+      <version>9.7.0</version>
+    </dependency>
+
     <dependency>
       <groupId>org.glassfish.jaxb</groupId>
       <artifactId>jaxb-runtime</artifactId>
