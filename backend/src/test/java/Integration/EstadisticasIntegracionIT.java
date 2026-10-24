@@ -37,7 +37,7 @@ public class EstadisticasIntegracionIT {
         localeOriginal = Locale.getDefault();
         Locale.setDefault(new Locale("es", "CR"));
 
-        reservaDatos = new ReservaDatos(XML_RESERVAS);
+        reservaDatos = new ReservaDatos();
         categoriaDatos = new CategoriaDatos(XML_CATEGORIAS);
         service = new EstadisticasService(new EstadisticasLogic(reservaDatos, categoriaDatos));
     }

@@ -21,7 +21,7 @@ public class AppFactory {
 
     public static ReservaService createReservaService(){
         try{
-            ReservaDatos datosReserva= new ReservaDatos("data/xml/reservas.xml");
+            ReservaDatos datosReserva= new ReservaDatos();
             ReservaLogic logicReserva= new ReservaLogic(datosReserva);
             return new ReservaService(logicReserva);
         } catch (Exception e) {
@@ -45,7 +45,7 @@ public class AppFactory {
 
     public static EstadisticasService createEstadisticasService() {
         try {
-            ReservaDatos datosReserva = new ReservaDatos("data/xml/reservas.xml");
+            ReservaDatos datosReserva = new ReservaDatos();
             CategoriaDatos datosCategoria = new CategoriaDatos("data/xml/categorias.xml");
 
             EstadisticasLogic logicEstadisticas = new EstadisticasLogic(datosReserva, datosCategoria);

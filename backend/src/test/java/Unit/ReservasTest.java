@@ -19,7 +19,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -51,24 +53,33 @@ public class ReservasTest {
         );
     }
 
+    // ---------- crear ----------
+
+    @Test
+    void crear_delegaEnDatosSinGenerarId() {
+        Reserva nueva = reservaValida();
+
+        logica.crear(nueva);
+
+        verify(datos).crear(nueva);
+        assertNull(nueva.getId());
+    }
+
+    @Test
+    void crear_reservaNula_lanzaExcepcion() {
+        assertThrows(IllegalArgumentException.class, () -> logica.crear(null));
+        verify(datos, never()).crear(any());
+    }
+
+    // ---------- eliminar ----------
+
     @Test
     void eliminar_Id_Inexistente_Debe_Lanzar_Excepcion() {
         when(datos.leerPorId("RESS-000")).thenReturn(null);
         assertThrows(IllegalArgumentException.class, () -> logica.eliminar("RESS-000"));
     }
 
-    @Test
-    void crear_id_existente_debe_lanzar_Excepcion() {
-        Reserva nueva = reservaValida();
-        nueva.setId("RES-000001");
-
-        Reserva existente = reservaValida();
-        existente.setId("RES-000001");
-
-        when(datos.leerPorId("RES-000001")).thenReturn(existente);
-
-        assertThrows(IllegalArgumentException.class, () -> logica.crear(nueva));
-    }
+    // ---------- validaciones de horario ----------
 
     @Test
     void verificarHoras_horaInicioDespuesDeHoraFin_deberiaLanzarExcepcion() {
@@ -84,6 +95,8 @@ public class ReservasTest {
         );
     }
 
+    // ---------- consultas ----------
+
     @Test
     void obtener_reservas_por_funcionario_lista_vacia_sin_reservas_null() {
         List<Reserva> resultado = logica.obtenerReservasPorFuncionario(null);
@@ -95,6 +108,15 @@ public class ReservasTest {
         List<Reserva> resultado = logica.obtenerReservasPorFuncionario("");
         assertTrue(resultado.isEmpty());
     }
+
+    @Test
+    void filtrarReserva_sinCoincidencias_retornaListaVacia() {
+        when(datos.obtenerTodos()).thenReturn(new ArrayList<>());
+        List<Reserva> resultado = logica.filtrarReserva(LocalDate.now().plusDays(1), "");
+        assertTrue(resultado.isEmpty());
+    }
+
+    // ---------- recursos ----------
 
     @Test
     void noHayRecursosDisponibles_deberiaLanzarExcepcion() {
@@ -125,6 +147,8 @@ public class ReservasTest {
         ));
     }
 
+    // ---------- categorias ----------
+
     @Test
     void actualizarCategoriasDeReserva_nuevasCategoriasNull_deberiaLanzarExcepcion() {
         Reserva reserva = reservaValida();
@@ -139,22 +163,5 @@ public class ReservasTest {
         assertThrows(IllegalArgumentException.class, () ->
                 logica.borrarCategoriasDeReserva(reserva, null)
         );
-    }
-
-    @Test
-    void crear_sinIdYSinReservasExistentes_generaPrimerId() {
-        Reserva nueva = reservaValida();
-        nueva.setId(null);
-        when(datos.obtenerTodos()).thenReturn(new ArrayList<>());
-        when(datos.leerPorId(anyString())).thenReturn(null);
-        logica.crear(nueva);
-        assertEquals("RES-000001", nueva.getId());
-    }
-
-    @Test
-    void filtrarReserva_sinCoincidencias_retornaListaVacia() {
-        when(datos.obtenerTodos()).thenReturn(new ArrayList<>());
-        List<Reserva> resultado = logica.filtrarReserva(LocalDate.now().plusDays(1), "");
-        assertTrue(resultado.isEmpty());
     }
 }
