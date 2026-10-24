@@ -43,3 +43,6 @@ build/
 
 ### Proyecto - Datos XML ###
 pdfs/
+
+###Credenciales BD
+.config/database.env
