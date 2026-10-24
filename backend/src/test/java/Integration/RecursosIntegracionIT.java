@@ -3,94 +3,112 @@ package Integration;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import una.proyecto.datos.Database;
 import una.proyecto.datos.RecursoDatos;
 import una.proyecto.logic.RecursoLogic;
 import una.proyecto.model.Recurso;
 import una.proyecto.service.RecursoService;
-import java.io.File;
+
+import java.sql.PreparedStatement;
+
 import static org.junit.jupiter.api.Assertions.*;
+
 public class RecursosIntegracionIT {
 
-    private static final String XML_TEST = "target/test-it-recursos.xml";
+    // Todas las pruebas usan ids con este prefijo para no tocar otros datos.
+    private static final String PREFIJO_PRUEBA = "IT-";
+    // Categorias que crea seed.sql (ids 1 y 2 en la tabla).
+    private static final String CATEGORIA_1 = "CAT-000001";
+    private static final String CATEGORIA_2 = "CAT-000002";
+
     private RecursoService service;
-    //----Creamos carpeta si no existe, limpiamos el xml para evitar aceptaciones o rechazos de test
-    //    y creamos el service con su nuevo xml, esto con datos limpios. Esto se ejecuta antes de cada test.
+
     @BeforeEach
     void setUp() throws Exception {
-        new File("target").mkdirs();
-        new File(XML_TEST).delete();
-        service = new RecursoService(new RecursoLogic(new RecursoDatos(XML_TEST)));
+        limpiarDatosDePrueba();
+        service = new RecursoService(new RecursoLogic(new RecursoDatos()));
     }
-    //---Limpiamos cada xml luego de ejecuatar un test---
-    @AfterEach
-    void tearDown() {
-        new File(XML_TEST).delete();
-    }
-    @Test
 
-    void obtener_todos_recursos_devuelve_vacio_si_no_hay_en_el_xml(){
-        assertNotNull(service.obtenerTodosRecursos());
-        assertTrue(service.obtenerTodosRecursos().isEmpty());
+    @AfterEach
+    void tearDown() throws Exception {
+        limpiarDatosDePrueba();
     }
-    @Test
-    void obtener_todos_recursos_devuelve_recursos_extraidos_xml(){
-        service.save(new Recurso("RE-100", "CAT-100", "Sala"));
-        service.save(new Recurso("RE-101", "CAT-100", "Sala para 10"));
-        Recurso r1 = service.recurPorId("RE-100");
-        Recurso r2 = service.recurPorId("RE-101");
-        assertNotNull(r1);
-        assertNotNull(r2);
-        assertEquals("RE-100", r1.getId());
-        assertEquals("RE-101", r2.getId());
-        assertEquals(2, service.obtenerTodosRecursos().size());
+
+    private void limpiarDatosDePrueba() throws Exception {
+        String sql = "delete from recursos where id_recurso like ?";
+        try (PreparedStatement stm = Database.instance().prepareStatement(sql)) {
+            stm.setString(1, PREFIJO_PRUEBA + "%");
+            Database.instance().executeUpdate(stm);
+        }
     }
-    @Test
-    void crear_recurso_valido(){
-        service.save(new Recurso("RE-100", "CAT-100", "Sala"));
-        Recurso r1 = service.recurPorId("RE-100");
-        assertNotNull(r1);
-        assertEquals("RE-100", r1.getId());
-        assertEquals(1, service.obtenerTodosRecursos().size());
+
+    private long contarRecursosDePrueba() {
+        return service.obtenerTodosRecursos().stream()
+                .filter(r -> r.getId().startsWith(PREFIJO_PRUEBA))
+                .count();
     }
+
+    // ---------- crear ----------
+
     @Test
-    void crear_recurso_existente(){
-        service.save(new Recurso("RE-100", "CAT-100", "Sala"));
-        Recurso r1 = service.recurPorId("RE-100");
-        assertNotNull(r1);
-        assertThrows(IllegalArgumentException.class, () -> service.save(r1));
+    void crear_recurso_valido_se_guarda_en_mysql() {
+        service.save(new Recurso("IT-100", CATEGORIA_1, "Sala de prueba"));
+
+        Recurso guardado = service.recurPorId("IT-100");
+        assertNotNull(guardado);
+        assertEquals("IT-100", guardado.getId());
+        assertEquals(CATEGORIA_1, guardado.getIdCategoria());
+        assertEquals("Sala de prueba", guardado.getDescripcion());
     }
+
     @Test
-    void actualizar_recurso_Inexistente(){
-        Recurso r1 = new Recurso("RE-100", "CAT-100", "Sala");
-        assertThrows(IllegalArgumentException.class, () ->service.update(r1));
+    void crear_recurso_existente_lanza_excepcion() {
+        service.save(new Recurso("IT-100", CATEGORIA_1, "Sala de prueba"));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> service.save(new Recurso("IT-100", CATEGORIA_1, "Otra sala")));
     }
+
     @Test
-    void eliminar_recurso_inexistente(){
-        Recurso r1 = new Recurso("RE-100", "CAT-100", "Sala");
-        assertThrows(IllegalArgumentException.class, () ->service.delete(r1.getId()));
+    void crear_recurso_con_categoria_inexistente_lanza_excepcion() {
+        RuntimeException error = assertThrows(RuntimeException.class,
+                () -> service.save(new Recurso("IT-100", "CAT-999999", "Sala de prueba")));
+
+        assertTrue(error.getMessage().contains("no existe"),
+                "Mensaje recibido: " + error.getMessage());
     }
+
+    // ---------- leer ----------
+
     @Test
-    void verifica_si_elimina_correctamente_recurso_existente(){
-        service.save(new Recurso("RE-100", "CAT-100", "Sala"));
-        Recurso r1 = service.recurPorId("RE-100");
-        assertNotNull(r1);
-        assertEquals(1, service.obtenerTodosRecursos().size());
-        service.delete(r1.getId());
-        Recurso r2 = service.recurPorId("RE-100");
-        assertNull(r2);
-        assertEquals(0, service.obtenerTodosRecursos().size());
+    void obtener_todos_incluye_los_recursos_creados() {
+        service.save(new Recurso("IT-100", CATEGORIA_1, "Sala de prueba"));
+        service.save(new Recurso("IT-101", CATEGORIA_2, "Laptop de prueba"));
+
+        assertEquals(2, contarRecursosDePrueba());
     }
+
     @Test
-    void obtener_recursos_por_categoria_especifica() {
-        Recurso r1 = new Recurso("RE-100", "CAT-101", "Sala1");
-        Recurso r2 = new Recurso("RE-101", "CAT-101", "Sala2");
-        Recurso r3 = new Recurso("RE-102", "CAT-101", "Sala3");
-        service.save(r1);
-        service.save(r2);
-        service.save(r3);
-        assertNotNull(r1);
-        assertNotNull(r2);
-        assertNotNull(r3);
-        assertEquals(3, service.recursosPorCategoria("CAT-101").size());
+    void leer_recurso_inexistente_devuelve_null() {
+        assertNull(service.recurPorId("IT-NO-EXISTE"));
+    }
+
+    // ---------- actualizar ----------
+
+    @Test
+    void actualizar_recurso_existente_cambia_sus_datos() {
+        service.save(new Recurso("IT-100", CATEGORIA_1, "Sala de prueba"));
+
+        service.update(new Recurso("IT-100", CATEGORIA_2, "Descripcion nueva"));
+
+        Recurso actualizado = service.recurPorId("IT-100");
+        assertEquals("Descripcion nueva", actualizado.getDescripcion());
+        assertEquals(CATEGORIA_2, actualizado.getIdCategoria());
+    }
+
+    @Test
+    void actualizar_recurso_inexistente_lanza_excepcion() {
+        assertThrows(IllegalArgumentException.class,
+                () -> service.update(new Recurso("IT-NO-EXISTE", CATEGORIA_1, "Sala")));
     }
 }

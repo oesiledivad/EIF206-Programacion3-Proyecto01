@@ -11,7 +11,7 @@ import una.proyecto.datos.UsuarioDatos;
 public class AppFactory {
     public static RecursoService createRecursoDatos(){
         try{
-            RecursoDatos datosRecurso= new RecursoDatos("data/xml/recursos.xml");
+            RecursoDatos datosRecurso= new RecursoDatos();
             RecursoLogic logicRecurso= new RecursoLogic(datosRecurso);
             return new RecursoService(logicRecurso);
         } catch (Exception e) {
