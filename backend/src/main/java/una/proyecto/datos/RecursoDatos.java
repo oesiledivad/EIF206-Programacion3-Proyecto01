@@ -7,8 +7,6 @@ import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
 import java.util.List;
-
-
 //=======================================
 //Aca iran los imports de la base de datos.
 //=======================================
@@ -17,7 +15,8 @@ import java.sql.ResultSet;
 public class RecursoDatos {
 
     // Atributos, instancia de la conexion
-     Database theInstance;
+    Database theInstance;
+    //Aca se encuentran errores de la base de datos
     private static final String PREFIJO_CATEGORIA = "CAT-";
     private static final int ERROR_DUPLICADO = 1062;
     private static final int ERROR_LLAVE_FORANEA = 1452;
