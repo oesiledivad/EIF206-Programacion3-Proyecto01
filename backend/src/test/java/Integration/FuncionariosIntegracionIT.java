@@ -23,7 +23,7 @@ public class FuncionariosIntegracionIT {
     void setUp() {
         new File("target").mkdirs();
         new File(XML_TEST).delete();
-        service = new FuncionarioService(new FuncionarioLogic(new UsuarioDatos(XML_TEST)));
+        service = new FuncionarioService(new FuncionarioLogic(new UsuarioDatos()));
     }
 
     @AfterEach

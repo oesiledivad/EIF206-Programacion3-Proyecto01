@@ -3,4 +3,5 @@ module una.proyecto.common {
     exports una.proyecto.model;
     exports una.proyecto.serialization;
     opens una.proyecto.model;
+    exports una.proyecto.protocolo;
 }

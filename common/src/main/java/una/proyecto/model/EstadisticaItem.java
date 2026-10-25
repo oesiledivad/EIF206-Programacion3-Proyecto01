@@ -1,6 +1,9 @@
 package una.proyecto.model;
 
-public class EstadisticaItem {
+import java.io.Serializable;
+
+public class EstadisticaItem implements Serializable {
+    private static final long serialVersionUID = 1L;
     private final String nombre;
     private final int cantidad;
 

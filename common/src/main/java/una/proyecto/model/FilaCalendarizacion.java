@@ -1,7 +1,9 @@
 package una.proyecto.model;
 
-public class FilaCalendarizacion {
+import java.io.Serializable;
 
+public class FilaCalendarizacion implements Serializable {
+    private static final long serialVersionUID = 1L;
     private String hora;
     private String lunes;
     private String martes;

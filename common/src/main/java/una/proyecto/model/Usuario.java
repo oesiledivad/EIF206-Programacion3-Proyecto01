@@ -4,13 +4,15 @@ import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlSeeAlso;
 
+import java.io.Serializable;
+
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlSeeAlso({
         Funcionario.class,
         Administrador.class
 })
-public abstract class Usuario {
-
+public abstract class Usuario implements Serializable {
+    private static final long serialVersionUID = 1L;
     private String id;
     private String role;
     private String password;

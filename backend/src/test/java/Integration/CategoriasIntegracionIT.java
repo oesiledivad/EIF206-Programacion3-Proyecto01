@@ -31,7 +31,7 @@ public class CategoriasIntegracionIT {
                 return new java.util.ArrayList<>();
             }
         };
-        service = new CategoriaService(new CategoriaLogic(new CategoriaDatos(XML_TEST), sinRecursos));
+        service = new CategoriaService(new CategoriaLogic(new CategoriaDatos(), sinRecursos));
     }
 
     @AfterEach
