@@ -246,6 +246,45 @@ como una aplicación independiente.
 Los siguientes pasos usan **PowerShell**, desde la raíz del repositorio.
 En Linux/macOS, el comando de Maven Wrapper es `./mvnw`.
 
+### 🚀 Inicio automático en Windows
+
+Con **JDK 17 o superior** instalado y **Docker Desktop en ejecución**, abre
+PowerShell en la raíz del repositorio y ejecuta:
+
+```powershell
+.\iniciar.ps1
+```
+
+El script configura los archivos locales cuando no existen, inicia MySQL,
+compila `common`, `backend` y `frontend`, crea el administrador si no existe y
+abre JavaFX conectado al backend. Conserva las credenciales y los datos existentes.
+En una instalación nueva, entra con el usuario **admin** y la contraseña guardada
+en `.config/admin.env`. Ese archivo es local y está excluido de Git.
+
+Al cerrar JavaFX, el script detiene el backend que inició. MySQL permanece
+disponible en Docker; para detenerlo utiliza el comando del paso 9.
+Los registros del backend quedan en `target/local/backend.log` y
+`target/local/backend-error.log`.
+
+```powershell
+# Comprobar MySQL y backend sin abrir JavaFX
+.\iniciar.ps1 -Comprobar
+
+# Reutilizar la compilación anterior cuando no cambió el código
+.\iniciar.ps1 -SinCompilar
+
+# Usar otro puerto para el backend y su cliente
+.\iniciar.ps1 -PuertoBackend 1235
+```
+
+Si PowerShell bloquea los scripts, puedes habilitar únicamente esta ejecución:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\iniciar.ps1
+```
+
+También puedes ejecutar cada paso manualmente como se describe a continuación.
+
 ### 1. 📥 Obtener el proyecto y comprobar Java
 
 ```powershell
