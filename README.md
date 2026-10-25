@@ -500,6 +500,26 @@ Se ejecutan las pruebas unitarias y la integración del login, el panel remoto,
 el cambio de contraseña y logout. Groq no es necesario para iniciar sesión;
 la configuración de IA se utiliza al invocar el asistente de reservas.
 
+### 🧪 Integración continua en GitHub Actions
+
+El workflow **Tests** (`.github/workflows/tests.yml`) se ejecuta en los pushes y
+pull requests dirigidos a `main` y `develop`. También puede iniciarse desde
+**Actions → Tests → Run workflow**.
+
+Utiliza JDK 21, Maven Wrapper y una instancia MySQL 8.4 exclusiva de CI,
+inicializada con `database/schema.sql`. Compila los tres módulos y ejecuta todas
+las pruebas unitarias junto con estas integraciones:
+
+* `UsuariosIntegracionIT`: persistencia de usuarios, hashes, estado activo y cambio de contraseña.
+* `FuncionariosIntegracionIT`: perfiles de funcionarios y su clave inicial.
+* `ServerIntegracionIT`: operaciones y permisos del servidor por sockets.
+* `LoginIntegracionIT`: ingreso, panel remoto, cambio de contraseña y cierre de sesión desde el cliente.
+
+Las demás suites de integración quedan fuera de este comando; el resultado del
+workflow corresponde a las pruebas enumeradas. No requiere secretos de Groq ni
+archivos de configuración de tu computadora. Los reportes se publican como
+artefacto **reportes-pruebas** y MySQL se elimina al terminar la ejecución.
+
 ### 9. ⏹️ Detener la ejecución
 
 Con `iniciar.ps1`, basta con cerrar la ventana JavaFX: el script detiene el
