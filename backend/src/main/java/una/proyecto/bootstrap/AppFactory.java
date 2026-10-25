@@ -35,7 +35,8 @@ public class AppFactory {
     }
     public static CategoriaService createCategoriaService(){
         try{
-            CategoriaDatos datosCategoria= new CategoriaDatos("data/xml/categorias.xml");
+            CategoriaDatos datosCategoria = new CategoriaDatos();
+            // ya no usan los xml
             CategoriaLogic logicCategoria= new CategoriaLogic(datosCategoria);
             return new CategoriaService(logicCategoria);
         } catch (Exception e) {
@@ -46,7 +47,8 @@ public class AppFactory {
     public static EstadisticasService createEstadisticasService() {
         try {
             ReservaDatos datosReserva = new ReservaDatos();
-            CategoriaDatos datosCategoria = new CategoriaDatos("data/xml/categorias.xml");
+            // ya no usan los xml
+            CategoriaDatos datosCategoria = new CategoriaDatos();
 
             EstadisticasLogic logicEstadisticas = new EstadisticasLogic(datosReserva, datosCategoria);
             return new EstadisticasService(logicEstadisticas);

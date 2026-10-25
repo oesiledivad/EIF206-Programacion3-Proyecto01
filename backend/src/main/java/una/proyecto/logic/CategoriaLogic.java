@@ -59,8 +59,7 @@ public class CategoriaLogic {
             throw new IllegalArgumentException("Ya existe una categoría con esa descripción");
         }
 
-        nueva.setId(generarSiguienteId());
-
+        // El id lo genera MySQL (AUTO_INCREMENT); CategoriaDatos.crear() se lo asigna a "nueva".
         categoriaDatos.crear(nueva);
     }
 
@@ -90,17 +89,8 @@ public class CategoriaLogic {
 
         categoriaDatos.eliminar(id);
     }
+    // ya no se debe generarSiguienteId() porque dos usuarios podrian calcular la misma CAT0001 a la vez
 
-    private String generarSiguienteId() {
-        int maximo = obtenerTodos().stream()
-                .map(Categoria::getId)
-                .filter(id -> id != null && id.startsWith("CAT-"))
-                .mapToInt(id -> Integer.parseInt(id.substring(4)))
-                .max()
-                .orElse(0);
-
-        return String.format("CAT-%06d", maximo + 1);
-    }
     public List<Categoria> categoriasSinRecursos(List<Categoria> categoriasEscogidas) {
         if (categoriasEscogidas == null || categoriasEscogidas.isEmpty()) {
             return List.of();
