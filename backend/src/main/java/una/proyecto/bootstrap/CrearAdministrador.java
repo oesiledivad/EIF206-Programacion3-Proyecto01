@@ -10,7 +10,10 @@ public final class CrearAdministrador {
 
     public static void main(String[] args) {
         char[] password;
-        if (System.console() != null) {
+        String configuredPassword = System.getenv("APP_ADMIN_PASSWORD");
+        if (configuredPassword != null) {
+            password = configuredPassword.toCharArray();
+        } else if (System.console() != null) {
             password = System.console().readPassword("Contraseña para admin: ");
         } else {
             String value = System.getenv("APP_ADMIN_PASSWORD");

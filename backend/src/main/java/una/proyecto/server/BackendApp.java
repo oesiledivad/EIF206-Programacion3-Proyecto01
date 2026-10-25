@@ -8,11 +8,16 @@ import java.io.IOException;
 public class BackendApp {
 
     public static void main(String[] args) {
+        String configuredPort = System.getenv("SERVER_PORT");
+        int port = configuredPort == null ? Protocol.PORT : Integer.parseInt(configuredPort);
+        if (port < 1 || port > 65535) {
+            throw new IllegalArgumentException("SERVER_PORT debe estar entre 1 y 65535");
+        }
         Server server;
         try {
-            server = new Server(Protocol.PORT);
+            server = new Server(port);
         } catch (IOException e) {
-            System.err.println("No se pudo abrir el puerto " + Protocol.PORT
+            System.err.println("No se pudo abrir el puerto " + port
                     + ". Puede que otro servidor ya este corriendo. Detalle: " + e.getMessage());
             return;
         } catch (RuntimeException e) {
