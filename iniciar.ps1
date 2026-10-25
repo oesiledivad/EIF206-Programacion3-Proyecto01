@@ -8,6 +8,7 @@ param(
 $ErrorActionPreference = 'Stop'
 $root = $PSScriptRoot
 $backend = $null
+$mysqlManaged = $false
 $lock = $null
 $variables = @('JAVA_HOME', 'PATH', 'DB_URL', 'DB_USER', 'DB_PASSWORD',
     'MYSQL_PORT', 'MYSQL_PASSWORD', 'MYSQL_ROOT_PASSWORD',
@@ -109,7 +110,8 @@ try {
     $env:SERVER_PORT = "$PuertoBackend"
 
     Write-Host 'Iniciando MySQL...'
-    Invoke-Compose @('up', '-d', '--wait')
+    $mysqlManaged = $true
+    Invoke-Compose @('up', '-d', '--wait', 'mysql')
     if (-not $SinCompilar) {
         Invoke-Maven @('install', '-DskipTests', '--batch-mode')
         Invoke-Maven @('-pl', 'backend', 'org.apache.maven.plugins:maven-dependency-plugin:3.7.0:build-classpath',
@@ -152,12 +154,20 @@ try {
     if (-not $ready) { throw "El backend no arranco a tiempo. Revise $stdout y $stderr." }
     Write-Host "Backend conectado a MySQL y escuchando en $PuertoBackend."
     if (-not $Comprobar) {
-        Write-Host 'Abriendo JavaFX. Al cerrar la ventana se detendra este backend.'
+        Write-Host 'Abriendo JavaFX. Al cerrar la ventana se detendran este backend y MySQL.'
         Invoke-Maven @('-pl', 'frontend', 'javafx:run')
     }
 } finally {
-    if ($backend -and -not $backend.HasExited) { Stop-Process -Id $backend.Id -ErrorAction SilentlyContinue }
-    if ($lock) { $lock.Dispose() }
-    foreach ($name in $variables) { [Environment]::SetEnvironmentVariable($name, $original[$name], 'Process') }
-    Pop-Location
+    try {
+        if ($backend -and -not $backend.HasExited) { Stop-Process -Id $backend.Id -ErrorAction SilentlyContinue }
+        if ($mysqlManaged) {
+            Write-Host 'Deteniendo MySQL y conservando sus datos...'
+            & docker compose --env-file "$root/.config/docker.env" stop mysql
+            if ($LASTEXITCODE -ne 0) { Write-Warning 'No se pudo detener MySQL. Use docker compose --env-file .config/docker.env stop mysql.' }
+        }
+    } finally {
+        if ($lock) { $lock.Dispose() }
+        foreach ($name in $variables) { [Environment]::SetEnvironmentVariable($name, $original[$name], 'Process') }
+        Pop-Location
+    }
 }
