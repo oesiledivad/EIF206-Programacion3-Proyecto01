@@ -32,7 +32,7 @@ public class CalendarizacionActividadesIntegracionIT {
         RecursoService sinRecursos = new RecursoService(null) {
             @Override public List<Recurso> obtenerTodosRecursos() { return new ArrayList<>(); }
         };
-        service = new ReservaService(new ReservaLogic(new ReservaDatos(XML_TEST), sinRecursos));
+        service = new ReservaService(new ReservaLogic(new ReservaDatos(), sinRecursos));
     }
 
     @AfterEach

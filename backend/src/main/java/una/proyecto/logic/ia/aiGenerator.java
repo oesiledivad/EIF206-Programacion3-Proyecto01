@@ -40,7 +40,8 @@ public class aiGenerator {
 
     public static Reserva extraeInformacion(String frase, List<Categoria> categoriasDisponibles) throws Exception {
 
-        if (API_KEY == null || API_KEY.isBlank()) {
+        // Este cambio es para que la API solo se exija cuando se va a usar un cliente HTTP real
+        if (httpClientOverride == null && (API_KEY == null || API_KEY.isBlank())) {
             throw new Exception("La API Key de Groq no está configurada en el archivo .env");
         }
 

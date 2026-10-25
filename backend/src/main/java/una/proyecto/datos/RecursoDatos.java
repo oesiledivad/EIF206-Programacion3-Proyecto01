@@ -1,86 +1,143 @@
 package una.proyecto.datos;
-
-import jakarta.xml.bind.JAXBContext;
-import jakarta.xml.bind.JAXBException;
-import jakarta.xml.bind.Marshaller;
-import jakarta.xml.bind.Unmarshaller;
-import una.proyecto.datos.wrapper.RecursosWrapper;
 import una.proyecto.model.Recurso;
-
 import java.io.File;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+//=======================================
+//Aca iran los imports de la base de datos.
+//=======================================
+import java.sql.ResultSet;
 
 public class RecursoDatos {
-    private   String filePath;
-    private final JAXBContext ctx;
-    private List<Recurso>cache;
 
-    public RecursoDatos(String filePath) throws Exception {
-        this.filePath=filePath;
-        try {
-            this.ctx = JAXBContext.newInstance(RecursosWrapper.class, Recurso.class);
-        }catch(JAXBException e){
-            throw new Exception("Error al inicializar JAXBContext: " + e.getMessage(), e);
-        }
-        this.cache=cargarTodo();
-        }
-    public void guardarTodo(List<Recurso> lista){
-    try {
-        Marshaller marshaller = ctx.createMarshaller();
-        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-        RecursosWrapper wrapper = new RecursosWrapper();
-        wrapper.setRecursos(lista);
-        marshaller.marshal(wrapper, new File(filePath));
-    }catch(JAXBException e){
-        throw  new RuntimeException("Error al guardar los recursos en XML: " + e.getMessage(), e);
-    }
-    }
-    public List<Recurso> cargarTodo(){
-        File file= new File (filePath);
-        if(!file.exists()){
-            return new ArrayList<>();
-        }
-        try{
-            Unmarshaller unmarshaller = ctx.createUnmarshaller();
-            RecursosWrapper wrapper = (RecursosWrapper) unmarshaller.unmarshal(file);
-            List<Recurso> lista = wrapper.getRecursos();
-            return lista != null ? new ArrayList<>(lista) : new ArrayList<>();
-        } catch (JAXBException e) {
-            throw new RuntimeException("Error de persistencia: Falló el unmarshal de JAXB", e);
-        }
+    // Atributos, instancia de la conexion
+    Database theInstance;
+    //Aca se encuentran errores de la base de datos
+    private static final String PREFIJO_CATEGORIA = "CAT-";
+    private static final int ERROR_DUPLICADO = 1062;
+    private static final int ERROR_LLAVE_FORANEA = 1452;
+    private static final int ERROR_LLAVE_FORANEA_SIN_DETALLE = 1216;
+
+
+    public RecursoDatos()throws Exception{
+
+        this.theInstance= Database.instance();
     }
 
+    private boolean esErrorLlaveForanea(SQLException e) {
+        return e.getErrorCode() == ERROR_LLAVE_FORANEA
+                || e.getErrorCode() == ERROR_LLAVE_FORANEA_SIN_DETALLE;
+    }
     public void crear(Recurso nuevoDto) {
-        cache.add(nuevoDto);
-        guardarTodo(cache);
-    }
-
-
-    public Recurso leerPorId(String id) {
-
-        return cache.stream()
-                .filter(u -> id.equals(u.getId()))
-                .findFirst()
-                .orElse(null);
-    }
-    public void actualizar(Recurso dtoActualizado) {
-
-        for (int i = 0; i < cache.size(); i++) {
-            if (Objects.equals(cache.get(i).getId(), dtoActualizado.getId())) {
-                cache.set(i, dtoActualizado);
-                guardarTodo(cache);
-                return;
+        String sql = "insert into recursos (id_recurso, descripcion, id_categoria) values (?, ?, ?)";
+        try (PreparedStatement stm = theInstance.prepareStatement(sql)) {
+            stm.setString(1, nuevoDto.getId());
+            stm.setString(2, nuevoDto.getDescripcion());
+            stm.setInt(3, categoriaAId(nuevoDto.getIdCategoria()));
+            theInstance.executeUpdate(stm);
+        } catch (SQLIntegrityConstraintViolationException e) {
+            if (e.getErrorCode() == ERROR_DUPLICADO) {
+                throw new RuntimeException("Ya existe un recurso con el id " + nuevoDto.getId(), e);
             }
+            if (esErrorLlaveForanea(e)) {
+                throw new RuntimeException("La categoria " + nuevoDto.getIdCategoria() + " no existe", e);
+            }
+            throw new RuntimeException("Error de integridad al crear el recurso: " + e.getMessage(), e);
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al crear el recurso: " + e.getMessage(), e);
         }
+    }
+    // Convierte el formato de la aplicacion (CAT-000001) al id de la tabla (1).
+    private int categoriaAId(String idCategoria) {
+        if (idCategoria == null || !idCategoria.startsWith(PREFIJO_CATEGORIA)) {
+            throw new IllegalArgumentException("Id de categoria invalido: " + idCategoria);
+        }
+        try {
+            return Integer.parseInt(idCategoria.substring(PREFIJO_CATEGORIA.length()));
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Id de categoria invalido: " + idCategoria, e);
+        }
+    }
+    public Recurso leerPorId(String id) {
+        String sql = "select id_recurso, descripcion, id_categoria from recursos "
+                + "where id_recurso = ? and activo = true";
+        try (PreparedStatement stm = theInstance.prepareStatement(sql)) {
+            stm.setString(1, id);
+            try (ResultSet rs = theInstance.executeQuery(stm)) {
+                if (rs.next()) {
+                    return aRecurso(rs);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al buscar el recurso " + id + ": " + e.getMessage(), e);
+        }
+        return null;
+    }
 
+    public void actualizar(Recurso dtoActualizado) {
+        String sql = "update recursos set descripcion = ?, id_categoria = ? "
+                + "where id_recurso = ? and activo = true";
+        try (PreparedStatement stm = theInstance.prepareStatement(sql)) {
+            stm.setString(1, dtoActualizado.getDescripcion());
+            stm.setInt(2, categoriaAId(dtoActualizado.getIdCategoria()));
+            stm.setString(3, dtoActualizado.getId());
+            int filas = theInstance.executeUpdate(stm);
+            if (filas == 0) {
+                throw new RuntimeException("No existe un recurso activo con el id " + dtoActualizado.getId());
+            }
+        } catch (SQLIntegrityConstraintViolationException e) {
+            if (e.getErrorCode() == ERROR_LLAVE_FORANEA) {
+                throw new RuntimeException("La categoria " + dtoActualizado.getIdCategoria() + " no existe", e);
+            }
+            throw new RuntimeException("Error de integridad al actualizar el recurso: " + e.getMessage(), e);
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al actualizar el recurso: " + e.getMessage(), e);
+        }
     }
+
     public void eliminar(String id) {
-        cache.removeIf(recurso -> Objects.equals(recurso.getId(), id));
-        guardarTodo(cache);
+        String sql = "update recursos set activo = false where id_recurso = ? and activo = true";
+        try (PreparedStatement stm = theInstance.prepareStatement(sql)) {
+            stm.setString(1, id);
+            int filas = theInstance.executeUpdate(stm);
+            if (filas == 0) {
+                throw new RuntimeException("No existe un recurso activo con el id " + id);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al eliminar el recurso " + id + ": " + e.getMessage(), e);
+        }
     }
+
+
     public List<Recurso> obtenerTodos() {
-        return new ArrayList<>(cache);
+        String sql= "select id_recurso, descripcion, id_categoria from recursos " +"where activo = true order by id_recurso";
+        List<Recurso> resultado = new ArrayList<>();
+        try(PreparedStatement std= theInstance.prepareStatement(sql)){
+            ResultSet resultSet= theInstance.executeQuery(std);
+            while (resultSet.next()) {
+                resultado.add(aRecurso(resultSet));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al obtener los recursos: " + e.getMessage(), e);
+        }
+        return resultado;
     }
+    private Recurso aRecurso(ResultSet rs) throws SQLException {
+        Recurso recurso = new Recurso();
+        recurso.setId(rs.getString("id_recurso"));
+        recurso.setDescripcion(rs.getString("descripcion"));
+        recurso.setIdCategoria(idACategoria(rs.getInt("id_categoria")));
+        return recurso;
+    }
+    private String idACategoria(int id) {
+        return String.format("%s%06d", PREFIJO_CATEGORIA, id);
+    }
+
 }
+
+
+

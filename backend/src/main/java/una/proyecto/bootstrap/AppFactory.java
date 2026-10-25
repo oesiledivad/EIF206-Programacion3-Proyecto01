@@ -11,7 +11,7 @@ import una.proyecto.datos.UsuarioDatos;
 public class AppFactory {
     public static RecursoService createRecursoDatos(){
         try{
-            RecursoDatos datosRecurso= new RecursoDatos("data/xml/recursos.xml");
+            RecursoDatos datosRecurso= new RecursoDatos();
             RecursoLogic logicRecurso= new RecursoLogic(datosRecurso);
             return new RecursoService(logicRecurso);
         } catch (Exception e) {
@@ -21,7 +21,7 @@ public class AppFactory {
 
     public static ReservaService createReservaService(){
         try{
-            ReservaDatos datosReserva= new ReservaDatos("data/xml/reservas.xml");
+            ReservaDatos datosReserva= new ReservaDatos();
             ReservaLogic logicReserva= new ReservaLogic(datosReserva);
             return new ReservaService(logicReserva);
         } catch (Exception e) {
@@ -35,7 +35,8 @@ public class AppFactory {
     }
     public static CategoriaService createCategoriaService(){
         try{
-            CategoriaDatos datosCategoria= new CategoriaDatos("data/xml/categorias.xml");
+            CategoriaDatos datosCategoria = new CategoriaDatos();
+            // ya no usan los xml
             CategoriaLogic logicCategoria= new CategoriaLogic(datosCategoria);
             return new CategoriaService(logicCategoria);
         } catch (Exception e) {
@@ -45,8 +46,9 @@ public class AppFactory {
 
     public static EstadisticasService createEstadisticasService() {
         try {
-            ReservaDatos datosReserva = new ReservaDatos("data/xml/reservas.xml");
-            CategoriaDatos datosCategoria = new CategoriaDatos("data/xml/categorias.xml");
+            ReservaDatos datosReserva = new ReservaDatos();
+            // ya no usan los xml
+            CategoriaDatos datosCategoria = new CategoriaDatos();
 
             EstadisticasLogic logicEstadisticas = new EstadisticasLogic(datosReserva, datosCategoria);
             return new EstadisticasService(logicEstadisticas);

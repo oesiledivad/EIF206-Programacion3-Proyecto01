@@ -37,7 +37,6 @@ public class CategoriasTest {
         return new Categoria(null, descripcion);
     }
 
-    // ── obtenerTodos ──────────────────────────────────────────────────────────
 
     // Probar obtenerTodos() cuando no hay categorias — debe retornar lista vacia
     @Test
@@ -161,40 +160,18 @@ public class CategoriasTest {
         logica.crear(categoriaValida("Proyector"));
         verify(datos).crear(any());
     }
-
-    // Verificar que crear() asigne un id con formato CAT-
+    // se borran las pruebas que se hacian con la CAT000 autogenerada y se cambian por esta
+    // La lógica ya no genera el id: se lo delega a CategoriaDatos (MySQL AUTO_INCREMENT)
     @Test
-    void crearAsignaIdConFormatoCAT() {
+    void crearNoAsignaIdYDelegaEnDatos() {
         when(datos.obtenerTodos()).thenReturn(new ArrayList<>());
         Categoria c = categoriaValida("Sala");
+
         logica.crear(c);
-        assertNotNull(c.getId());
-        assertTrue(c.getId().startsWith("CAT-"));
-    }
 
-    // Verificar que el primer id autogenerado sea CAT-000001
-    @Test
-    void crearPrimerIdEsCAT000001() {
-        when(datos.obtenerTodos()).thenReturn(new ArrayList<>());
-        Categoria c = categoriaValida("Sala");
-        logica.crear(c);
-        assertEquals("CAT-000001", c.getId());
+        assertNull(c.getId());   // con el mock, nadie asignó id
+        verify(datos).crear(c);  // se le pasó a datos la misma categoría
     }
-
-    // Verificar que el segundo id autogenerado sea CAT-000002
-    @Test
-    void crearSegundoIdEsCAT000002() {
-        when(datos.obtenerTodos())
-                .thenReturn(new ArrayList<>())
-                .thenReturn(List.of(new Categoria("CAT-000001", "Sala")));
-        Categoria c1 = categoriaValida("Sala");
-        logica.crear(c1);
-        Categoria c2 = categoriaValida("Computadora");
-        logica.crear(c2);
-        assertEquals("CAT-000002", c2.getId());
-    }
-
-    // ── actualizar ────────────────────────────────────────────────────────────
 
     // Probar actualizar() con id null — debe lanzar IllegalArgumentException
     @Test

@@ -29,13 +29,7 @@ public class ReservaLogic {
         if (nuevaReserva == null) {
             throw new IllegalArgumentException("La reserva no puede ser nula");
         }
-        if (nuevaReserva.getId() == null || nuevaReserva.getId().trim().isEmpty()) {
-            nuevaReserva.setId(generarSiguienteIdReserva());
-        }
-        Reserva existente = reservaDatos.leerPorId(nuevaReserva.getId());
-        if (existente != null) {
-            throw new IllegalArgumentException("La reserva con id " + nuevaReserva.getId() + " ya existe");
-        }
+
         reservaDatos.crear(nuevaReserva);
     }
 
@@ -213,16 +207,7 @@ public class ReservaLogic {
         Reserva reserva = reservaDatos.leerPorId(id);
         reserva.setCategoriasDeRecursos(categorias);
     }
-    private String generarSiguienteIdReserva() {
-        int maximo = obtenerTodos().stream()
-                .map(Reserva::getId)
-                .filter(id -> id != null && id.startsWith("RES-"))
-                .mapToInt(id -> Integer.parseInt(id.substring(4)))
-                .max()
-                .orElse(0);
 
-        return String.format("RES-%06d", maximo + 1);
-    }
     //aca voy a filtrar las reservas por id de categoria
    public List<Reserva> filtrarReserva(LocalDate fecha, String idCategoria){
            List<Reserva> reservas = obtenerTodos();
