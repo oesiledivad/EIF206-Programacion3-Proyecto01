@@ -25,6 +25,9 @@ public final class Protocol {
     public static final int RESERVA_BUSCAR = 102;
     public static final int RESERVA_CANCELAR = 103;
 
+    // Notificaciones asincronas (900)
+    public static final int NOTIFICACION_RESERVA_CREADA = 900;
+
     private Protocol() {
     }
 }

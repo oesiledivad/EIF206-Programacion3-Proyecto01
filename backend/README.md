@@ -47,9 +47,27 @@ Para incluir también las pruebas de integración de IA:
 mvn -pl backend -am verify
 ```
 
+Para verificar pruebas del servidor sin un frontend, si no un cliente simulado:
+
+```sh
+mvn -pl backend -am clean verify "-Dit.test=ServerIntegracionIT" "-Dfailsafe.failIfNoSpecifiedTests=false"
+```
+
+
+
 Surefire ejecuta las clases `*Test` y Failsafe las clases `*IT`. Los reportes
 se encuentran en `backend/target/surefire-reports/` y
 `backend/target/failsafe-reports/`.
+## Decisiones de diseño
+
+1. **Implementación del patrón de diseño fachada en**:`src/main/java/una/proyecto/service/Servicios.java`
+2. **Uso de una clase anónima `Worker `** : Con esto evitamos que el worker sea un hilo, sin embargo utiliza un hilo apra poder trabajar 
+     en paralelo. A esto le llamamos ` Usar ` en lugar de `Ser `. Nos permite tener ciertas ventajas. 
+
+        1.  No expone un run() publico, nadie puede ejecutar su ciclo por error en un hilo equivocado. 
+        2.  El Worker queda libre para heredar de otra clase si algún día lo necesita.
+3. 
+
 
 ## Configuración y datos
 
