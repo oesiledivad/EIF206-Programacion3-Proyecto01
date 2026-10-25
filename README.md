@@ -9,7 +9,9 @@ Sistema de escritorio para la **gestión integral de reservas de recursos instit
 <p>
   <img src="https://img.shields.io/badge/Java-17%2B-orange?logo=openjdk&logoColor=white" alt="Java 17+">
   <img src="https://img.shields.io/badge/JavaFX-21.0.6-2f73c9?logo=java&logoColor=white" alt="JavaFX 21">
-  <img src="https://img.shields.io/badge/Maven-3.x-C71A36?logo=apachemaven&logoColor=white" alt="Maven">
+  <img src="https://img.shields.io/badge/Maven-3.9.16-C71A36?logo=apachemaven&logoColor=white" alt="Maven">
+  <img src="https://img.shields.io/badge/MySQL-8.4-4479A1?logo=mysql&logoColor=white" alt="MySQL 8.4">
+  <img src="https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white" alt="Docker Compose">
   <img src="https://img.shields.io/badge/JUnit-5-25A162?logo=junit5&logoColor=white" alt="JUnit 5">
   <img src="https://img.shields.io/badge/Mockito-5.x-78C257" alt="Mockito">
   <img src="https://img.shields.io/badge/AI-Groq-00A67E" alt="Groq">
@@ -96,7 +98,7 @@ La base también puede ejecutarse con [Docker Compose](database/DOCKER.md).
 
 ## Arquitectura del Sistema
 
-El proyecto organiza sus capas en módulos Maven. La interfaz pertenece a `frontend`, los servicios, la lógica y el acceso a datos a `backend`, y los modelos compartidos a `common`. La aplicación de escritorio invoca los servicios localmente y utiliza persistencia MySQL. El diseño relacional y los scripts MySQL se encuentran en `database/`.
+El proyecto organiza sus capas en módulos Maven. La interfaz pertenece a `frontend`, los servicios, la lógica y el acceso a datos a `backend`, y los modelos compartidos a `common`. El ingreso, el cambio de contraseña y el panel inicial se comunican con el servidor mediante sockets. El backend utiliza MySQL. El diseño relacional y los scripts MySQL se encuentran en `database/`.
 
 ```text
 ┌─────────────────────────────────────────────┐
@@ -122,7 +124,7 @@ El proyecto organiza sus capas en módulos Maven. La interfaz pertenece a `front
                        ▼
 ┌─────────────────────────────────────────────┐
 │                   DATOS                     │
-│        MySQL · JDBC · Repositorios  │
+│         MySQL · JDBC · Repositorios         │
 └──────────────────────┬──────────────────────┘
                        │
                        ▼
@@ -180,9 +182,10 @@ GROQ_MODEL=nombre_del_modelo_qwen
 Asegúrate de tener instalado en tu entorno de desarrollo:
 
 1. **Java Development Kit (JDK) 17 o superior** (se recomienda fuertemente JDK 21).
-2. **Apache Maven** para la compilación y gestión de dependencias.
+2. **Docker Desktop** iniciado, con contenedores Linux y Docker Compose.
+3. **Maven Wrapper** incluido en el repositorio (`mvnw.cmd` en Windows y `mvnw` en Linux/macOS). Descarga Maven 3.9.16 en la primera ejecución; no requiere instalar Maven por separado.
 
-### ¿Cómo instalar Maven?
+### Maven instalado en el sistema (opcional)
 
 * **En Linux (Ubuntu/Debian):**
 ```bash
@@ -211,6 +214,9 @@ mvn -version
 
 ```text
 pom.xml                         # POM padre: agrega los tres módulos
+mvnw / mvnw.cmd                 # Maven Wrapper
+compose.yaml                    # MySQL 8.4 con volumen persistente
+.config/                        # Ejemplos de configuración local
 common/
 ├── pom.xml
 └── src/main/java/              # Modelos y adaptadores compartidos
@@ -233,28 +239,175 @@ data/xml/                       # Archivos de datos del proyecto 01
 
 ## Compilación y Ejecución
 
-Si deseas clonar el repositorio desde cero, compilar el código, ejecutar la suite de pruebas automatizadas y arrancar la aplicación de escritorio mediante Maven, sigue estos pasos en tu terminal:
-1. **Clonar el repositorio y acceder a la carpeta del proyecto:**
+El recorrido de inicio es **JavaFX → sockets → Backend → MySQL en Docker**.
+`common` es una biblioteca compartida: se compila con el proyecto y no se ejecuta
+como una aplicación independiente.
 
-```bash
-git clone https://github.com/oesiledivad/EIF206-Programacion3-Proyecto01.git
+Los siguientes pasos usan **PowerShell**, desde la raíz del repositorio.
+En Linux/macOS, el comando de Maven Wrapper es `./mvnw`.
+
+### 1. 📥 Obtener el proyecto y comprobar Java
+
+```powershell
+git clone --branch develop https://github.com/oesiledivad/EIF206-Programacion3-Proyecto01.git
 cd EIF206-Programacion3-Proyecto01
+.\mvnw.cmd -version
+docker compose version
 ```
 
-2. **Configurar el entorno:**
-* Asegúrate de crear y configurar el archivo `.env` en la raíz del proyecto siguiendo las instrucciones detalladas en el archivo `README`. *(Nota: El comando del siguiente paso fallará si este archivo no está configurado correctamente).*
+Si ya tienes el repositorio, utiliza tu copia de trabajo. Maven debe indicar
+**Java 17 o superior**, preferiblemente **JDK 21**. Si muestra Java 8, configura
+`JAVA_HOME` con la ruta de tu JDK y agrega su carpeta `bin` al `PATH`. Comprueba
+la versión en cada terminal usada para ejecutar el proyecto.
 
+### 2. ⚙️ Configurar MySQL
 
-3. **Compilar el código y ejecutar todas las pruebas automatizadas (Unitarias e Integración):**
+Crear los archivos locales solo si no existen:
 
-```bash
-mvn clean verify
+```powershell
+if (-not (Test-Path .config/docker.env)) {
+    Copy-Item .config/docker.env.example .config/docker.env
+}
+if (-not (Test-Path .config/database.env)) {
+    Copy-Item .config/database.docker.env.example .config/database.env
+}
 ```
 
-4. **Ejecutar la interfaz gráfica con JavaFX:**
+Editar ambos archivos con los siguientes datos:
 
-```bash
-mvn install -DskipTests
-mvn -pl frontend javafx:run
+| Archivo | Configuración |
+| --- | --- |
+| `.config/docker.env` | `MYSQL_PORT=3307`, contraseña de `reservas_app` en `MYSQL_PASSWORD` y contraseña de MySQL root en `MYSQL_ROOT_PASSWORD` |
+| `.config/database.env` | `DB_URL=jdbc:mysql://127.0.0.1:3307/sistema_reservas`, `DB_USER=reservas_app` y la misma contraseña de aplicación en `DB_PASSWORD` |
+
+Las contraseñas de ejemplo deben sustituirse por valores locales. Estos archivos
+están excluidos de Git. El usuario MySQL `reservas_app` es la cuenta de conexión
+del backend; el usuario `admin` del sistema se crea en el paso 5.
+
+### 3. 🐳 Iniciar MySQL
+
+Con Docker Desktop abierto:
+
+```powershell
+docker compose --env-file .config/docker.env config --quiet
+docker compose --env-file .config/docker.env up -d --wait
+docker compose --env-file .config/docker.env ps
 ```
 
+El servicio debe aparecer como **healthy**. La base `sistema_reservas` y sus seis
+tablas se crean automáticamente al inicializar un volumen vacío. MySQL publica
+`127.0.0.1:3307`, por lo que puede convivir con otra instalación local en `3306`.
+
+Para cargar las dos categorías y los dos recursos de demostración:
+
+```powershell
+Get-Content -Raw database/seed.sql | docker compose --env-file .config/docker.env exec -T mysql sh -c 'MYSQL_PWD="$MYSQL_PASSWORD" mysql -u "$MYSQL_USER" "$MYSQL_DATABASE"'
+```
+
+El catálogo es opcional; el login también funciona con un catálogo vacío.
+
+### 4. 🔨 Compilar los tres módulos
+
+```powershell
+.\mvnw.cmd install -DskipTests
+```
+
+Este comando compila e instala `common`, `backend` y `frontend` en el repositorio
+Maven local. Ejecutarlo también después de cambiar clases compartidas.
+
+### 5. 🔐 Crear el administrador
+
+Ejecutar una vez para la base de datos elegida. La contraseña solicitada será la
+que usarás en la pantalla de login; debe tener al menos seis caracteres.
+
+```powershell
+$claveAdmin = Read-Host "Contraseña para admin" -AsSecureString
+$env:APP_ADMIN_PASSWORD = [System.Net.NetworkCredential]::new("", $claveAdmin).Password
+try {
+    .\mvnw.cmd -pl backend exec:java "-Dexec.mainClass=una.proyecto.bootstrap.CrearAdministrador"
+} finally {
+    Remove-Item Env:APP_ADMIN_PASSWORD -ErrorAction SilentlyContinue
+    $claveAdmin.Dispose()
+}
+```
+
+El resultado es **Administrador creado.** Si `admin` ya existe, la utilidad
+conserva su contraseña y su estado. Usar la contraseña definida cuando se creó;
+las credenciales se almacenan como hashes en MySQL.
+
+### 6. 🖥️ Ejecutar el backend — terminal 1
+
+```powershell
+.\mvnw.cmd -pl backend exec:java
+```
+
+Mantener esa terminal abierta. Debe mostrar:
+
+```text
+Servidor escuchando en el puerto 1234
+```
+
+### 7. 📅 Ejecutar el frontend — terminal 2
+
+Abrir otra terminal en la misma raíz del repositorio, con el JDK configurado:
+
+```powershell
+.\mvnw.cmd -pl frontend javafx:run
+```
+
+Ingresar con **ID `admin`** y la contraseña del paso 5. Debe abrirse el panel
+principal con el nombre **Administrador** y los contadores leídos desde el backend.
+Si se cargó el catálogo, el panel mostrará **2 recursos**.
+
+El login, la consulta del panel inicial, el cambio de contraseña y el cierre de
+sesión utilizan el proxy de sockets. Las demás vistas conservan sus llamadas a
+los servicios locales. Las operaciones de red de login y carga del panel se
+realizan en segundo plano para mantener la interfaz disponible.
+
+Para conectar ese frontend a un backend en otra computadora, definir antes de
+arrancarlo:
+
+```powershell
+$env:SERVER_HOST = "IP_DEL_EQUIPO_BACKEND"
+$env:SERVER_PORT = "1234"
+```
+
+### 8. ✅ Verificar la conexión
+
+Las pruebas del recorrido de ingreso usan sockets reales y la base configurada.
+Ejecutarlas con una base exclusiva para pruebas:
+
+```powershell
+.\mvnw.cmd verify "-Dit.test=LoginIntegracionIT" -Dfailsafe.failIfNoSpecifiedTests=false
+```
+
+Se ejecutan las pruebas unitarias y la integración del login, el panel remoto,
+el cambio de contraseña y logout. Groq no es necesario para iniciar sesión;
+la configuración de IA se utiliza al invocar el asistente de reservas.
+
+### 9. ⏹️ Detener la ejecución
+
+Cerrar la ventana JavaFX, detener el backend con `Ctrl+C` y apagar MySQL:
+
+```powershell
+docker compose --env-file .config/docker.env down
+```
+
+El volumen conserva los datos. Los scripts de inicialización y las contraseñas
+de creación de MySQL solo se aplican a un volumen vacío.
+
+### 🛠️ Problemas de conexión
+
+| Mensaje o síntoma | Comprobación |
+| --- | --- |
+| Java 8 o `Unrecognized option: --module-path` | Revisar `JAVA_HOME` y la salida de `.\mvnw.cmd -version` |
+| No se puede conectar con Docker | Abrir Docker Desktop y comprobar que el motor esté iniciado |
+| MySQL no aparece `healthy` | Consultar `docker compose --env-file .config/docker.env logs mysql` |
+| `Access denied` de MySQL | Comparar `DB_PASSWORD` con la contraseña usada al crear el volumen; editar un archivo no cambia las credenciales de una base existente |
+| No se pudo comunicar con el servidor | Iniciar primero el backend y comprobar host y puerto `1234` |
+| Credenciales incorrectas | Usar el usuario de aplicación `admin`, no `reservas_app`, y la contraseña del paso 5 |
+| Dependencia `common` o `backend` no encontrada | Ejecutar `.\mvnw.cmd install -DskipTests` desde la raíz |
+
+Más información: [Docker y persistencia](database/DOCKER.md),
+[usuarios y credenciales](database/USUARIOS.md) y
+[protocolo de autenticación](docs/protocolo-autenticacion.md).

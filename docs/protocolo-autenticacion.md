@@ -22,6 +22,7 @@ hilos.
 | 10 | `AUTH_LOGIN` | ID con `writeObject(String)`, contraseña con `writeObject(String)` | `Usuario` activo con nombre y rol, sin credenciales |
 | 11 | `AUTH_LOGOUT` | Ninguno | `null` |
 | 12 | `AUTH_CAMBIAR_CLAVE` | Contraseña actual y nueva con `writeObject(String)` | `null` |
+| 20 | `DASHBOARD_RESUMEN` | Ninguno; requiere sesión | `DashboardData` con reservas visibles y contadores |
 | 99 | `DISCONNECT` | Ninguno | Cierre del socket, sin respuesta |
 
 Después de enviar cada petición, ejecutar `flush()`. Se recomienda `reset()` del
@@ -77,3 +78,10 @@ Los errores de autorización también consumen los parámetros de la petición, 
 modo que el siguiente intercambio conserva el orden del protocolo.
 
 [Backend](../backend/README.md) · [Usuarios y credenciales](../database/USUARIOS.md)
+
+## Panel inicial
+
+`DashboardData` contiene las reservas visibles para la sesión y los totales de
+recursos y funcionarios. Un funcionario recibe únicamente sus reservas; el total
+de funcionarios se entrega solo al administrador. Los perfiles incluidos no
+contienen credenciales. El frontend carga este resumen en segundo plano.

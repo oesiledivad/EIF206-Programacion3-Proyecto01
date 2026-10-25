@@ -9,6 +9,7 @@ JavaFX y organizada según el patrón Modelo–Vista–Controlador.
 | --- | --- |
 | `src/main/java/una/proyecto/app` | Punto de entrada `MainApp` |
 | `src/main/java/una/proyecto/controller` | Controladores de las pantallas |
+| `src/main/java/una/proyecto/proxy` | Cliente de autenticación y consulta del panel por sockets |
 | `src/main/java/una/proyecto/presentation/logic` | Lógica de presentación de ingreso y navegación |
 | `src/main/java/una/proyecto/utils` | Sesión local, navegación, ventanas y generación de PDF |
 | `src/main/resources/una/proyecto/ui` | Vistas FXML |
@@ -21,8 +22,9 @@ funcionarios, categorías y recursos, calendarios, estadísticas y reportes PDF.
 
 ## Dependencias
 
-El módulo utiliza los modelos de [`common`](../common/README.md) y los servicios
-locales de [`backend`](../backend/README.md). Las vistas usan JavaFX, FormsFX e
+El módulo utiliza los modelos y contratos de [`common`](../common/README.md).
+Ingreso, cambio de contraseña y panel inicial utilizan `ServiceProxy` contra
+[`backend`](../backend/README.md). Las demás vistas usan servicios locales. Las vistas usan JavaFX, FormsFX e
 Ikonli; los reportes utilizan PDFBox y EasyTable.
 
 ## Ejecución
@@ -31,10 +33,12 @@ Usar JDK 17 o superior —se recomienda JDK 21— y Maven. Ejecutar los comandos
 desde la raíz del repositorio:
 
 ```sh
-mvn install -DskipTests
-mvn -pl frontend javafx:run
+./mvnw install -DskipTests
+./mvnw -pl frontend javafx:run
 ```
 
+Iniciar primero MySQL y el backend siguiendo el [arranque completo](../README.md#compilación-y-ejecución).
+En Windows PowerShell, usar `.\mvnw.cmd` en lugar de `./mvnw`.
 La instalación resuelve las dependencias entre módulos en el repositorio Maven
 local. El objetivo `javafx:run` se aplica únicamente a `frontend`.
 
@@ -51,7 +55,7 @@ asistente de IA se carga desde el archivo `.env` descrito en el
 Para ejecutar las pruebas del módulo y sus dependencias sin llamadas externas a IA:
 
 ```sh
-mvn -pl frontend -am verify "-Dit.test=*IT,!IAgeneratorIntegracionIT" -Dfailsafe.failIfNoSpecifiedTests=false
+./mvnw -pl frontend -am verify "-Dit.test=*IT,!IAgeneratorIntegracionIT" -Dfailsafe.failIfNoSpecifiedTests=false
 ```
 
 Los reportes propios del módulo se generan en `target/surefire-reports/` y

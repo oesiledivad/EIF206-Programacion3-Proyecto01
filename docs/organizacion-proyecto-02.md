@@ -18,8 +18,8 @@ frontend --> backend --> common
     |______________________^
 ```
 
-La aplicación de escritorio utiliza los servicios del backend mediante llamadas
-locales. El backend depende de los modelos de common y es independiente de JavaFX.
+Ingreso, cambio de contraseña y panel inicial usan sockets mediante `ServiceProxy`.
+Las demás vistas de escritorio utilizan servicios locales del backend. El backend depende de los modelos de common y es independiente de JavaFX.
 Common no depende de los otros módulos.
 
 Cada módulo tiene su propio `pom.xml` y descriptor `module-info.java`.
@@ -45,14 +45,14 @@ de credenciales se realiza mediante `AuthService` en el backend.
 Usar JDK 17 o superior (JDK 21 recomendado) y Maven. Ejecutar desde la raíz:
 
 ```sh
-mvn verify
+./mvnw verify
 ```
 
 Para ejecutar la interfaz:
 
 ```sh
-mvn install -DskipTests
-mvn -pl frontend javafx:run
+./mvnw install -DskipTests
+./mvnw -pl frontend javafx:run
 ```
 
 El objetivo `javafx:run` corresponde al frontend. Importar el `pom.xml` raíz en
@@ -67,7 +67,7 @@ classpath; la aplicación conserva los descriptores JPMS de sus módulos.
 Para verificar sin llamar al servicio externo de IA:
 
 ```sh
-mvn verify "-Dit.test=*IT,!IAgeneratorIntegracionIT" -Dfailsafe.failIfNoSpecifiedTests=false
+./mvnw verify "-Dit.test=*IT,!IAgeneratorIntegracionIT" -Dfailsafe.failIfNoSpecifiedTests=false
 ```
 
 Las pruebas de integración de IA utilizan Groq y requieren `GROQ_API_KEY`.

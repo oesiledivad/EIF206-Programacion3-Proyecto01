@@ -23,6 +23,15 @@ repositorio como directorio de trabajo. Con una consola interactiva solicita la
 contraseña; desde IntelliJ, definir `APP_ADMIN_PASSWORD` en el entorno de esa
 ejecución. Requiere al menos seis caracteres.
 
+Desde la raíz también se puede ejecutar con Maven Wrapper:
+
+```sh
+./mvnw -pl backend exec:java "-Dexec.mainClass=una.proyecto.bootstrap.CrearAdministrador"
+```
+
+En Windows, usar `.\mvnw.cmd`. La [guía de arranque](../README.md#compilación-y-ejecución)
+incluye el ingreso de la contraseña desde PowerShell.
+
 La utilidad crea el usuario `admin`. Si existe, conserva su contraseña y estado.
 Las contraseñas se configuran localmente y no se incluyen en los scripts SQL.
 
@@ -47,7 +56,7 @@ Las pruebas de integración requieren una base exclusiva para pruebas con
 y otro puerto. No usar datos personales en esa base.
 
 ```sh
-mvn verify "-Dit.test=UsuariosIntegracionIT,FuncionariosIntegracionIT,ServerIntegracionIT,LoginIntegracionIT" -Dfailsafe.failIfNoSpecifiedTests=false
+./mvnw verify "-Dit.test=UsuariosIntegracionIT,FuncionariosIntegracionIT,ServerIntegracionIT,LoginIntegracionIT" -Dfailsafe.failIfNoSpecifiedTests=false
 ```
 
 La conexión acepta `DB_URL`, `DB_USER` y `DB_PASSWORD` desde el entorno o desde

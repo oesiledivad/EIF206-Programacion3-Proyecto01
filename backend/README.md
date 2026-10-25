@@ -23,36 +23,49 @@ y utiliza MySQL mediante JDBC.
 ## Uso y dependencias
 
 El punto de entrada del servidor es `una.proyecto.server.BackendApp`. El servidor
-escucha en `Protocol.PORT` y atiende el contrato de autenticación y reservas por
+escucha en `Protocol.PORT` y atiende el contrato de autenticación, panel inicial y reservas por
 sockets. El [`frontend`](../frontend/README.md) también utiliza servicios locales.
 
 Sus dependencias de aplicación son `common`, MySQL Connector/J, JAXB, el cliente
 HTTP de Java, JSON y Dotenv. El módulo es independiente de JavaFX.
+
+## Ejecución
+
+Con MySQL configurado, compilar el repositorio y ejecutar desde su raíz:
+
+```sh
+./mvnw install -DskipTests
+./mvnw -pl backend exec:java
+```
+
+En Windows PowerShell, usar `.\mvnw.cmd` en lugar de `./mvnw`. El servidor escucha
+por defecto en `1234`. Seguir el [arranque completo](../README.md#compilación-y-ejecución)
+para configurar Docker y crear el administrador.
 
 ## Compilación y pruebas
 
 Usar JDK 17 o superior —se recomienda JDK 21— y Maven. Ejecutar desde la raíz:
 
 ```sh
-mvn -pl backend -am package -DskipTests
+./mvnw -pl backend -am package -DskipTests
 ```
 
 Para ejecutar las pruebas locales y excluir la integración con el servicio de IA:
 
 ```sh
-mvn -pl backend -am verify "-Dit.test=*IT,!IAgeneratorIntegracionIT" -Dfailsafe.failIfNoSpecifiedTests=false
+./mvnw -pl backend -am verify "-Dit.test=*IT,!IAgeneratorIntegracionIT" -Dfailsafe.failIfNoSpecifiedTests=false
 ```
 
 Para incluir también las pruebas de integración de IA:
 
 ```sh
-mvn -pl backend -am verify
+./mvnw -pl backend -am verify
 ```
 
 Para verificar pruebas del servidor sin un frontend, si no un cliente simulado:
 
 ```sh
-mvn -pl backend -am clean verify "-Dit.test=ServerIntegracionIT" "-Dfailsafe.failIfNoSpecifiedTests=false"
+./mvnw -pl backend -am clean verify "-Dit.test=ServerIntegracionIT" "-Dfailsafe.failIfNoSpecifiedTests=false"
 ```
 
 
