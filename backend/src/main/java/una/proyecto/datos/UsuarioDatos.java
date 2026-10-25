@@ -1,288 +1,189 @@
 package una.proyecto.datos;
 
-import jakarta.xml.bind.JAXBContext;
-import jakarta.xml.bind.Marshaller;
-import jakarta.xml.bind.Unmarshaller;
-import una.proyecto.datos.wrapper.UsuariosWrapper;
 import una.proyecto.model.Administrador;
 import una.proyecto.model.Funcionario;
 import una.proyecto.model.Usuario;
+import una.proyecto.security.PasswordHasher;
 
-import java.io.File;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class UsuarioDatos {
-
-    private final String XML_PATH;
+    private static final String SELECT_USUARIO =
+            "SELECT u.id_usuario, u.nombre, u.rol, u.activo, f.telefono "
+            + "FROM usuarios u LEFT JOIN funcionarios f ON u.id_usuario = f.id_usuario ";
+    private final Database db;
 
     public UsuarioDatos() {
-        this.XML_PATH = "data/xml/usuarios.xml";
-        verifyAndCreateDefaultFile();
+        this.db = Database.instance();
     }
 
-    public UsuarioDatos(String xmlPath) {
-        this.XML_PATH = xmlPath;
-        verifyAndCreateDefaultFile();
-    }
-
-    /**
-     * Verifica que el archivo XML del usuario exista.
-     * Si no existe, crea la estructura de directorios
-     * y un administrador predeterminado.
-     */
-    private void verifyAndCreateDefaultFile() {
-
-        File file = new File(XML_PATH);
-
-        System.out.println("Checking users file: " + file.getAbsolutePath());
-
-        if (file.exists()) {
-
-            System.out.println("Users file already exists.");
-
-            return;
-        }
-
-        try {
-
-            File parentDirectory = file.getParentFile();
-
-            if (parentDirectory != null && !parentDirectory.exists()) {
-
-                boolean created = parentDirectory.mkdirs();
-
-                if (!created && !parentDirectory.exists()) {
-                    throw new RuntimeException("Could not create directory: " + parentDirectory.getAbsolutePath());
-                }
-            }
-
-            List<Usuario> initialUsers = new ArrayList<>();
-
-            Administrador defaultAdmin =
-                    new Administrador(
-                            "admin",
-                            "ADMIN",
-                            "Administrador"
-                    );
-
-            defaultAdmin.setPassword("admin");
-
-            initialUsers.add(defaultAdmin);
-
-            saveUsers(initialUsers);
-
-            System.out.println("Default users file created at: " + file.getAbsolutePath());
-
-        } catch (Exception e) {
-
-            System.err.println("Error creating default users file.");
-
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Crea el JAXB que utiliza este DAO.
-     */
-    private JAXBContext createJAXBContext() throws Exception {
-
-        return JAXBContext.newInstance(
-                UsuariosWrapper.class,
-                Usuario.class,
-                Funcionario.class,
-                Administrador.class
-        );
-    }
-
-    /**
-     * Carga todos los usuarios desde el archivo XML.
-     */
     public List<Usuario> loadUsers() {
-
-        File file = new File(XML_PATH);
-
-        if (!file.exists()) {
-
-            System.err.println("Users XML file does not exist: " + file.getAbsolutePath());
-
-            return new ArrayList<>();
-        }
-
-        try {
-
-            JAXBContext context = createJAXBContext();
-
-            Unmarshaller unmarshaller = context.createUnmarshaller();
-
-            UsuariosWrapper wrapper = (UsuariosWrapper) unmarshaller.unmarshal(file);
-
-            if (wrapper == null || wrapper.getUsuarios() == null) {
-                return new ArrayList<>();
-            }
-
-            return wrapper.getUsuarios();
-
-        } catch (Exception e) {
-
-            System.err.println("Error loading users from XML.");
-
-            e.printStackTrace();
-
-            return new ArrayList<>();
+        try (Connection connection = db.openConnection();
+             PreparedStatement statement = connection.prepareStatement(
+                     SELECT_USUARIO + "WHERE u.activo = TRUE ORDER BY u.id_usuario");
+             ResultSet rows = statement.executeQuery()) {
+            List<Usuario> users = new ArrayList<>();
+            while (rows.next()) users.add(toUsuario(rows));
+            return users;
+        } catch (SQLException e) {
+            throw failure("consultar usuarios", e);
         }
     }
 
-    /**
-     * Guarda la lista completa de usuarios en formato XML.
-     * Se sobrescribe el archivo existente.
-     */
-    public void saveUsers(List<Usuario> users) {
-
-        if (users == null) {
-            return;
-        }
-
-        try {
-
-            File file = new File(XML_PATH);
-
-            File parentDirectory = file.getParentFile();
-
-            if (parentDirectory != null && !parentDirectory.exists()) {
-
-                boolean created = parentDirectory.mkdirs();
-
-                if (!created && !parentDirectory.exists()) {
-                    throw new RuntimeException("Could not create directory: " + parentDirectory.getAbsolutePath());
-                }
-            }
-
-            JAXBContext context = createJAXBContext();
-
-            Marshaller marshaller = context.createMarshaller();
-
-            marshaller.setProperty(
-                    Marshaller.JAXB_FORMATTED_OUTPUT,
-                    true
-            );
-
-            UsuariosWrapper wrapper = new UsuariosWrapper();
-
-            wrapper.setUsuarios(users);
-
-            marshaller.marshal(wrapper, file);
-
-            System.out.println("Users saved to: " + file.getAbsolutePath());
-
-        } catch (Exception e) {
-
-            System.err.println("Error saving users to XML.");
-
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Busca a un usuario por su ID.
-     */
     public Usuario findUserById(String id) {
-
-        if (id == null || id.isBlank()) {
-            return null;
-        }
-
-        for (Usuario user : loadUsers()) {
-
-            if (user.getId() != null && user.getId().equalsIgnoreCase(id)) {
-
-                return user;
+        if (id == null || id.isBlank()) return null;
+        try (Connection connection = db.openConnection();
+             PreparedStatement statement = connection.prepareStatement(
+                     SELECT_USUARIO + "WHERE u.id_usuario = ? AND u.activo = TRUE")) {
+            statement.setString(1, id);
+            try (ResultSet rows = statement.executeQuery()) {
+                return rows.next() ? toUsuario(rows) : null;
             }
+        } catch (SQLException e) {
+            throw failure("buscar el usuario", e);
         }
-
-        return null;
     }
 
-    /**
-     * Agrega un nuevo usuario.
-     *
-     * @return true si se agregó el usuario,
-     *         false si el ID ya existe.
-     */
-    public boolean addUser(Usuario newUser) {
-
-        if (newUser == null || newUser.getId() == null || newUser.getId().isBlank()) {
-
-            return false;
+    public String findPasswordHash(String id) {
+        if (id == null || id.isBlank()) return null;
+        try (Connection connection = db.openConnection();
+             PreparedStatement statement = connection.prepareStatement(
+                     "SELECT clave_hash FROM usuarios WHERE id_usuario = ? AND activo = TRUE")) {
+            statement.setString(1, id);
+            try (ResultSet rows = statement.executeQuery()) {
+                return rows.next() ? rows.getString(1) : null;
+            }
+        } catch (SQLException e) {
+            throw failure("consultar las credenciales", e);
         }
-
-        if (findUserById(newUser.getId()) != null) {
-            return false;
-        }
-
-        List<Usuario> users = loadUsers();
-
-        users.add(newUser);
-
-        saveUsers(users);
-
-        return true;
     }
 
-    /**
-     * Actualiza un usuario existente.
-     *
-     * @return true si se actualizó el usuario,
-     *         false si el usuario no existe.
-     */
-    public boolean updateUser(Usuario updatedUser) {
-
-        if (updatedUser == null || updatedUser.getId() == null || updatedUser.getId().isBlank()) {
-
-            return false;
-        }
-
-        List<Usuario> users = loadUsers();
-
-        for (int i = 0; i < users.size(); i++) {
-
-            Usuario currentUser = users.get(i);
-
-            if (currentUser.getId() != null && currentUser.getId().equalsIgnoreCase(updatedUser.getId())) {
-
-                users.set(i, updatedUser);
-
-                saveUsers(users);
-
+    public boolean addUser(Usuario user) {
+        if (user == null || user.getId() == null || user.getId().isBlank()) return false;
+        validateProfile(user);
+        String hash = PasswordHasher.hash(user.getPassword());
+        try (Connection connection = db.openConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                try (PreparedStatement statement = connection.prepareStatement(
+                        "INSERT INTO usuarios (id_usuario, nombre, clave_hash, rol, activo) VALUES (?, ?, ?, ?, TRUE)")) {
+                    statement.setString(1, user.getId());
+                    statement.setString(2, user.getName());
+                    statement.setString(3, hash);
+                    statement.setString(4, user.getRole());
+                    statement.executeUpdate();
+                }
+                if (user instanceof Funcionario funcionario) {
+                    try (PreparedStatement statement = connection.prepareStatement(
+                            "INSERT INTO funcionarios (id_usuario, telefono) VALUES (?, ?)")) {
+                        statement.setString(1, user.getId());
+                        statement.setString(2, funcionario.getPhone());
+                        statement.executeUpdate();
+                    }
+                }
+                connection.commit();
                 return true;
+            } catch (SQLException e) {
+                connection.rollback();
+                if (e.getErrorCode() == 1062) return false;
+                throw e;
             }
+        } catch (SQLException e) {
+            throw failure("crear el usuario", e);
         }
-
-        return false;
     }
 
-    /**
-     * Elimina a un usuario por su ID.
-     *
-     * @return true si se eliminó al usuario,
-     *         false si no se encontró al usuario.
-     */
+    public boolean updateUser(Usuario user) {
+        if (user == null || user.getId() == null || user.getId().isBlank()) return false;
+        validateProfile(user);
+        // Las credenciales solo se actualizan mediante changePassword.
+        try (Connection connection = db.openConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                try (PreparedStatement statement = connection.prepareStatement(
+                        "UPDATE usuarios SET nombre = ? WHERE id_usuario = ? AND rol = ? AND activo = TRUE")) {
+                    statement.setString(1, user.getName());
+                    statement.setString(2, user.getId());
+                    statement.setString(3, user.getRole());
+                    if (statement.executeUpdate() == 0) {
+                        connection.rollback();
+                        return false;
+                    }
+                }
+                if (user instanceof Funcionario funcionario) {
+                    try (PreparedStatement statement = connection.prepareStatement(
+                            "UPDATE funcionarios SET telefono = ? WHERE id_usuario = ?")) {
+                        statement.setString(1, funcionario.getPhone());
+                        statement.setString(2, user.getId());
+                        if (statement.executeUpdate() == 0) {
+                            connection.rollback();
+                            throw new SQLException("El funcionario no tiene un perfil asociado");
+                        }
+                    }
+                }
+                connection.commit();
+                return true;
+            } catch (SQLException e) {
+                connection.rollback();
+                throw e;
+            }
+        } catch (SQLException e) {
+            throw failure("actualizar el usuario", e);
+        }
+    }
+
     public boolean deleteUser(String id) {
-
-        if (id == null || id.isBlank()) {
-            return false;
+        if (id == null || id.isBlank()) return false;
+        try (Connection connection = db.openConnection();
+             PreparedStatement statement = connection.prepareStatement(
+                     "UPDATE usuarios SET activo = FALSE WHERE id_usuario = ? AND activo = TRUE")) {
+            statement.setString(1, id);
+            return statement.executeUpdate() == 1;
+        } catch (SQLException e) {
+            throw failure("desactivar el usuario", e);
         }
+    }
 
-        List<Usuario> users = loadUsers();
-
-        boolean removed = users.removeIf(user -> user.getId() != null && user.getId().equalsIgnoreCase(id));
-
-        if (!removed) {
-            return false;
+    public boolean changePassword(String id, String expectedHash, String newHash) {
+        try (Connection connection = db.openConnection();
+             PreparedStatement statement = connection.prepareStatement(
+                     "UPDATE usuarios SET clave_hash = ? WHERE id_usuario = ? AND clave_hash = ? AND activo = TRUE")) {
+            statement.setString(1, newHash);
+            statement.setString(2, id);
+            statement.setString(3, expectedHash);
+            return statement.executeUpdate() == 1;
+        } catch (SQLException e) {
+            throw failure("cambiar la contraseña", e);
         }
+    }
 
-        saveUsers(users);
+    private Usuario toUsuario(ResultSet row) throws SQLException {
+        String id = row.getString("id_usuario");
+        String nombre = row.getString("nombre");
+        Usuario user;
+        if ("FUNCIONARIO".equals(row.getString("rol"))) {
+            String telefono = row.getString("telefono");
+            if (telefono == null) throw new SQLException("El funcionario no tiene un perfil asociado");
+            user = new Funcionario(id, "FUNCIONARIO", nombre, telefono);
+        } else {
+            user = new Administrador(id, "ADMIN", nombre);
+        }
+        user.setActive(row.getBoolean("activo"));
+        return user;
+    }
 
-        return true;
+    private void validateProfile(Usuario user) {
+        boolean funcionario = user instanceof Funcionario && "FUNCIONARIO".equals(user.getRole());
+        boolean admin = user instanceof Administrador && "ADMIN".equals(user.getRole());
+        if (!funcionario && !admin) throw new IllegalArgumentException("El rol no corresponde al perfil del usuario.");
+    }
+
+    private IllegalStateException failure(String operation, SQLException cause) {
+        return new IllegalStateException("No se pudo " + operation + ".", cause);
     }
 }

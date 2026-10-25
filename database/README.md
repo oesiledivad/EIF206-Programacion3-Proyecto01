@@ -61,3 +61,8 @@ posteriores de estructura requeriran scripts de migracion.
 El script usa `root` solo para la instalacion manual. La aplicacion debe tener
 un usuario MySQL propio, configurado exclusivamente en el backend. No subir
 credenciales al repositorio.
+
+## Entorno y usuarios
+
+- [MySQL con Docker Compose](DOCKER.md)
+- [Usuarios, contraseñas y pruebas](USUARIOS.md)

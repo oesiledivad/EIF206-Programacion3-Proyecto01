@@ -35,6 +35,7 @@ public class Database {
             config = Dotenv.configure()
                     .directory(CONFIG_DIR)
                     .filename(CONFIG_FILE)
+                    .ignoreIfMissing()
                     .load();
         } catch (DotenvException e) {
             throw new IllegalStateException(
@@ -52,7 +53,7 @@ public class Database {
             throw new IllegalStateException(
                     "Falta la variable " + nombre + " en " + CONFIG_DIR + "/" + CONFIG_FILE);
         }
-        return valor.trim();
+        return "DB_PASSWORD".equals(nombre) ? valor : valor.trim();
     }
 
     // Devuelve la conexion compartida. Los DAO NO deben cerrarla.
@@ -68,6 +69,10 @@ public class Database {
             cnx = DriverManager.getConnection(url, user, password);
         }
         return cnx;
+    }
+
+    public Connection openConnection() throws SQLException {
+        return DriverManager.getConnection(url, user, password);
     }
 
     public PreparedStatement prepareStatement(String sql) throws SQLException {

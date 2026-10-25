@@ -1,86 +1,68 @@
 package Integration;
 
 import org.junit.jupiter.api.*;
+import una.proyecto.datos.Database;
 import una.proyecto.datos.UsuarioDatos;
-import una.proyecto.presentation.logic.LoginLogic;
+import una.proyecto.logic.FuncionarioLogic;
+import una.proyecto.logic.UsuarioLogic;
 import una.proyecto.model.Funcionario;
+import una.proyecto.presentation.logic.LoginLogic;
 import una.proyecto.service.AuthService;
 import una.proyecto.utils.SessionManager;
-
-import java.io.File;
-
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Pruebas de integración reales: LoginLogic -> AuthService -> UsuarioDatos -> XML.
- */
-public class LoginIntegracionIT {
+class LoginIntegracionIT {
+    private static final String ID = "992000001";
+    private UsuarioDatos datos;
+    private LoginLogic logic;
 
-    private static final String XML_TEST = "target/test-it-login.xml";
-    private LoginLogic loginLogic;
-    private UsuarioDatos usuarioDatos;
-
-    @BeforeEach
-    void setUp() {
-        new File("target").mkdirs();
-        new File(XML_TEST).delete();
-        usuarioDatos = new UsuarioDatos(XML_TEST);
-        loginLogic = new LoginLogic(new AuthService(usuarioDatos));
+    @BeforeEach void setup() throws Exception {
+        limpiar();
+        datos = new UsuarioDatos();
+        new FuncionarioLogic(datos).crear(new Funcionario(ID, "FUNCIONARIO", "Juan Perez", "88887777"));
+        logic = new LoginLogic(new AuthService(datos));
     }
 
-    @AfterEach
-    void tearDown() {
-        new File(XML_TEST).delete();
+    @AfterEach void limpiar() throws Exception {
         SessionManager.getInstance().logout();
+        try (Connection connection = Database.instance().openConnection()) {
+            for (String table : new String[]{"funcionarios", "usuarios"}) {
+                try (PreparedStatement statement = connection.prepareStatement("DELETE FROM " + table + " WHERE id_usuario = ?")) {
+                    statement.setString(1, ID);
+                    statement.executeUpdate();
+                }
+            }
+        }
     }
 
-    @Test
-    void loginConAdminPorDefecto_exitoso() {
-        var result = loginLogic.validateCredentials("admin", "admin");
-
-        assertTrue(result.isSuccess());
-        assertEquals("admin", result.getUsuario().getId());
-        assertTrue(SessionManager.getInstance().isLoggedIn());
-    }
-
-    @Test
-    void loginConFuncionarioCreadoEnXML_exitoso() {
-        Funcionario f = new Funcionario("111111111", "FUNCIONARIO", "Juan Perez", "88887777");
-        f.setPassword("clave123");
-        usuarioDatos.addUser(f);
-
-        var result = loginLogic.validateCredentials("111111111", "clave123");
-
+    @Test void loginConClaveInicialCargaSesionSinCredenciales() {
+        var result = logic.validateCredentials(ID, ID);
         assertTrue(result.isSuccess());
         assertEquals("Juan Perez", result.getUsuario().getName());
+        assertNull(result.getUsuario().getPassword());
+        assertEquals(ID, SessionManager.getInstance().getId());
     }
 
-    @Test
-    void loginConPasswordIncorrecta_falla() {
-        Funcionario f = new Funcionario("111111111", "FUNCIONARIO", "Juan Perez", "88887777");
-        f.setPassword("clave123");
-        usuarioDatos.addUser(f);
-
-        var result = loginLogic.validateCredentials("111111111", "claveMala");
-
-        assertFalse(result.isSuccess());
-        assertEquals("Credenciales incorrectas", result.getMessage());
+    @Test void claveIncorrectaNoIniciaSesion() {
+        assertFalse(logic.validateCredentials(ID, "incorrecta").isSuccess());
         assertFalse(SessionManager.getInstance().isLoggedIn());
     }
 
-    @Test
-    void loginConUsuarioInexistente_falla() {
-        var result = loginLogic.validateCredentials("999999999", "clave123");
-
-        assertFalse(result.isSuccess());
-        assertEquals("Credenciales incorrectas", result.getMessage());
+    @Test void bajaLogicaImpideLogin() {
+        datos.deleteUser(ID);
+        assertFalse(logic.validateCredentials(ID, ID).isSuccess());
+        assertFalse(SessionManager.getInstance().isLoggedIn());
     }
 
-    @Test
-    void loginConFormatoIdInvalido_noConsultaXML() {
-        var result = loginLogic.validateCredentials("abc", "clave123");
+    @Test void claveConEspaciosSeVerificaSinRecortarla() {
+        new UsuarioLogic(datos).cambiarContrasena(ID, ID, " clave nueva ");
+        assertTrue(logic.validateCredentials(ID, " clave nueva ").isSuccess());
+    }
 
-        assertFalse(result.isSuccess());
-        assertEquals("Formato de ID inválido", result.getMessage());
+    @Test void formatoInvalidoNoIniciaSesion() {
+        assertFalse(logic.validateCredentials("abc", ID).isSuccess());
+        assertFalse(SessionManager.getInstance().isLoggedIn());
     }
 }

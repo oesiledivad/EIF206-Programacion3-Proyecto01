@@ -15,8 +15,9 @@ public abstract class Usuario implements Serializable {
     private static final long serialVersionUID = 1L;
     private String id;
     private String role;
-    private String password;
+    private transient String password;
     private String name;
+    private boolean active = true;
 
     /**
      * Empty constructor required by JAXB.
@@ -60,6 +61,10 @@ public abstract class Usuario implements Serializable {
     public void setPassword(String password) {
         this.password = password;
     }
+
+    public boolean isActive() { return active; }
+
+    public void setActive(boolean active) { this.active = active; }
 
     public String getName() {
         return name;

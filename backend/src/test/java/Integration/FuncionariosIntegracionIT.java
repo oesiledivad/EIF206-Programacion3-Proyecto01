@@ -6,100 +6,103 @@ import una.proyecto.logic.FuncionarioLogic;
 import una.proyecto.model.Funcionario;
 import una.proyecto.service.FuncionarioService;
 
-import java.io.File;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import una.proyecto.datos.Database;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Pruebas de integración reales: FuncionarioService → FuncionarioLogic → UsuarioDatos → XML.
- * Usa un archivo XML temporal en target/ para no tocar los datos originales del proyecto.
- */
 public class FuncionariosIntegracionIT {
 
-    private static final String XML_TEST = "target/test-it-usuarios.xml";
     private FuncionarioService service;
 
     @BeforeEach
-    void setUp() {
-        new File("target").mkdirs();
-        new File(XML_TEST).delete();
+    void setUp() throws Exception {
+        limpiar();
         service = new FuncionarioService(new FuncionarioLogic(new UsuarioDatos()));
     }
 
     @AfterEach
-    void tearDown() {
-        new File(XML_TEST).delete();
+    void limpiar() throws Exception {
+        try (Connection connection = Database.instance().openConnection()) {
+            for (String table : new String[]{"funcionarios", "usuarios"}) {
+                try (PreparedStatement statement = connection.prepareStatement(
+                        "DELETE FROM " + table + " WHERE id_usuario IN ('991000011', '991000012')")) {
+                    statement.executeUpdate();
+                }
+            }
+        }
     }
 
     private Funcionario funcionarioValido(String id) {
         return new Funcionario(id, "FUNCIONARIO", "Juan Perez", "88887777");
     }
 
-    // Integración CRUD: guardar un funcionario y leerlo desde el XML real
+    // Integración CRUD: guardar un funcionario y leerlo desde el MySQL real
     @Test
-    void crearYLeerFuncionarioDesdeXML() {
-        service.addEmployee(funcionarioValido("111111111"));
-        Funcionario resultado = service.obetenerUsuarioPorId("111111111");
+    void crearYLeerFuncionarioDesdeMySQL() {
+        service.addEmployee(funcionarioValido("991000011"));
+        Funcionario resultado = service.obetenerUsuarioPorId("991000011");
         assertNotNull(resultado);
-        assertEquals("111111111", resultado.getId());
+        assertEquals("991000011", resultado.getId());
         assertEquals("Juan Perez", resultado.getName());
     }
 
-    // Integración CRUD: actualizar nombre y teléfono y verificar cambio persistido en XML
+    // Integración CRUD: actualizar nombre y teléfono y verificar cambio persistido en MySQL
     @Test
-    void actualizarFuncionarioPersisteCambioEnXML() {
-        service.addEmployee(funcionarioValido("111111111"));
-        service.updateEmployee(new Funcionario("111111111", "FUNCIONARIO", "Maria Lopez", "77776666"));
-        Funcionario leido = service.obetenerUsuarioPorId("111111111");
+    void actualizarFuncionarioPersisteCambioEnMySQL() {
+        service.addEmployee(funcionarioValido("991000011"));
+        service.updateEmployee(new Funcionario("991000011", "FUNCIONARIO", "Maria Lopez", "77776666"));
+        Funcionario leido = service.obetenerUsuarioPorId("991000011");
         assertEquals("Maria Lopez", leido.getName());
         assertEquals("77776666", leido.getPhone());
     }
 
-    // Integración CRUD: actualizar conserva la clave original en el XML
+    // Integración CRUD: actualizar conserva la clave original en el MySQL
     @Test
-    void actualizarFuncionarioConservaClaveEnXML() {
-        service.addEmployee(funcionarioValido("111111111"));
-        String claveOriginal = service.obetenerUsuarioPorId("111111111").getPassword();
-        service.updateEmployee(new Funcionario("111111111", "FUNCIONARIO", "Maria Lopez", "77776666"));
-        assertEquals(claveOriginal, service.obetenerUsuarioPorId("111111111").getPassword());
+    void actualizarFuncionarioConservaClaveEnMySQL() {
+        service.addEmployee(funcionarioValido("991000011"));
+        String claveOriginal = new UsuarioDatos().findPasswordHash("991000011");
+        service.updateEmployee(new Funcionario("991000011", "FUNCIONARIO", "Maria Lopez", "77776666"));
+        assertEquals(claveOriginal, new UsuarioDatos().findPasswordHash("991000011"));
     }
 
-    // Integración CRUD: eliminar un funcionario y verificar que ya no existe en el XML
+    // Integración CRUD: eliminar un funcionario y verificar que ya no existe en el MySQL
     @Test
-    void eliminarFuncionarioYaNoExisteEnXML() {
-        service.addEmployee(funcionarioValido("111111111"));
-        service.deleteEmployee("111111111");
-        assertNull(service.obetenerUsuarioPorId("111111111"));
+    void eliminarFuncionarioYaNoExisteEnMySQL() {
+        service.addEmployee(funcionarioValido("991000011"));
+        service.deleteEmployee("991000011");
+        assertNull(service.obetenerUsuarioPorId("991000011"));
     }
 
-    // Integración CRUD: crear varios funcionarios y obtenerlos todos desde el XML
+    // Integración CRUD: crear varios funcionarios y obtenerlos todos desde el MySQL
     @Test
-    void crearVariosFuncionariosYObtenerTodosDesdeXML() {
-        service.addEmployee(funcionarioValido("111111111"));
-        service.addEmployee(new Funcionario("222222222", "FUNCIONARIO", "Ana Gomez", "66665555"));
+    void crearVariosFuncionariosYObtenerTodosDesdeMySQL() {
+        service.addEmployee(funcionarioValido("991000011"));
+        service.addEmployee(new Funcionario("991000012", "FUNCIONARIO", "Ana Gomez", "66665555"));
         assertEquals(2, service.getAllEmployees().size());
     }
 
-    // Integración: buscar por id parcial encuentra funcionario persistido en XML
+    // Integración: buscar por id parcial encuentra funcionario persistido en MySQL
     @Test
-    void buscarPorIdParcialEncuentraFuncionarioEnXML() {
-        service.addEmployee(funcionarioValido("111111111"));
-        assertFalse(service.findById("111").isEmpty());
+    void buscarPorIdParcialEncuentraFuncionarioEnMySQL() {
+        service.addEmployee(funcionarioValido("991000011"));
+        assertFalse(service.findById("991000011").isEmpty());
     }
 
-    // Integración: buscar por nombre parcial encuentra funcionario persistido en XML
+    // Integración: buscar por nombre parcial encuentra funcionario persistido en MySQL
     @Test
-    void buscarPorNombreParcialEncuentraFuncionarioEnXML() {
-        service.addEmployee(funcionarioValido("111111111"));
+    void buscarPorNombreParcialEncuentraFuncionarioEnMySQL() {
+        service.addEmployee(funcionarioValido("991000011"));
         assertFalse(service.findByName("Juan").isEmpty());
     }
 
-    // Integración: cédula duplicada no genera un segundo registro en el XML
+    // Integración: cédula duplicada no genera un segundo registro en el MySQL
     @Test
-    void crearCedulaDuplicadaNoGuardaSegundoRegistroEnXML() {
-        service.addEmployee(funcionarioValido("111111111"));
+    void crearCedulaDuplicadaNoGuardaSegundoRegistroEnMySQL() {
+        service.addEmployee(funcionarioValido("991000011"));
         assertThrows(IllegalArgumentException.class,
-                () -> service.addEmployee(funcionarioValido("111111111")));
+                () -> service.addEmployee(funcionarioValido("991000011")));
         assertEquals(1, service.getAllEmployees().size());
     }
 }

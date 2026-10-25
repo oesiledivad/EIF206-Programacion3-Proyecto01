@@ -1,155 +1,93 @@
 package Unit;
 
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import una.proyecto.datos.UsuarioDatos;
 import una.proyecto.logic.UsuarioLogic;
 import una.proyecto.model.Funcionario;
-import una.proyecto.model.Usuario;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
-import java.util.ArrayList;
-import java.util.List;
+import una.proyecto.security.PasswordHasher;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class UsuarioLogicTest {
+    private static String oldHash;
+    private UsuarioDatos datos;
+    private UsuarioLogic logic;
 
-    @Mock
-    private UsuarioDatos usuarioDatos;
-
-    private UsuarioLogic usuarioLogic;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-        usuarioLogic = new UsuarioLogic(usuarioDatos);
+    @BeforeAll static void hash() { oldHash = PasswordHasher.hash("claveActual"); }
+    @BeforeEach void setup() {
+        datos = mock(UsuarioDatos.class);
+        logic = new UsuarioLogic(datos);
     }
 
-    private Funcionario crearUsuario(String id, String password) {
-        Funcionario u = new Funcionario(id, "FUNCIONARIO", "Nombre Test");
-        u.setPassword(password);
-        return u;
+    private void usuarioActivo() {
+        when(datos.findUserById("123456789")).thenReturn(
+                new Funcionario("123456789", "FUNCIONARIO", "Juan Perez", "88888888"));
+        when(datos.findPasswordHash("123456789")).thenReturn(oldHash);
     }
 
-    // ---------- cambiarContrasena ----------
-
-    @Test
-    void cambiarContrasena_usuarioNoExiste_lanzaExcepcion() {
-        when(usuarioDatos.loadUsers()).thenReturn(new ArrayList<>());
-
-        var ex = assertThrows(IllegalArgumentException.class,
-                () -> usuarioLogic.cambiarContrasena("123456789", "actual", "nuevaClave"));
-
-        assertEquals("El usuario no existe.", ex.getMessage());
-        verify(usuarioDatos, never()).saveUsers(any());
+    @Test void cambiaSoloLaCredencialEsperadaYGuardaHashNuevo() {
+        usuarioActivo();
+        when(datos.changePassword(eq("123456789"), eq(oldHash), anyString())).thenReturn(true);
+        logic.cambiarContrasena("123456789", "claveActual", "claveNueva");
+        var captor = ArgumentCaptor.forClass(String.class);
+        verify(datos).changePassword(eq("123456789"), eq(oldHash), captor.capture());
+        assertTrue(PasswordHasher.verify("claveNueva", captor.getValue()));
+        assertNotEquals(oldHash, captor.getValue());
+        verify(datos, never()).updateUser(any());
     }
 
-    @Test
-    void cambiarContrasena_contrasenaActualIncorrecta_lanzaExcepcion() {
-        Funcionario u = crearUsuario("123456789", "claveReal");
-        when(usuarioDatos.loadUsers()).thenReturn(new ArrayList<>(List.of(u)));
-
-        var ex = assertThrows(IllegalArgumentException.class,
-                () -> usuarioLogic.cambiarContrasena("123456789", "claveIncorrecta", "nuevaClave"));
-
-        assertEquals("La contraseña actual es incorrecta.", ex.getMessage());
-        verify(usuarioDatos, never()).saveUsers(any());
+    @Test void usuarioInexistenteNoCambiaClave() {
+        assertThrows(IllegalArgumentException.class,
+                () -> logic.cambiarContrasena("nadie", "claveActual", "claveNueva"));
+        verify(datos, never()).changePassword(any(), any(), any());
     }
 
-    @Test
-    void cambiarContrasena_nuevaContrasenaNull_lanzaExcepcion() {
-        Funcionario u = crearUsuario("123456789", "claveActual");
-        when(usuarioDatos.loadUsers()).thenReturn(new ArrayList<>(List.of(u)));
-
-        var ex = assertThrows(IllegalArgumentException.class,
-                () -> usuarioLogic.cambiarContrasena("123456789", "claveActual", null));
-
-        assertEquals("La nueva contraseña debe tener al menos 6 caracteres.", ex.getMessage());
+    @Test void usuarioInactivoNoCambiaClave() {
+        var user = new Funcionario("123456789", "FUNCIONARIO", "Juan", "88888888");
+        user.setActive(false);
+        when(datos.findUserById("123456789")).thenReturn(user);
+        assertThrows(IllegalArgumentException.class,
+                () -> logic.cambiarContrasena("123456789", "claveActual", "claveNueva"));
+        verify(datos, never()).findPasswordHash(any());
     }
 
-    @Test
-    void cambiarContrasena_nuevaContrasenaCorta_lanzaExcepcion() {
-        Funcionario u = crearUsuario("123456789", "claveActual");
-        when(usuarioDatos.loadUsers()).thenReturn(new ArrayList<>(List.of(u)));
-
-        var ex = assertThrows(IllegalArgumentException.class,
-                () -> usuarioLogic.cambiarContrasena("123456789", "claveActual", "123"));
-
-        assertEquals("La nueva contraseña debe tener al menos 6 caracteres.", ex.getMessage());
+    @Test void claveActualIncorrectaNoEscribe() {
+        usuarioActivo();
+        assertThrows(IllegalArgumentException.class,
+                () -> logic.cambiarContrasena("123456789", "incorrecta", "claveNueva"));
+        verify(datos, never()).changePassword(any(), any(), any());
     }
 
-    @Test
-    void cambiarContrasena_nuevaIgualALaActual_lanzaExcepcion() {
-        Funcionario u = crearUsuario("123456789", "claveActual");
-        when(usuarioDatos.loadUsers()).thenReturn(new ArrayList<>(List.of(u)));
-
-        var ex = assertThrows(IllegalArgumentException.class,
-                () -> usuarioLogic.cambiarContrasena("123456789", "claveActual", "claveActual"));
-
-        assertEquals("La nueva contraseña debe ser diferente a la actual.", ex.getMessage());
+    @Test void rechazaClaveNuevaCortaNulaOIgual() {
+        usuarioActivo();
+        for (String invalid : new String[]{null, "123", "claveActual"}) {
+            assertThrows(IllegalArgumentException.class,
+                    () -> logic.cambiarContrasena("123456789", "claveActual", invalid));
+        }
+        verify(datos, never()).changePassword(any(), any(), any());
     }
 
-    @Test
-    void cambiarContrasena_casoExitoso_cambiaYGuarda() {
-        Funcionario u = crearUsuario("123456789", "claveVieja");
-        List<Usuario> lista = new ArrayList<>(List.of(u));
-        when(usuarioDatos.loadUsers()).thenReturn(lista);
-
-        usuarioLogic.cambiarContrasena("123456789", "claveVieja", "claveNueva");
-
-        assertEquals("claveNueva", u.getPassword());
-        verify(usuarioDatos).saveUsers(lista);
+    @Test void cambioConcurrenteNoSeSobrescribe() {
+        usuarioActivo();
+        when(datos.changePassword(any(), any(), any())).thenReturn(false);
+        assertThrows(IllegalArgumentException.class,
+                () -> logic.cambiarContrasena("123456789", "claveActual", "claveNueva"));
     }
 
-    @Test
-    void cambiarContrasena_idCaseInsensitive_encuentraUsuario() {
-        Funcionario u = crearUsuario("ABC123", "claveVieja");
-        when(usuarioDatos.loadUsers()).thenReturn(new ArrayList<>(List.of(u)));
-
-        usuarioLogic.cambiarContrasena("abc123", "claveVieja", "claveNueva");
-
-        assertEquals("claveNueva", u.getPassword());
+    @Test void obtenerUsuarioConIdVacioNoConsultaDatos() {
+        assertNull(logic.obtenerUsuario(null));
+        assertNull(logic.obtenerUsuario(" "));
+        verifyNoInteractions(datos);
     }
 
-    // ---------- obtenerUsuario ----------
-
-    @Test
-    void obtenerUsuario_idNull_retornaNullSinConsultarDatos() {
-        assertNull(usuarioLogic.obtenerUsuario(null));
-        verifyNoInteractions(usuarioDatos);
-    }
-
-    @Test
-    void obtenerUsuario_idVacio_retornaNullSinConsultarDatos() {
-        assertNull(usuarioLogic.obtenerUsuario(""));
-        verifyNoInteractions(usuarioDatos);
-    }
-
-    @Test
-    void obtenerUsuario_existente_loRetorna() {
-        Funcionario u = crearUsuario("123456789", "clave123");
-        when(usuarioDatos.loadUsers()).thenReturn(List.of(u));
-
-        Usuario result = usuarioLogic.obtenerUsuario("123456789");
-
-        assertEquals(u, result);
-    }
-
-    @Test
-    void obtenerUsuario_noExistente_retornaNull() {
-        when(usuarioDatos.loadUsers()).thenReturn(List.of());
-
-        assertNull(usuarioLogic.obtenerUsuario("999999999"));
-    }
-
-    @Test
-    void obtenerUsuario_caseInsensitive_loEncuentra() {
-        Funcionario u = crearUsuario("ABC123", "clave123");
-        when(usuarioDatos.loadUsers()).thenReturn(List.of(u));
-
-        assertEquals(u, usuarioLogic.obtenerUsuario("abc123"));
+    @Test void obtenerUsuarioConsultaPorId() {
+        var user = new Funcionario("123456789", "FUNCIONARIO", "Juan", "88888888");
+        when(datos.findUserById("123456789")).thenReturn(user);
+        assertSame(user, logic.obtenerUsuario("123456789"));
+        assertNull(logic.obtenerUsuario("999999999"));
     }
 }

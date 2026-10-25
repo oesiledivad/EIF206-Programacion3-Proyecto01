@@ -238,7 +238,7 @@ public class FuncionariosTest {
         when(datos.updateUser(any())).thenReturn(true);
         Funcionario actualizado = new Funcionario("123456789", "FUNCIONARIO", "Maria Lopez", "77776666");
         logica.actualizar(actualizado);
-        assertEquals("clave123", actualizado.getPassword());
+        assertNull(actualizado.getPassword());
     }
 
     // Verificar que actualizar() conserve el rol "FUNCIONARIO"

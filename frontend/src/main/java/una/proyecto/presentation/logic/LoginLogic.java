@@ -42,17 +42,11 @@ public class LoginLogic {
         }
 
         // Autenticacion contra el sistema
-        Usuario usuario = authService.authenticate(userId.trim(), password.trim());
+        Usuario usuario = authService.authenticate(userId.trim(), password);
 
         if (usuario == null) {
             return LoginResult.error("Credenciales incorrectas");
         }
-
-        // Verificar si el usuario esta activo
-        // TODO: cuando se arreglen otras cosas
-       // if (!usuario.isActive()) {
-       //     return LoginResult.error("Usuario inactivo, contacte al administrador");
-       // }
 
         // Iniciar sesion en el sistema
         SessionManager.getInstance().login(

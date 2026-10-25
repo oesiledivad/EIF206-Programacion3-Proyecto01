@@ -84,10 +84,13 @@ Operaciones completas de alta, consulta, modificación y baja para:
 
 ---
 
-## Credenciales Iniciales
-Para acceder al sistema por primera vez, utiliza el usuario administrador predeterminado:
-- **ID:** `admin`
-- **Clave:** `admin`
+## Acceso inicial
+
+Crear el administrador con la [utilidad del backend](database/USUARIOS.md).
+Los funcionarios reciben su identificación como contraseña inicial y pueden
+cambiarla desde la aplicación. Las credenciales se almacenan como hashes en MySQL.
+
+La base también puede ejecutarse con [Docker Compose](database/DOCKER.md).
 
 ---
 
