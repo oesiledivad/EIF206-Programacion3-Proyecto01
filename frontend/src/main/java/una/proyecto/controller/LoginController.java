@@ -1,6 +1,7 @@
 package una.proyecto.controller;
 
 import javafx.animation.PauseTransition;
+import javafx.concurrent.Task;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
@@ -152,8 +153,9 @@ public class LoginController {
 
     @FXML
     private void handleLogin() {
+        if (btnLogin.isDisabled()) return;
         String userId = txtUserId.getText().trim();
-        String password = txtPassword.getText().trim();
+        String password = txtPassword.getText();
 
         if (userId.isEmpty() || password.isEmpty()) {
             showError("Por favor ingrese ID y clave");
@@ -162,25 +164,28 @@ public class LoginController {
 
         setUIStateForLogin(true);
 
-        PauseTransition delay = createDelay(userId, password);
-        delay.play();
-    }
-
-    private PauseTransition createDelay(String userId, String password) {
-        PauseTransition delay = new PauseTransition(Duration.millis(1000));
-        delay.setOnFinished(event -> {
-            LoginLogic.LoginResult result = loginLogic.validateCredentials(userId, password);
-
-            if (result.isSuccess()) {
+        Task<LoginLogic.LoginResult> task = new Task<>() {
+            @Override protected LoginLogic.LoginResult call() {
+                return loginLogic.validateCredentials(userId, password);
+            }
+        };
+        task.setOnSucceeded(event -> {
+            if (task.getValue().isSuccess()) {
                 navigateToMainScreen();
             } else {
-                showError(result.getMessage());
+                showError(task.getValue().getMessage());
                 txtPassword.clear();
-                txtUserId.requestFocus();
                 setUIStateForLogin(false);
+                txtUserId.requestFocus();
             }
         });
-        return delay;
+        task.setOnFailed(event -> {
+            showError("No se pudo iniciar sesión. Verifique la conexión con el servidor.");
+            setUIStateForLogin(false);
+        });
+        Thread thread = new Thread(task, "Login-Servidor");
+        thread.setDaemon(true);
+        thread.start();
     }
 
     private void navigateToMainScreen() {

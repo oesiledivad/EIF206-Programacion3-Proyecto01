@@ -19,6 +19,7 @@ public final class Protocol {
     public static final int AUTH_LOGIN = 10;
     public static final int AUTH_LOGOUT = 11;
     public static final int AUTH_CAMBIAR_CLAVE = 12;
+    public static final int DASHBOARD_RESUMEN = 20;
 
     // Operaciones generales
     public static final int DISCONNECT = 99;

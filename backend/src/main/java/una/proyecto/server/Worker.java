@@ -2,6 +2,8 @@ package una.proyecto.server;
 
 import una.proyecto.model.Reserva;
 import una.proyecto.model.Usuario;
+import una.proyecto.model.DashboardData;
+import una.proyecto.model.Funcionario;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import una.proyecto.protocolo.Protocol;
@@ -118,6 +120,20 @@ public class Worker {
                 }
                 servicios.getUsuarioLogic().cambiarContrasena(sesion.getId(), (String) actual, (String) nueva);
                 return null;
+            }
+            case Protocol.DASHBOARD_RESUMEN: {
+                Usuario sesion = requireSession();
+                boolean admin = "ADMIN".equals(sesion.getRole());
+                var reservas = admin ? servicios.getReservaService().obtenerTodasReservas()
+                        : servicios.getReservaService().obtenerReservasPorFuncionario(sesion.getId());
+                var funcionarios = admin ? servicios.getFuncionarioService().getAllEmployees()
+                        : java.util.List.<Funcionario>of();
+                for (Reserva reserva : reservas) {
+                    funcionarios.stream().filter(f -> f.getId().equals(reserva.getIdFuncionario()))
+                            .findFirst().ifPresent(reserva::setFuncionarioReserva);
+                }
+                return new DashboardData(reservas, servicios.getRecursoService().obtenerTodosRecursos().size(),
+                        funcionarios.size());
             }
             case Protocol.RESERVA_CREAR:
             case Protocol.RESERVA_LISTAR:

@@ -47,3 +47,4 @@ pdfs/
 ###Credenciales BD
 .config/database.env
 .config/docker.env
+.config/admin.env

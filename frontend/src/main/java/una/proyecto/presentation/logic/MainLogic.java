@@ -1,6 +1,7 @@
 package una.proyecto.presentation.logic;
 
 import una.proyecto.utils.SessionManager;
+import una.proyecto.proxy.ServiceProxy;
 
 import java.util.List;
 
@@ -45,6 +46,7 @@ public class MainLogic {
      * Cierra la sesión del usuario
      */
     public void logoutUser() {
+        ServiceProxy.instance().logout();
         SessionManager.getInstance().logout();
     }
 

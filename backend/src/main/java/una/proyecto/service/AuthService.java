@@ -2,9 +2,10 @@ package una.proyecto.service;
 
 import una.proyecto.datos.UsuarioDatos;
 import una.proyecto.model.Usuario;
+import una.proyecto.model.LoginService;
 import una.proyecto.security.PasswordHasher;
 
-public class AuthService {
+public class AuthService implements LoginService {
     private final UsuarioDatos usuarioDatos;
 
     public AuthService() { this(new UsuarioDatos()); }
