@@ -4,7 +4,7 @@
 
 ### EIF206 — Programación III · Proyectos 01 y 02
 
-Sistema de escritorio para la **gestión integral de reservas de recursos institucionales**, desarrollado con Java y JavaFX. Incluye autenticación y roles, gestión de reservas y recursos, persistencia XML, generación de reportes PDF, pruebas automatizadas e integración con **Inteligencia Artificial (LLM)** mediante la API de Groq.
+Sistema de escritorio para la **gestión integral de reservas de recursos institucionales**, desarrollado con Java y JavaFX. Incluye autenticación y roles, gestión de reservas y recursos, persistencia MySQL, generación de reportes PDF, pruebas automatizadas e integración con **Inteligencia Artificial (LLM)** mediante la API de Groq.
 
 <p>
   <img src="https://img.shields.io/badge/Java-17%2B-orange?logo=openjdk&logoColor=white" alt="Java 17+">
@@ -79,7 +79,7 @@ Operaciones completas de alta, consulta, modificación y baja para:
 - **Reportes profesionales:** Generación automatizada de reportes en PDF integrados en todas las vistas principales del sistema.
 
 ### 💾 Persistencia y Calidad
-- **Persistencia XML y JAXB:** Almacenamiento estructurado mediante wrappers especializados y adaptadores de fecha/hora.
+- **Persistencia MySQL:** Repositorios JDBC y esquema relacional para usuarios, funcionarios, categorías, recursos y reservas.
 - **Pruebas Automatizadas:** Suite completa de pruebas unitarias (JUnit 5) e integración (Mockito).
 
 ---
@@ -96,7 +96,7 @@ La base también puede ejecutarse con [Docker Compose](database/DOCKER.md).
 
 ## Arquitectura del Sistema
 
-El proyecto organiza sus capas en módulos Maven. La interfaz pertenece a `frontend`, los servicios, la lógica y el acceso a datos a `backend`, y los modelos compartidos a `common`. La aplicación de escritorio invoca los servicios localmente y utiliza persistencia XML. El diseño relacional y los scripts MySQL se encuentran en `database/`.
+El proyecto organiza sus capas en módulos Maven. La interfaz pertenece a `frontend`, los servicios, la lógica y el acceso a datos a `backend`, y los modelos compartidos a `common`. La aplicación de escritorio invoca los servicios localmente y utiliza persistencia MySQL. El diseño relacional y los scripts MySQL se encuentran en `database/`.
 
 ```text
 ┌─────────────────────────────────────────────┐
@@ -122,7 +122,7 @@ El proyecto organiza sus capas en módulos Maven. La interfaz pertenece a `front
                        ▼
 ┌─────────────────────────────────────────────┐
 │                   DATOS                     │
-│        XML · JAXB · Wrappers · Adaptadores  │
+│        MySQL · JDBC · Repositorios  │
 └──────────────────────┬──────────────────────┘
                        │
                        ▼
@@ -140,13 +140,13 @@ El proyecto organiza sus capas en módulos Maven. La interfaz pertenece a `front
 | **Interfaz de Usuario** | Vistas JavaFX, archivos FXML, hojas de estilo CSS y controladores de eventos.                                 |
 | **Servicios**           | Orquestación de operaciones de la aplicación y conexión lógica con controladores.                             |
 | **Lógica**              | Reglas de negocio, validaciones de disponibilidad y submódulo de IA (`aiGenerator`).                          |
-| **Datos**               | Operaciones CRUD y serialización JAXB sobre archivos XML estructurados.                                       |
+| **Datos**               | Operaciones CRUD mediante JDBC sobre las tablas MySQL.                                       |
 | **Modelos**             | Clases de dominio principales (`Administrador`, `Categoria`, `Funcionario`, `Recurso`, `Reserva`, `Usuario`). |
 
 ### Tecnologías e Integraciones Clave
 
 * 🤖 **Groq API:** Procesamiento e inferencia mediante modelos LLM avanzados.
-* 💾 **Jakarta JAXB:** Mapeo y persistencia de objetos en formato XML.
+* 💾 **MySQL y JDBC:** Almacenamiento relacional y acceso a datos.
 * 📄 **Apache PDFBox + EasyTable:** Renderizado y exportación de reportes institucionales en PDF.
 * 🔐 **Dotenv Java:** Manejo seguro de configuraciones y variables de entorno.
 
@@ -217,7 +217,7 @@ common/
 backend/
 ├── pom.xml
 └── src/
-    ├── main/                   # Servicios, lógica, IA y datos XML
+    ├── main/                   # Servicios, lógica, IA y datos MySQL
     └── test/                   # Pruebas de negocio y persistencia
 frontend/
 ├── pom.xml
@@ -226,7 +226,7 @@ frontend/
     └── test/                   # Pruebas de login y lógica de presentación
 database/                       # MER DBML, esquema MySQL y catálogo de ejemplo
 docs/                           # Documentación de arquitectura
-data/xml/                       # Datos locales actuales, ignorados por Git
+data/xml/                       # Archivos de datos del proyecto 01
 ```
 
 ---

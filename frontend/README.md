@@ -43,8 +43,10 @@ directorio de trabajo al ejecutar `una.proyecto.app.MainApp`.
 
 ## Configuración y pruebas
 
-Los datos XML se leen desde `data/xml/` en la raíz. La configuración del asistente
-de IA se carga desde el archivo `.env` descrito en el [README general](../README.md).
+Los servicios locales utilizan la conexión MySQL descrita en la
+[guía de usuarios y configuración](../database/USUARIOS.md). La configuración del
+asistente de IA se carga desde el archivo `.env` descrito en el
+[README general](../README.md).
 
 Para ejecutar las pruebas del módulo y sus dependencias sin llamadas externas a IA:
 

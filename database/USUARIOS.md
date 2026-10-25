@@ -47,7 +47,7 @@ Las pruebas de integración requieren una base exclusiva para pruebas con
 y otro puerto. No usar datos personales en esa base.
 
 ```sh
-mvn verify "-Dtest=AuthServiceTest,UsuarioLogicTest,FuncionariosTest,PasswordHasherTest,LoginLogicTest,MainLogicTest" "-Dit.test=UsuariosIntegracionIT,FuncionariosIntegracionIT,LoginIntegracionIT" -Dsurefire.failIfNoSpecifiedTests=false -Dfailsafe.failIfNoSpecifiedTests=false
+mvn verify "-Dit.test=UsuariosIntegracionIT,FuncionariosIntegracionIT,ServerIntegracionIT,LoginIntegracionIT" -Dfailsafe.failIfNoSpecifiedTests=false
 ```
 
 La conexión acepta `DB_URL`, `DB_USER` y `DB_PASSWORD` desde el entorno o desde
@@ -56,3 +56,5 @@ usuario reservados. La conversión de archivos XML existentes es una operación
 independiente de la creación del esquema.
 
 [MySQL con Docker](DOCKER.md) · [Esquema y catálogo](README.md)
+
+[Contrato de autenticación por sockets](../docs/protocolo-autenticacion.md)

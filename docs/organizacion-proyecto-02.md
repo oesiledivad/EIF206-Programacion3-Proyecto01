@@ -6,7 +6,7 @@ Java y la configuración de compilación y pruebas.
 | Módulo | Contenido | Documentación |
 | --- | --- | --- |
 | `frontend` | Aplicación JavaFX, MVC y reportes PDF | [README](../frontend/README.md) |
-| `backend` | Servicios, lógica, integración con IA y datos XML | [README](../backend/README.md) |
+| `backend` | Servidor, servicios, lógica, integración con IA y datos MySQL | [README](../backend/README.md) |
 | `common` | Modelos y adaptadores de serialización | [README](../common/README.md) |
 
 El MER y los scripts MySQL se encuentran en [`database`](../database/README.md).
@@ -76,12 +76,14 @@ GitHub Actions ejecuta `mvn verify` desde la raíz para procesar todos los módu
 
 ## Configuración y datos
 
-Los datos XML se almacenan en `data/xml/`, la configuración de IA en `.env` y los
-reportes PDF en `pdfs/`, todos relativos a la raíz del repositorio. Los plugins de
-pruebas y de ejecución utilizan ese directorio de trabajo.
+La conexión JDBC usa `DB_URL`, `DB_USER` y `DB_PASSWORD` desde el entorno o desde
+`.config/database.env`. La configuración de IA se define en `.env` y los reportes
+se guardan en `pdfs/`, relativos a la raíz del repositorio.
 
-El recurso de ejemplo de usuarios pertenece al backend. La capa de datos utiliza
-los archivos de `data/xml/`. Los directorios `target/`, los datos locales y `.env`
-están excluidos del control de versiones mediante `.gitignore`.
+Los plugins de pruebas y ejecución utilizan la raíz como directorio de trabajo.
+Los directorios `target/` y las configuraciones locales están excluidos de Git.
+
+El servidor expone el [contrato de autenticación por sockets](protocolo-autenticacion.md).
+Los modelos compartidos transportan perfiles sin contraseñas ni hashes.
 
 Para instalar el esquema MySQL, seguir la [guía de base de datos](../database/README.md).

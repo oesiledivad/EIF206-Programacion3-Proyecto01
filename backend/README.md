@@ -2,7 +2,7 @@
 
 Servicios, reglas de negocio y acceso a datos del Sistema de Reserva de Recursos.
 Este módulo utiliza los modelos compartidos de [`common`](../common/README.md)
-y conserva la persistencia XML mediante JAXB.
+y utiliza MySQL mediante JDBC.
 
 ## Contenido
 
@@ -11,21 +11,23 @@ y conserva la persistencia XML mediante JAXB.
 | `src/main/java/una/proyecto/service` | Servicios de autenticación, funcionarios, categorías, recursos, reservas, calendarios y estadísticas |
 | `src/main/java/una/proyecto/logic` | Validaciones y reglas de negocio |
 | `src/main/java/una/proyecto/logic/ia` | Interpretación de solicitudes de reserva con Groq |
-| `src/main/java/una/proyecto/datos` | Acceso a los archivos XML |
-| `src/main/java/una/proyecto/datos/wrapper` | Contenedores de serialización JAXB |
+| `src/main/java/una/proyecto/datos` | Repositorios JDBC y configuración MySQL |
+| `src/main/java/una/proyecto/datos/wrapper` | Contenedores JAXB |
 | `src/main/java/una/proyecto/datos/xml` | Utilidades XML |
-| `src/main/java/una/proyecto/bootstrap` | Construcción de servicios mediante `AppFactory` |
+| `src/main/java/una/proyecto/bootstrap` | Construcción de servicios y creación del administrador |
+| `src/main/java/una/proyecto/server` | Servidor, workers y punto de entrada `BackendApp` |
+| `src/main/java/una/proyecto/security` | Hash y verificación de contraseñas |
 | `src/main/resources/una/proyecto/datos` | Recurso XML de usuarios |
 | `src/test/java` | Pruebas unitarias y de integración |
 
 ## Uso y dependencias
 
-Los servicios son invocados localmente por el
-[`frontend`](../frontend/README.md). El módulo se compila como una biblioteca JAR
-y no declara un punto de entrada ejecutable.
+El punto de entrada del servidor es `una.proyecto.server.BackendApp`. El servidor
+escucha en `Protocol.PORT` y atiende el contrato de autenticación y reservas por
+sockets. El [`frontend`](../frontend/README.md) también utiliza servicios locales.
 
-Sus dependencias de aplicación son `common`, JAXB, el cliente HTTP de Java,
-JSON y Dotenv. El módulo es independiente de JavaFX.
+Sus dependencias de aplicación son `common`, MySQL Connector/J, JAXB, el cliente
+HTTP de Java, JSON y Dotenv. El módulo es independiente de JavaFX.
 
 ## Compilación y pruebas
 
@@ -71,12 +73,9 @@ se encuentran en `backend/target/surefire-reports/` y
 
 ## Configuración y datos
 
-Las rutas de datos se resuelven desde la raíz del repositorio:
-
-- `data/xml/usuarios.xml`
-- `data/xml/categorias.xml`
-- `data/xml/recursos.xml`
-- `data/xml/reservas.xml`
+La conexión MySQL se configura con `DB_URL`, `DB_USER` y `DB_PASSWORD`, desde el
+entorno o desde `.config/database.env`. Usar la raíz del repositorio como directorio
+de trabajo e inicializar la base con los scripts de `database/`.
 
 El asistente de IA utiliza `GROQ_API_KEY`, `GROQ_URL` y `GROQ_MODEL`, definidos
 en el entorno o en el `.env` de la raíz. Las pruebas de integración de IA llaman
@@ -84,7 +83,12 @@ al servicio externo y se omiten si no hay clave configurada. Las pruebas unitari
 de IA usan un cliente HTTP simulado.
 
 El diseño relacional y los scripts de MySQL se documentan en
-[`database`](../database/README.md). La ejecución de esos scripts es independiente
-de los servicios XML descritos aquí.
+[`database`](../database/README.md). Los repositorios JDBC utilizan las tablas de ese esquema.
 
 [Documentación general](../README.md) · [Arquitectura](../docs/organizacion-proyecto-02.md)
+
+## Autenticación y entorno
+
+- [Usuarios MySQL y contraseñas](../database/USUARIOS.md)
+- [Contrato de autenticación por sockets](../docs/protocolo-autenticacion.md)
+- [MySQL con Docker Compose](../database/DOCKER.md)
