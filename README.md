@@ -177,6 +177,77 @@ GROQ_MODEL=nombre_del_modelo_qwen
 ---
 
 
+## Configuración del Archivo `.config/docker.env`
+
+Docker Compose utiliza este archivo para crear MySQL. Si ejecutas `iniciar.ps1`,
+se genera automáticamente con contraseñas locales. Para configurarlo manualmente,
+copia `.config/docker.env.example` como `.config/docker.env` y completa:
+
+```env
+MYSQL_PORT=3307
+MYSQL_PASSWORD=tu_clave_de_reservas_app
+MYSQL_ROOT_PASSWORD=tu_clave_de_root
+```
+
+### Descripción de Variables
+
+* **`MYSQL_PORT`**: Puerto de MySQL en tu computadora; el contenedor utiliza internamente el puerto `3306`.
+* **`MYSQL_PASSWORD`**: Contraseña del usuario MySQL `reservas_app`, utilizado por el backend.
+* **`MYSQL_ROOT_PASSWORD`**: Contraseña del administrador de MySQL, independiente del usuario `admin` de la aplicación.
+
+Estas contraseñas se establecen al inicializar un volumen vacío. Editar el archivo
+después no cambia las credenciales de una base existente.
+
+---
+
+## Configuración del Archivo `.config/database.env`
+
+El backend utiliza este archivo para conectarse a MySQL. `iniciar.ps1` lo genera
+con los datos de Docker cuando no existe. Para configurarlo manualmente, copia
+`.config/database.docker.env.example` como `.config/database.env` y completa:
+
+```env
+DB_URL=jdbc:mysql://127.0.0.1:3307/sistema_reservas
+DB_USER=reservas_app
+DB_PASSWORD=tu_clave_de_reservas_app
+```
+
+### Descripción de Variables
+
+* **`DB_URL`**: Dirección JDBC de la base. El puerto debe coincidir con `MYSQL_PORT` de `.config/docker.env`.
+* **`DB_USER`**: Usuario MySQL de conexión; Docker crea `reservas_app`.
+* **`DB_PASSWORD`**: Debe ser exactamente la misma contraseña que `MYSQL_PASSWORD`.
+
+Para MySQL instalado directamente en el sistema, utiliza como plantilla
+`.config/database.env.example` y ajusta el puerto, usuario y contraseña a esa
+instalación. El script de inicio automático utiliza la configuración de Docker.
+
+---
+
+## Configuración del Archivo `.config/admin.env`
+
+El script de inicio utiliza este archivo para crear el administrador de la
+aplicación cuando no existe. Puedes copiar `.config/admin.env.example` como
+`.config/admin.env`; si no existe, el script lo genera con este contenido:
+
+```env
+APP_ADMIN_PASSWORD=admin
+```
+
+### Descripción de Variables
+
+* **`APP_ADMIN_PASSWORD`**: Contraseña inicial del usuario de aplicación `admin`. Acepta `admin` o una contraseña personalizada de al menos seis caracteres.
+
+El acceso inicial por defecto es **admin / admin**. Cambiar este archivo no
+restablece la contraseña de un administrador existente; el cambio de contraseña
+se realiza desde la aplicación.
+
+Los tres archivos `.config/*.env` anteriores están excluidos de Git. Las
+plantillas `.example` documentan su estructura y se incluyen en el repositorio.
+La configuración de Groq es independiente y no es necesaria para iniciar sesión.
+
+---
+
 ## Requisitos Previos e Instalación de Maven
 
 Asegúrate de tener instalado en tu entorno de desarrollo:
@@ -215,6 +286,7 @@ mvn -version
 ```text
 pom.xml                         # POM padre: agrega los tres módulos
 mvnw / mvnw.cmd                 # Maven Wrapper
+iniciar.ps1                     # Arranque y cierre local de JavaFX, backend y MySQL
 compose.yaml                    # MySQL 8.4 con volumen persistente
 .config/                        # Ejemplos de configuración local
 common/
@@ -262,8 +334,11 @@ En una instalación nueva, entra con el usuario **admin** y la contraseña **adm
 La clave inicial se guarda en `.config/admin.env`, un archivo local excluido de Git.
 Si ya existe un administrador o ese archivo tiene otra clave, se conserva su configuración.
 
-Al cerrar JavaFX, el script detiene el backend que inició. MySQL permanece
-disponible en Docker; para detenerlo utiliza el comando del paso 9.
+Al cerrar JavaFX, el script detiene el backend que inició y el servicio MySQL de
+este proyecto, incluso si MySQL ya estaba encendido. También los detiene al
+terminar `-Comprobar` o si ocurre un error después de intentar iniciar MySQL.
+El volumen conserva los datos para el siguiente arranque. Docker Desktop
+permanece abierto.
 Los registros del backend quedan en `target/local/backend.log` y
 `target/local/backend-error.log`.
 
@@ -427,7 +502,11 @@ la configuración de IA se utiliza al invocar el asistente de reservas.
 
 ### 9. ⏹️ Detener la ejecución
 
-Cerrar la ventana JavaFX, detener el backend con `Ctrl+C` y apagar MySQL:
+Con `iniciar.ps1`, basta con cerrar la ventana JavaFX: el script detiene el
+backend y MySQL automáticamente.
+
+Si seguiste los pasos manuales, cierra JavaFX, detén el backend con `Ctrl+C` y
+apaga MySQL:
 
 ```powershell
 docker compose --env-file .config/docker.env down
