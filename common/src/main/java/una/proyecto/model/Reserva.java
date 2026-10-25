@@ -8,13 +8,15 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import una.proyecto.serialization.LocalDateAdapter;
 import una.proyecto.serialization.LocalTimeAdapter;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
 @XmlRootElement(name="reserva")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class Reserva {
+public class Reserva implements Serializable {
+    private static final long serialVersionUID = 1L;
     private String id;
     private String actividad;
     @XmlJavaTypeAdapter(LocalDateAdapter.class)
