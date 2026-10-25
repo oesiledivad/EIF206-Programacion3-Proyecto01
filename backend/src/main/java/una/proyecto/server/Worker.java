@@ -1,6 +1,9 @@
 package una.proyecto.server;
 
 import una.proyecto.model.Reserva;
+import una.proyecto.model.Usuario;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import una.proyecto.protocolo.Protocol;
 import una.proyecto.service.ReservaService;
 import una.proyecto.service.Servicios;
@@ -18,6 +21,7 @@ public class Worker {
     private final Server server;
     private final Servicios servicios;
     private final String sid;
+    private volatile Usuario usuario;
 
     // Canal sincrono: peticiones y respuestas
     private final Socket socket;
@@ -91,6 +95,30 @@ public class Worker {
     // Reparte cada operacion al metodo de su entidad.
     private Object ejecutar(int operacion) throws IOException, ClassNotFoundException {
         switch (operacion) {
+            case Protocol.AUTH_LOGIN: {
+                Object id = is.readObject();
+                Object clave = is.readObject();
+                logout();
+                if (!(id instanceof String) || !(clave instanceof String)) {
+                    throw new IllegalArgumentException("Credenciales inválidas.");
+                }
+                usuario = servicios.getAuthService().authenticate((String) id, (String) clave);
+                if (usuario == null) throw new IllegalArgumentException("Credenciales incorrectas.");
+                return usuario;
+            }
+            case Protocol.AUTH_LOGOUT:
+                logout();
+                return null;
+            case Protocol.AUTH_CAMBIAR_CLAVE: {
+                Object actual = is.readObject();
+                Object nueva = is.readObject();
+                Usuario sesion = requireSession();
+                if (!(actual instanceof String) || !(nueva instanceof String)) {
+                    throw new IllegalArgumentException("Contraseñas inválidas.");
+                }
+                servicios.getUsuarioLogic().cambiarContrasena(sesion.getId(), (String) actual, (String) nueva);
+                return null;
+            }
             case Protocol.RESERVA_CREAR:
             case Protocol.RESERVA_LISTAR:
             case Protocol.RESERVA_BUSCAR:
@@ -118,19 +146,42 @@ public class Worker {
         switch (operacion) {
             case Protocol.RESERVA_CREAR: {
                 Reserva reserva = (Reserva) is.readObject();
+                Usuario sesion = requireSession();
+                requireFuncionario(sesion);
+                if (reserva == null) throw new IllegalArgumentException("La reserva es requerida.");
+                if (reserva.getIdFuncionario() != null
+                        && !sesion.getId().equalsIgnoreCase(reserva.getIdFuncionario())) {
+                    throw new IllegalArgumentException("No puede reservar para otro funcionario.");
+                }
+                reserva.setIdFuncionario(sesion.getId());
+                reservaService.verificarHorasService(reserva.getFecha(), reserva.getHoraInicio(), reserva.getHoraFin());
                 reservaService.save(reserva);
                 server.notificarReservaCreada(this, reserva);
                 return reserva;
             }
             case Protocol.RESERVA_LISTAR: {
-                return new ArrayList<Reserva>(reservaService.obtenerTodasReservas());
+                Usuario sesion = requireSession();
+                return new ArrayList<Reserva>("ADMIN".equals(sesion.getRole())
+                        ? reservaService.obtenerTodasReservas()
+                        : reservaService.obtenerReservasPorFuncionario(sesion.getId()));
             }
             case Protocol.RESERVA_BUSCAR: {
                 String id = (String) is.readObject();
-                return reservaService.buscarPorId(id);
+                Usuario sesion = requireSession();
+                Reserva reserva = reservaService.buscarPorId(id);
+                if (reserva != null && !"ADMIN".equals(sesion.getRole())) requirePropietario(sesion, reserva);
+                return reserva;
             }
             case Protocol.RESERVA_CANCELAR: {
                 String id = (String) is.readObject();
+                Usuario sesion = requireSession();
+                requireFuncionario(sesion);
+                Reserva reserva = reservaService.buscarPorId(id);
+                if (reserva == null) throw new IllegalArgumentException("La reserva no existe.");
+                requirePropietario(sesion, reserva);
+                boolean futura = reserva.getFecha().isAfter(LocalDate.now())
+                        || (reserva.getFecha().equals(LocalDate.now()) && reserva.getHoraInicio().isAfter(LocalTime.now()));
+                if (!futura) throw new IllegalArgumentException("Solo puede cancelar reservas futuras.");
                 reservaService.delete(id);
                 return null;
             }
@@ -139,26 +190,68 @@ public class Worker {
         }
     }
 
+    private synchronized Usuario requireSession() {
+        Usuario sesion = usuario;
+        Usuario vigente = sesion == null ? null : servicios.getAuthService().activeUser(sesion.getId());
+        if (vigente == null) {
+            logout();
+            throw new IllegalStateException("Debe iniciar sesión con un usuario activo.");
+        }
+        usuario = vigente;
+        return vigente;
+    }
+
+    private void requireFuncionario(Usuario sesion) {
+        if (!"FUNCIONARIO".equals(sesion.getRole())) {
+            throw new IllegalArgumentException("Esta operación requiere un funcionario.");
+        }
+    }
+
+    private void requirePropietario(Usuario sesion, Reserva reserva) {
+        if (!sesion.getId().equalsIgnoreCase(reserva.getIdFuncionario())) {
+            throw new IllegalArgumentException("La reserva pertenece a otro funcionario.");
+        }
+    }
+
+    private synchronized void logout() {
+        usuario = null;
+        cerrarCanalAsync();
+    }
+
+    String getUsuarioId() {
+        Usuario sesion = usuario;
+        return sesion == null ? null : sesion.getId();
+    }
+
     // ================= Alertas =================
 
     // Lo llama el Server cuando el cliente abre su canal de alertas.
     public synchronized void setCanalAsync(Socket socketAsync, ObjectOutputStream osAsync,
-                                           ObjectInputStream isAsync) {
+                                           ObjectInputStream isAsync) throws IOException {
+        try {
+            requireSession();
+        } catch (IllegalStateException e) {
+            throw new IOException("El canal de alertas requiere una sesión activa.", e);
+        }
+        cerrarCanalAsync();
+        osAsync.writeInt(Protocol.STATUS_NO_ERROR);
+        osAsync.flush();
         this.socketAsync = socketAsync;
         this.osAsync = osAsync;
     }
 
     // Lo llaman los hilos de OTROS Workers (via Server); por eso es synchronized.
     public synchronized void enviarNotificacion(int tipo, Object dato) {
-        if (osAsync == null) {
+        if (osAsync == null || usuario == null) {
             return; // Este cliente todavia no abrio su canal de alertas.
         }
         try {
+            requireSession();
             osAsync.writeInt(tipo);
             osAsync.writeObject(dato);
             osAsync.flush();
             osAsync.reset();
-        } catch (IOException e) {
+        } catch (IOException | IllegalStateException e) {
             System.err.println("[" + sid + "] No se pudo enviar la alerta: " + e.getMessage());
             cerrarCanalAsync();
         }
@@ -166,7 +259,8 @@ public class Worker {
 
     // ================= Cierre =================
 
-    private void cerrar() {
+    synchronized void cerrar() {
+        usuario = null;
         server.remover(this);
         cerrarCanalAsync();
         try {

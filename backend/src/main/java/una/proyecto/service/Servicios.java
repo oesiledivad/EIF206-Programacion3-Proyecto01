@@ -1,6 +1,7 @@
 package una.proyecto.service;
 
 import una.proyecto.bootstrap.AppFactory;
+import una.proyecto.logic.UsuarioLogic;
 
 // Fachada del backend: crea una sola instancia de cada servicio
 // y la comparte con todos los Workers.
@@ -8,6 +9,7 @@ import una.proyecto.bootstrap.AppFactory;
 public class Servicios {
 
     private final AuthService authService;
+    private final UsuarioLogic usuarioLogic;
     private final ReservaService reservaService;
     private final RecursoService recursoService;
     private final CategoriaService categoriaService;
@@ -17,6 +19,7 @@ public class Servicios {
 
     public Servicios() {
         this.authService = new AuthService();
+        this.usuarioLogic = new UsuarioLogic();
         this.reservaService = AppFactory.createReservaService();
         this.recursoService = AppFactory.createRecursoDatos();
         this.categoriaService = AppFactory.createCategoriaService();
@@ -24,6 +27,8 @@ public class Servicios {
         this.estadisticasService = AppFactory.createEstadisticasService();
         this.calendarizacionService = new CalendarizacionService();
     }
+
+    public UsuarioLogic getUsuarioLogic() { return usuarioLogic; }
 
     public AuthService getAuthService() {
         return authService;
