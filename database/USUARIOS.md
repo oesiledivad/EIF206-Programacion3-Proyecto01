@@ -21,7 +21,8 @@ Con la base configurada e inicializada, ejecutar la clase
 `una.proyecto.bootstrap.CrearAdministrador` del backend, usando la raíz del
 repositorio como directorio de trabajo. Con una consola interactiva solicita la
 contraseña; desde IntelliJ, definir `APP_ADMIN_PASSWORD` en el entorno de esa
-ejecución. Requiere al menos seis caracteres.
+ejecución. Acepta la clave inicial `admin` o una contraseña de al menos seis caracteres.
+El script `iniciar.ps1` utiliza `admin` / `admin` en instalaciones nuevas.
 
 Desde la raíz también se puede ejecutar con Maven Wrapper:
 

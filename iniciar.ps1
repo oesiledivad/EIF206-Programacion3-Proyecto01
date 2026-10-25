@@ -125,12 +125,12 @@ try {
     if ("$adminCount".Trim() -notmatch '^[01]$') { throw 'Respuesta inesperada al consultar el administrador.' }
     if ("$adminCount".Trim() -eq '0') {
         if (-not (Test-Path .config/admin.env)) {
-            "APP_ADMIN_PASSWORD=$(New-Password)" | Set-Content .config/admin.env -Encoding ASCII
+            'APP_ADMIN_PASSWORD=admin' | Set-Content .config/admin.env -Encoding ASCII
         }
         $env:APP_ADMIN_PASSWORD = (Read-Config .config/admin.env)['APP_ADMIN_PASSWORD']
         if (-not $env:APP_ADMIN_PASSWORD) { throw 'Falta APP_ADMIN_PASSWORD en .config/admin.env.' }
         Invoke-Maven @('-pl', 'backend', 'exec:java', '-Dexec.mainClass=una.proyecto.bootstrap.CrearAdministrador', '--batch-mode')
-        Write-Host 'Administrador creado. Usuario: admin. Consulte la clave en .config/admin.env.'
+        Write-Host 'Administrador creado. Usuario: admin. Clave inicial en .config/admin.env (por defecto: admin).'
     } else {
         Write-Host 'Se conserva el administrador existente y su clave.'
     }

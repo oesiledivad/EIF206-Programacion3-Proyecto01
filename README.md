@@ -258,8 +258,9 @@ PowerShell en la raíz del repositorio y ejecuta:
 El script configura los archivos locales cuando no existen, inicia MySQL,
 compila `common`, `backend` y `frontend`, crea el administrador si no existe y
 abre JavaFX conectado al backend. Conserva las credenciales y los datos existentes.
-En una instalación nueva, entra con el usuario **admin** y la contraseña guardada
-en `.config/admin.env`. Ese archivo es local y está excluido de Git.
+En una instalación nueva, entra con el usuario **admin** y la contraseña **admin**.
+La clave inicial se guarda en `.config/admin.env`, un archivo local excluido de Git.
+Si ya existe un administrador o ese archivo tiene otra clave, se conserva su configuración.
 
 Al cerrar JavaFX, el script detiene el backend que inició. MySQL permanece
 disponible en Docker; para detenerlo utiliza el comando del paso 9.

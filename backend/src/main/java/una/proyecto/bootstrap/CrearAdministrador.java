@@ -19,8 +19,8 @@ public final class CrearAdministrador {
             String value = System.getenv("APP_ADMIN_PASSWORD");
             password = value == null ? null : value.toCharArray();
         }
-        if (password == null || password.length < 6) {
-            throw new IllegalArgumentException("Ingrese una contraseña de al menos 6 caracteres mediante consola o APP_ADMIN_PASSWORD.");
+        if (password == null || (password.length < 6 && !Arrays.equals(password, "admin".toCharArray()))) {
+            throw new IllegalArgumentException("Use la clave inicial admin o una contraseña de al menos 6 caracteres.");
         }
         try {
             Administrador admin = new Administrador("admin", "ADMIN", "Administrador");
