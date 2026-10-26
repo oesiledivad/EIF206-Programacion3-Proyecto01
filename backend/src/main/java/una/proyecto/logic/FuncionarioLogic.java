@@ -113,7 +113,6 @@ public class FuncionarioLogic {
 
         // Regla de negocio: se conserva rol y clave actuales, no se pisan
         actualizado.setRole("FUNCIONARIO");
-        actualizado.setPassword(existente.getPassword());
 
         boolean actualizadoOk = usuarioDatos.updateUser(actualizado);
 

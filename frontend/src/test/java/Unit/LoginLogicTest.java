@@ -96,12 +96,12 @@ class LoginLogicTest {
     }
 
     @Test
-    void trim_seAplicaAntesDeAutenticar() {
+    void trim_seAplicaAlIdYConservaLaContrasena() {
         Usuario usuario = mock(Usuario.class);
-        when(authService.authenticate("123456789", "123456")).thenReturn(usuario);
+        when(authService.authenticate("123456789", "  123456  ")).thenReturn(usuario);
 
         loginLogic.validateCredentials("  123456789  ", "  123456  ");
 
-        verify(authService).authenticate("123456789", "123456");
+        verify(authService).authenticate("123456789", "  123456  ");
     }
 }

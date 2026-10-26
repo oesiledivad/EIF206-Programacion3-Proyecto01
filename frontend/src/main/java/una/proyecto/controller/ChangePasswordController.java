@@ -3,9 +3,8 @@ package una.proyecto.controller;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
-import una.proyecto.logic.UsuarioLogic;
-import una.proyecto.model.Usuario;
-import una.proyecto.service.AuthService;
+import javafx.concurrent.Task;
+import una.proyecto.proxy.ServiceProxy;
 import una.proyecto.utils.DialogController;
 import una.proyecto.utils.SessionManager;
 
@@ -19,8 +18,6 @@ public class ChangePasswordController implements DialogController {
     @FXML private Button btnCambiar;
     @FXML private Button btnCancelar;
 
-    private final AuthService authService = new AuthService();
-    private final UsuarioLogic usuarioLogic = new UsuarioLogic();
     private final SessionManager sessionManager = SessionManager.getInstance();
 
     private Stage dialogStage;
@@ -73,6 +70,7 @@ public class ChangePasswordController implements DialogController {
     }
 
     private void handleCambiarContrasena() {
+        if (btnCambiar.isDisabled()) return;
         String usuario = txtUsuario.getText().trim();
         String contrasenaActual = txtContrasenaActual.getText();
         String nuevaContrasena = txtNuevaContrasena.getText();
@@ -109,33 +107,40 @@ public class ChangePasswordController implements DialogController {
             return;
         }
 
-        // Validar contraseña actual con AuthService
-        Usuario usuarioAutenticado = authService.authenticate(usuario, contrasenaActual);
-        if (usuarioAutenticado == null) {
-            showError("La contraseña actual es incorrecta.");
-            return;
-        }
-
-        // Cambiar contraseña usando UsuarioLogic
-        try {
-            usuarioLogic.cambiarContrasena(usuario, contrasenaActual, nuevaContrasena);
+        btnCambiar.setDisable(true);
+        btnCancelar.setDisable(true);
+        Task<Void> task = new Task<>() {
+            @Override protected Void call() {
+                if (sessionManager.isLoggedIn()) {
+                    ServiceProxy.instance().changePassword(contrasenaActual, nuevaContrasena);
+                } else {
+                    try (ServiceProxy proxy = new ServiceProxy()) {
+                        if (proxy.authenticate(usuario, contrasenaActual) == null) {
+                            throw new IllegalArgumentException("Credenciales incorrectas.");
+                        }
+                        proxy.changePassword(contrasenaActual, nuevaContrasena);
+                    }
+                }
+                return null;
+            }
+        };
+        task.setOnSucceeded(event -> {
             cambioExitoso = true;
-
-            // Mostrar mensaje de éxito
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Éxito");
             alert.setHeaderText(null);
             alert.setContentText("Contraseña cambiada correctamente.");
             alert.showAndWait();
-
-            // Cerrar diálogo
-            if (dialogStage != null) {
-                dialogStage.close();
-            }
-
-        } catch (Exception e) {
-            showError("Error al cambiar la contraseña: " + e.getMessage());
-        }
+            if (dialogStage != null) dialogStage.close();
+        });
+        task.setOnFailed(event -> {
+            showError(task.getException().getMessage());
+            btnCambiar.setDisable(false);
+            btnCancelar.setDisable(false);
+        });
+        Thread thread = new Thread(task, "CambioClave-Servidor");
+        thread.setDaemon(true);
+        thread.start();
     }
 
     private void handleCancelar() {

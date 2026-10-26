@@ -3,6 +3,9 @@ package una.proyecto.controller;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.concurrent.Task;
+import una.proyecto.model.DashboardData;
+import una.proyecto.proxy.ServiceProxy;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -10,11 +13,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 import una.proyecto.model.Funcionario;
 import una.proyecto.model.Reserva;
-import una.proyecto.model.Recurso;
-import una.proyecto.service.FuncionarioService;
-import una.proyecto.service.ReservaService;
-import una.proyecto.service.RecursoService;
-import una.proyecto.bootstrap.AppFactory;
 import una.proyecto.utils.SessionManager;
 
 import java.time.LocalDate;
@@ -52,10 +50,6 @@ public class DashboardController {
     @FXML
     public TableColumn<Reserva, String> colFuncionario;
 
-    private final ReservaService reservaService = AppFactory.createReservaService();
-    private final RecursoService recursoService = AppFactory.createRecursoDatos();
-    private final FuncionarioService funcionarioService = AppFactory.createFuncionarioService();
-
     @FXML
     public void initialize() {
         if (colId != null) colId.setCellValueFactory(new PropertyValueFactory<>("id"));
@@ -79,7 +73,7 @@ public class DashboardController {
             colFuncionario.setCellValueFactory(cellData -> {
                 Reserva r = cellData.getValue();
                 if (r != null && r.getIdFuncionario() != null) {
-                    Funcionario func = funcionarioService.obetenerUsuarioPorId(r.getIdFuncionario());
+                    Funcionario func = r.getFuncionarioReserva();
                     String nombreFuncionario = (func != null && func.getName() != null) ? func.getName() : r.getIdFuncionario();
                     return new javafx.beans.property.SimpleStringProperty(nombreFuncionario);
                 }
@@ -93,28 +87,26 @@ public class DashboardController {
     /**
      * Carga y procesa los datos filtrando estrictamente por permisos según SessionManager (ADMIN vs FUNCIONARIO).
      */
-    private void loadDashboardData() {
+    private void loadDashboardData(DashboardData data) {
         SessionManager session = SessionManager.getInstance();
         String nombre = session.getName() != null ? session.getName() : "Usuario";
         boolean isAdmin = session.isAdmin();
-        String currentUserId = session.getId();
 
         lblUserWelcome.setText(nombre);
 
         List<Reserva> reservasFiltradas;
-        List<Recurso> todosLosRecursos = recursoService.obtenerTodosRecursos();
+
 
         if (isAdmin) {
-            reservasFiltradas = reservaService.obtenerTodasReservas();
+            reservasFiltradas = data.reservas();
 
-            List<Funcionario> todosLosUsuarios = funcionarioService.getAllEmployees();
-            lblUsuariosActivos.setText(String.valueOf(todosLosUsuarios.size()));
+            lblUsuariosActivos.setText(String.valueOf(data.totalFuncionarios()));
 
             if (colFuncionario != null) {
                 colFuncionario.setVisible(true);
             }
         } else {
-            reservasFiltradas = reservaService.obtenerReservasPorFuncionario(currentUserId);
+            reservasFiltradas = data.reservas();
             if (activeUsersCard != null) {
                 activeUsersCard.setVisible(false);
             }
@@ -125,7 +117,7 @@ public class DashboardController {
         }
 
         lblTotalReservas.setText(String.valueOf(reservasFiltradas.size()));
-        lblRecursosDisponibles.setText(String.valueOf(todosLosRecursos.size()));
+        lblRecursosDisponibles.setText(String.valueOf(data.totalRecursos()));
 
         LocalDate hoy = LocalDate.now();
         long actividadesHoyCount = reservasFiltradas.stream()
@@ -153,6 +145,17 @@ public class DashboardController {
         if (lblUserWelcome != null) {
             lblUserWelcome.setText(nombre);
         }
-        loadDashboardData();
+        lblWelcome.setText("Cargando información...");
+        Task<DashboardData> task = new Task<>() {
+            @Override protected DashboardData call() { return ServiceProxy.instance().dashboard(); }
+        };
+        task.setOnSucceeded(event -> {
+            lblWelcome.setText("Bienvenido de vuelta");
+            loadDashboardData(task.getValue());
+        });
+        task.setOnFailed(event -> lblWelcome.setText("No se pudo cargar el panel. Verifique la conexión con el servidor."));
+        Thread thread = new Thread(task, "Dashboard-Servidor");
+        thread.setDaemon(true);
+        thread.start();
     }
 }

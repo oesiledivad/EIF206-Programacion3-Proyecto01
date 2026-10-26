@@ -68,6 +68,7 @@
         <artifactId>javafx-maven-plugin</artifactId>
         <version>0.0.8</version>
         <configuration>
+          <executable>${java.home}/bin/java</executable>
           <mainClass>una.proyecto.frontend/una.proyecto.app.MainApp</mainClass>
           <workingDirectory>${project.basedir}/..</workingDirectory>
           <launcher>app</launcher>

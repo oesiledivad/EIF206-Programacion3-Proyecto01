@@ -4,11 +4,15 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import una.proyecto.utils.Navigation;
+import una.proyecto.proxy.ServiceProxy;
 
 public class MainApp extends Application {
     public static void main(String[] args) {
         launch(args);
     }
+
+    @Override
+    public void stop() { ServiceProxy.instance().close(); }
 
     @Override
     public void start(Stage primaryStage) throws Exception {

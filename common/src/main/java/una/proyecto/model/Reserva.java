@@ -102,6 +102,10 @@ public class Reserva implements Serializable {
         return funcionarioReserva;
     }
 
+    public void setFuncionarioReserva(Funcionario funcionario) {
+        this.funcionarioReserva = funcionario;
+    }
+
     public EstadoReserva getEstado(){return this.estado;}
 
     public String getNombreFuncionario() {

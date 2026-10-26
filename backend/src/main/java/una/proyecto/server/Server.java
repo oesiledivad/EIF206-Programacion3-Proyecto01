@@ -15,12 +15,12 @@ import java.util.List;
 
 // Espera conexiones de los frontends, les asigna un Worker
 // y reparte las notificaciones entre los clientes conectados.
-public class Server {
+public class Server implements AutoCloseable {
 
     private final ServerSocket serverSocket;
     private final List<Worker> workers = Collections.synchronizedList(new ArrayList<>());
     private final Servicios servicios;
-    private int contadorSesiones = 0;
+    private volatile boolean activo = true;
 
     public Server(int puerto) throws IOException {
         this.serverSocket = new ServerSocket(puerto);
@@ -31,11 +31,12 @@ public class Server {
 
     public void iniciar() {
         System.out.println("Servidor escuchando en el puerto " + serverSocket.getLocalPort());
-        while (true) {
+        while (activo) {
             Socket socket;
             try {
                 socket = serverSocket.accept();
             } catch (IOException e) {
+                if (!activo) break;
                 System.err.println("Error al aceptar un cliente: " + e.getMessage());
                 continue;
             }
@@ -125,8 +126,11 @@ public class Server {
         synchronized (workers) {
             destinos = new ArrayList<>(workers);
         }
+        String usuarioOrigen = origen.getUsuarioId();
         for (Worker worker : destinos) {
-            if (worker != origen) {
+            String usuarioDestino = worker.getUsuarioId();
+            if (worker != origen && usuarioDestino != null
+                    && !usuarioDestino.equalsIgnoreCase(usuarioOrigen)) {
                 worker.enviarNotificacion(Protocol.NOTIFICACION_RESERVA_CREADA, reserva);
             }
         }
@@ -135,8 +139,16 @@ public class Server {
     // ================= Auxiliares =================
 
     private synchronized String generarSid() {
-        contadorSesiones++;
-        return "S-" + contadorSesiones;
+        return java.util.UUID.randomUUID().toString();
+    }
+
+    @Override
+    public void close() throws IOException {
+        activo = false;
+        serverSocket.close();
+        List<Worker> conexiones;
+        synchronized (workers) { conexiones = new ArrayList<>(workers); }
+        for (Worker worker : conexiones) worker.cerrar();
     }
 
     private void cerrar(Socket socket) {

@@ -2,67 +2,34 @@ package una.proyecto.logic;
 
 import una.proyecto.datos.UsuarioDatos;
 import una.proyecto.model.Usuario;
-
-import java.util.List;
+import una.proyecto.security.PasswordHasher;
 
 public class UsuarioLogic {
-
     private final UsuarioDatos usuarioDatos;
 
-    public UsuarioLogic() {
-        this.usuarioDatos = new UsuarioDatos();
-    }
-    public UsuarioLogic(UsuarioDatos usuarioDatos) {
-        this.usuarioDatos = usuarioDatos;
-    }
-    /**
-     * Cambia la contraseña de un usuario
-     * @param id ID del usuario
-     * @param contrasenaActual Contraseña actual
-     * @param nuevaContrasena Nueva contraseña
-     * @throws IllegalArgumentException si los datos son inválidos
-     */
-    public void cambiarContrasena(String id, String contrasenaActual, String nuevaContrasena) {
-        // Validar que el usuario exista
-        List<Usuario> usuarios = usuarioDatos.loadUsers();
-        Usuario usuario = usuarios.stream()
-                .filter(u -> u.getId().equalsIgnoreCase(id))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("El usuario no existe."));
+    public UsuarioLogic() { this(new UsuarioDatos()); }
 
-        // Validar contraseña actual
-        if (!usuario.getPassword().equals(contrasenaActual)) {
+    public UsuarioLogic(UsuarioDatos usuarioDatos) { this.usuarioDatos = usuarioDatos; }
+
+    public void cambiarContrasena(String id, String contrasenaActual, String nuevaContrasena) {
+        Usuario user = usuarioDatos.findUserById(id);
+        if (user == null || !user.isActive()) throw new IllegalArgumentException("El usuario no existe.");
+        String oldHash = usuarioDatos.findPasswordHash(id);
+        if (!PasswordHasher.verify(contrasenaActual, oldHash)) {
             throw new IllegalArgumentException("La contraseña actual es incorrecta.");
         }
-
-        // Validar nueva contraseña (mínimo 6 caracteres)
         if (nuevaContrasena == null || nuevaContrasena.length() < 6) {
             throw new IllegalArgumentException("La nueva contraseña debe tener al menos 6 caracteres.");
         }
-
-        // Validar que sea diferente a la actual
         if (nuevaContrasena.equals(contrasenaActual)) {
             throw new IllegalArgumentException("La nueva contraseña debe ser diferente a la actual.");
         }
-
-        usuario.changePassword(nuevaContrasena);
-
-        // Guardar cambios
-        usuarioDatos.saveUsers(usuarios);
+        if (!usuarioDatos.changePassword(user.getId(), oldHash, PasswordHasher.hash(nuevaContrasena))) {
+            throw new IllegalArgumentException("La sesión o contraseña cambió; vuelva a ingresar.");
+        }
     }
 
-    /**
-     * Obtiene un usuario por su ID
-     */
     public Usuario obtenerUsuario(String id) {
-        if (id == null || id.isEmpty()) {
-            return null;
-        }
-
-        List<Usuario> usuarios = usuarioDatos.loadUsers();
-        return usuarios.stream()
-                .filter(u -> u.getId().equalsIgnoreCase(id))
-                .findFirst()
-                .orElse(null);
+        return id == null || id.isBlank() ? null : usuarioDatos.findUserById(id);
     }
 }

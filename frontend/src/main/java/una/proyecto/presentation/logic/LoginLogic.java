@@ -1,18 +1,19 @@
 package una.proyecto.presentation.logic;
 
 import una.proyecto.model.Usuario;
-import una.proyecto.service.AuthService;
+import una.proyecto.model.LoginService;
+import una.proyecto.proxy.ServiceProxy;
 import una.proyecto.utils.SessionManager;
 
 public class LoginLogic {
 
-    private final AuthService authService;
+    private final LoginService authService;
 
     public LoginLogic() {
-        this.authService = new AuthService();
+        this.authService = ServiceProxy.instance();
     }
     // constructor para tests
-    public LoginLogic(AuthService authService) {
+    public LoginLogic(LoginService authService) {
         this.authService = authService;
     }
 
@@ -42,17 +43,17 @@ public class LoginLogic {
         }
 
         // Autenticacion contra el sistema
-        Usuario usuario = authService.authenticate(userId.trim(), password.trim());
+        SessionManager.getInstance().logout();
+        Usuario usuario;
+        try {
+            usuario = authService.authenticate(userId.trim(), password);
+        } catch (IllegalStateException e) {
+            return LoginResult.error(e.getMessage());
+        }
 
         if (usuario == null) {
             return LoginResult.error("Credenciales incorrectas");
         }
-
-        // Verificar si el usuario esta activo
-        // TODO: cuando se arreglen otras cosas
-       // if (!usuario.isActive()) {
-       //     return LoginResult.error("Usuario inactivo, contacte al administrador");
-       // }
 
         // Iniciar sesion en el sistema
         SessionManager.getInstance().login(
