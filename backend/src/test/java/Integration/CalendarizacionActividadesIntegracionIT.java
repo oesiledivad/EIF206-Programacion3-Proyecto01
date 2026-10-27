@@ -1,13 +1,23 @@
 package Integration;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import una.proyecto.datos.CategoriaDatos;
+import una.proyecto.datos.Database;
+import una.proyecto.datos.RecursoDatos;
 import una.proyecto.datos.ReservaDatos;
+import una.proyecto.logic.RecursoLogic;
 import una.proyecto.logic.ReservaLogic;
-import una.proyecto.model.*;
+import una.proyecto.model.Categoria;
+import una.proyecto.model.EstadoReserva;
+import una.proyecto.model.Recurso;
+import una.proyecto.model.Reserva;
+import una.proyecto.service.CalendarizacionService;
 import una.proyecto.service.RecursoService;
 import una.proyecto.service.ReservaService;
 
-import java.io.File;
+import java.sql.PreparedStatement;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -16,112 +26,178 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Pruebas de integración reales: ReservaService → ReservaLogic → ReservaDatos → XML.
- * Usa un archivo XML temporal en target/ para no tocar los datos originales del proyecto.
- * RecursoService se implementa sin recursos para aislar la capa de reservas.
+ * Pruebas de integración reales: ReservaService → ReservaLogic → ReservaDatos → MySQL (reservas + reserva_recurso).
+ * Crea su propio funcionario, categoría y recurso con prefijo IT- y los borra al terminar.
  */
 public class CalendarizacionActividadesIntegracionIT {
 
-    private static final String XML_TEST = "target/test-it-reservas.xml";
+    private static final String FUNCIONARIO_PRUEBA = "IT-FUNC-CAL";
+    private static final String PREFIJO_CATEGORIA = "IT-CAL";
+    private static final String RECURSO_PRUEBA = "IT-CAL-001";
+    private static final LocalDate FECHA = LocalDate.now().plusDays(7);
+
     private ReservaService service;
+    private Categoria categoria;
 
     @BeforeEach
     void setUp() throws Exception {
-        new File("target").mkdirs();
-        new File(XML_TEST).delete();
-        RecursoService sinRecursos = new RecursoService(null) {
-            @Override public List<Recurso> obtenerTodosRecursos() { return new ArrayList<>(); }
-        };
-        service = new ReservaService(new ReservaLogic(new ReservaDatos(), sinRecursos));
+        limpiarDatosDePrueba();
+
+        ejecutar("insert into usuarios (id_usuario, nombre, clave_hash, rol) values (?, ?, ?, ?)",
+                FUNCIONARIO_PRUEBA, "Funcionario de prueba", "sin-clave", "FUNCIONARIO");
+        ejecutar("insert into funcionarios (id_usuario, telefono) values (?, ?)",
+                FUNCIONARIO_PRUEBA, "00000000");
+
+        categoria = new Categoria(null, PREFIJO_CATEGORIA + " Sala");
+        new CategoriaDatos().crear(categoria);                       // MySQL le asigna el id
+        new RecursoDatos().crear(new Recurso(RECURSO_PRUEBA, categoria.getId(), "Sala de prueba"));
+
+        RecursoService recursoService = new RecursoService(new RecursoLogic(new RecursoDatos()));
+        service = new ReservaService(new ReservaLogic(new ReservaDatos(), recursoService));
     }
 
     @AfterEach
-    void tearDown() {
-        new File(XML_TEST).delete();
+    void tearDown() throws Exception {
+        limpiarDatosDePrueba();
     }
 
-    private Reserva reservaValida(String id) {
-        Funcionario f = new Funcionario("111111111", "FUNCIONARIO", "Juan Perez", "88887777");
-        Reserva r = new Reserva("Reunion IT", LocalDate.now().plusDays(1),
-                LocalTime.of(9, 0), LocalTime.of(10, 0),
-                "111111111", new ArrayList<>(), EstadoReserva.ACTIVA, f);
-        r.setId(id);
-        r.setCategoriasDeRecursosIds(new ArrayList<>());
-        r.setRecursosAsignadosIds(new ArrayList<>());
-        return r;
+    // Orden inverso a las llaves foráneas: hijos primero, padres después.
+    private void limpiarDatosDePrueba() throws Exception {
+        ejecutar("delete from reserva_recurso where id_reserva in "
+                + "(select id_reserva from reservas where id_funcionario = ?)", FUNCIONARIO_PRUEBA);
+        ejecutar("delete from reservas where id_funcionario = ?", FUNCIONARIO_PRUEBA);
+        ejecutar("delete from recursos where id_recurso like ?", PREFIJO_CATEGORIA + "-%");
+        ejecutar("delete from categorias where descripcion like ?", PREFIJO_CATEGORIA + "%");
+        ejecutar("delete from funcionarios where id_usuario = ?", FUNCIONARIO_PRUEBA);
+        ejecutar("delete from usuarios where id_usuario = ?", FUNCIONARIO_PRUEBA);
     }
 
-    // Integración CRUD: guardar una reserva y leerla desde el XML real
+    private void ejecutar(String sql, String... parametros) throws Exception {
+        try (PreparedStatement stm = Database.instance().prepareStatement(sql)) {
+            for (int i = 0; i < parametros.length; i++) {
+                stm.setString(i + 1, parametros[i]);
+            }
+            Database.instance().executeUpdate(stm);
+        }
+    }
+
+    // Arma la reserva como lo hace la pantalla: la lógica asigna un recurso disponible por categoría.
+    private Reserva reservar(String actividad, LocalDate fecha, LocalTime inicio, LocalTime fin) {
+        Reserva reserva = service.crearReserva(actividad, fecha, inicio, fin,
+                FUNCIONARIO_PRUEBA, List.of(categoria), EstadoReserva.ACTIVA, null);
+        service.save(reserva);
+        return reserva;
+    }
+
+    private long contarReservasDePrueba() {
+        return service.obtenerReservasPorFuncionario(FUNCIONARIO_PRUEBA).size();
+    }
+
     @Test
-    void crearYLeerReservaDesdeXML() {
-        service.save(reservaValida("RES-IT-001"));
-        Reserva leida = service.buscarPorId("RES-IT-001");
+    void crear_reserva_guarda_sus_recursos_y_categorias() {
+        Reserva reserva = reservar("Reunion IT", FECHA, LocalTime.of(9, 0), LocalTime.of(10, 0));
+
+        Reserva leida = service.buscarPorId(reserva.getId());
+
         assertNotNull(leida);
-        assertEquals("RES-IT-001", leida.getId());
-        assertEquals("Reunion IT", leida.getActividad());
+        assertEquals(List.of(RECURSO_PRUEBA), leida.getRecursosAsignadosIds());
+        assertEquals(List.of(categoria.getId()), leida.getCategoriasDeRecursosIds());
     }
 
-    // Integración CRUD: crear varias reservas y obtenerlas todas desde el XML
     @Test
-    void crearVariasReservasYObtenerTodasDesdeXML() {
-        service.save(reservaValida("RES-IT-001"));
-        service.save(reservaValida("RES-IT-002"));
-        assertEquals(2, service.obtenerTodasReservas().size());
+    void obtener_todas_incluye_los_recursos_de_cada_reserva() {
+        reservar("Reunion IT", FECHA, LocalTime.of(9, 0), LocalTime.of(10, 0));
+
+        Reserva leida = service.obtenerReservasPorFuncionario(FUNCIONARIO_PRUEBA).get(0);
+
+        assertEquals(List.of(RECURSO_PRUEBA), leida.getRecursosAsignadosIds());
     }
 
-    // Integración CRUD: eliminar una reserva y verificar que ya no existe en el XML
     @Test
-    void eliminarReservaYaNoExisteEnXML() {
-        service.save(reservaValida("RES-IT-001"));
-        service.delete("RES-IT-001");
-        assertNull(service.buscarPorId("RES-IT-001"));
+    void crear_con_recurso_inexistente_hace_rollback() {
+        Reserva reserva = new Reserva("Reunion IT", FECHA, LocalTime.of(9, 0), LocalTime.of(10, 0),
+                FUNCIONARIO_PRUEBA, new ArrayList<>(), EstadoReserva.ACTIVA, null);
+        reserva.setRecursosAsignadosIds(List.of("IT-CAL-NO-EXISTE"));
+
+        RuntimeException error = assertThrows(RuntimeException.class, () -> service.save(reserva));
+
+        assertTrue(error.getMessage().contains("no existe"), "Mensaje recibido: " + error.getMessage());
+        assertEquals(0, contarReservasDePrueba()); // no quedó la reserva sin recursos
+        assertNull(reserva.getId());
     }
 
-    // Integración: filtrar reservas por fecha y categoría sobre datos persistidos en XML
     @Test
-    void filtrarReservasPorFechaYCategoriaDesdeXML() {
-        Reserva r = reservaValida("RES-IT-001");
-        r.setCategoriasDeRecursosIds(List.of("CAT-000001"));
-        service.save(r);
-        assertFalse(service.filtrarReservasService(r.getFecha(), "CAT-000001").isEmpty());
+    void recurso_ocupado_no_se_asigna_dos_veces_en_el_mismo_horario() {
+        reservar("Primera", FECHA, LocalTime.of(9, 0), LocalTime.of(10, 0));
+
+        IllegalArgumentException error = assertThrows(IllegalArgumentException.class,
+                () -> reservar("Traslapada", FECHA, LocalTime.of(9, 30), LocalTime.of(10, 30)));
+
+        assertTrue(error.getMessage().contains("No hay recursos disponibles"),
+                "Mensaje recibido: " + error.getMessage());
+        assertEquals(1, contarReservasDePrueba());
     }
 
-    // Integración: filtrar por categoría inexistente retorna vacío desde XML real
     @Test
-    void filtrarReservasCategoriaInexistenteRetornaVacioDesdeXML() {
-        Reserva r = reservaValida("RES-IT-001");
-        r.setCategoriasDeRecursosIds(List.of("CAT-000001"));
-        service.save(r);
-        assertTrue(service.filtrarReservasService(r.getFecha(), "CAT-999999").isEmpty());
+    void recurso_se_puede_reusar_en_un_horario_sin_traslape() {
+        reservar("Primera", FECHA, LocalTime.of(9, 0), LocalTime.of(10, 0));
+        reservar("Segunda", FECHA, LocalTime.of(10, 0), LocalTime.of(11, 0));
+
+        assertEquals(2, contarReservasDePrueba());
     }
 
-    // Integración: obtener reservas por funcionario sobre datos persistidos en XML
     @Test
-    void obtenerReservasPorFuncionarioDesdeXML() {
-        service.save(reservaValida("RES-IT-001"));
-        assertFalse(service.obtenerReservasPorFuncionario("111111111").isEmpty());
+    void cancelar_reserva_libera_el_recurso() {
+        Reserva primera = reservar("Primera", FECHA, LocalTime.of(9, 0), LocalTime.of(10, 0));
+
+        service.delete(primera.getId());
+        Reserva nueva = reservar("Nueva", FECHA, LocalTime.of(9, 0), LocalTime.of(10, 0));
+
+        assertEquals(List.of(RECURSO_PRUEBA), service.buscarPorId(nueva.getId()).getRecursosAsignadosIds());
     }
 
-    // Integración: repoblar categorías asigna objetos reales a reservas cargadas desde XML
     @Test
-    void repoblarCategoriasAsignaCategoriasSobreReservasDeXML() {
-        Reserva r = reservaValida("RES-IT-001");
-        r.setCategoriasDeRecursosIds(List.of("CAT-000001"));
-        r.setCategoriasDeRecursos(null);
-        service.save(r);
-        List<Reserva> reservas = service.obtenerTodasReservas();
-        List<Categoria> catalogo = List.of(new Categoria("CAT-000001", "Sala"));
-        service.repoblarCategoriasService(reservas, catalogo);
-        assertNotNull(reservas.get(0).getCategoriasDeRecursos());
+    void filtrar_por_fecha_y_categoria_encuentra_la_reserva() {
+        Reserva reserva = reservar("Reunion IT", FECHA, LocalTime.of(9, 0), LocalTime.of(10, 0));
+
+        List<Reserva> filtradas = service.filtrarReservasService(FECHA, categoria.getId());
+
+        assertTrue(filtradas.stream().anyMatch(r -> r.getId().equals(reserva.getId())));
+    }
+
+    @Test
+    void filtrar_por_otra_fecha_no_encuentra_la_reserva() {
+        reservar("Reunion IT", FECHA, LocalTime.of(9, 0), LocalTime.of(10, 0));
+
+        assertTrue(service.filtrarReservasService(FECHA.plusDays(1), categoria.getId()).isEmpty());
+    }
+
+    @Test
+    void filtrar_por_categoria_inexistente_retorna_vacio() {
+        reservar("Reunion IT", FECHA, LocalTime.of(9, 0), LocalTime.of(10, 0));
+
+        assertTrue(service.filtrarReservasService(FECHA, "CAT-999999").isEmpty());
+    }
+
+    @Test
+    void repoblar_categorias_asigna_los_objetos_categoria() {
+        reservar("Reunion IT", FECHA, LocalTime.of(9, 0), LocalTime.of(10, 0));
+        List<Reserva> reservas = service.obtenerReservasPorFuncionario(FUNCIONARIO_PRUEBA);
+
+        service.repoblarCategoriasService(reservas, List.of(categoria));
+
         assertEquals(1, reservas.get(0).getCategoriasDeRecursos().size());
+        assertEquals(categoria.getId(), reservas.get(0).getCategoriasDeRecursos().get(0).getId());
     }
 
-    // Integración: id duplicado no genera un segundo registro en el XML
     @Test
-    void crearIdDuplicadoNoGuardaSegundoRegistroEnXML() {
-        service.save(reservaValida("RES-IT-001"));
-        assertThrows(IllegalArgumentException.class,
-                () -> service.save(reservaValida("RES-IT-001")));
-        assertEquals(1, service.obtenerTodasReservas().size());
+    void calendarizacion_semanal_incluye_solo_las_reservas_de_esa_semana() {
+        Reserva estaSemana = reservar("Esta semana", FECHA, LocalTime.of(9, 0), LocalTime.of(10, 0));
+        Reserva otraSemana = reservar("Otra semana", FECHA.plusWeeks(1), LocalTime.of(9, 0), LocalTime.of(10, 0));
+
+        List<Reserva> semana = new CalendarizacionService().obtenerReservasDeLaSemana(FECHA);
+
+        assertTrue(semana.stream().anyMatch(r -> r.getId().equals(estaSemana.getId())));
+        assertTrue(semana.stream().noneMatch(r -> r.getId().equals(otraSemana.getId())));
     }
 }
