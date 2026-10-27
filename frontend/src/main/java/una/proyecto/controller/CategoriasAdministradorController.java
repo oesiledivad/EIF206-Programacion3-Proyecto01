@@ -4,17 +4,18 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import una.proyecto.model.Categoria;
-import una.proyecto.service.CategoriaService;
-import una.proyecto.bootstrap.AppFactory;
+import una.proyecto.proxy.ServiceProxy;
 import una.proyecto.utils.GeneradorPDFS;
 import una.proyecto.utils.ReportePDF;
 import una.proyecto.utils.TablePDF;
-import java.util.List;
+
+import java.util.Optional;
 
 public class CategoriasAdministradorController {
 
@@ -36,42 +37,18 @@ public class CategoriasAdministradorController {
     @FXML
     private TableColumn<Categoria, String> colDescripcion;
 
-    private final CategoriaService categoryService = AppFactory.createCategoriaService();
+    // El controller ya no conoce el backend: todo pasa por el proxy (sockets).
+    private final ServiceProxy proxy = ServiceProxy.instance();
 
     private final ObservableList<Categoria> listaObservable = FXCollections.observableArrayList();
 
-    // Método para calcular el siguiente ID según las categorías registradas
-    // Lo hice asi para que no se mostrara el txt fiel del id ahi vacio todo feo entonces
-    // muestra el siguiente id y de una lo pone asi
-    private String obtenerSiguienteIdCategoria() {
-        List<Categoria> lista = categoryService.obtenerTodas();
-        if (lista == null || lista.isEmpty()) {
-            return "CAT-000001";
-        }
-
-        int maxId = lista.stream()
-                .map(Categoria::getId)
-                .filter(id -> id != null && id.startsWith("CAT-"))
-                .mapToInt(id -> {
-                    try {
-                        return Integer.parseInt(id.replace("CAT-", ""));
-                    } catch (NumberFormatException e) {
-                        return 0;
-                    }
-                })
-                .max()
-                .orElse(0);
-
-        return String.format("CAT-%06d", maxId + 1);
-    }
     @FXML
     public void initialize() {
-        txtID.setEditable(false);
-        loadCategories();
+        txtID.setEditable(false); // vacío = categoría nueva; MySQL asigna el id al guardar
         configureTable();
         configureSelectionListener();
         configureSearchListener();
-        txtID.setText(obtenerSiguienteIdCategoria());
+        loadCategories();
     }
 
     @FXML
@@ -80,26 +57,24 @@ public class CategoriasAdministradorController {
     }
 
     private void configureTable() {
-        colID.setCellValueFactory(
-                new PropertyValueFactory<>("id")
-        );
-
-        colDescripcion.setCellValueFactory(
-                new PropertyValueFactory<>("descripcion")
-        );
-
+        colID.setCellValueFactory(new PropertyValueFactory<>("id"));
+        colDescripcion.setCellValueFactory(new PropertyValueFactory<>("descripcion"));
         tablaCategorias.setItems(listaObservable);
     }
 
     private void loadCategories() {
-        listaObservable.setAll(categoryService.obtenerTodas());
+        try {
+            listaObservable.setAll(proxy.categoriasObtenerTodas());
+        } catch (Exception e) {
+            showAlert("Error", e.getMessage());
+        }
     }
 
+    // Al seleccionar una fila, el formulario pasa a modo "editar".
     private void configureSelectionListener() {
         tablaCategorias.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
-                txtID.setText(String.valueOf(newValue.getId()));
-                txtID.setEditable(false);
+                txtID.setText(newValue.getId());
                 txtDescripcion.setText(newValue.getDescripcion());
             }
         });
@@ -110,32 +85,36 @@ public class CategoriasAdministradorController {
     }
 
     private void searchCategories(String searchText) {
-        listaObservable.setAll(categoryService.buscarPorDescripcion(searchText));
+        try {
+            listaObservable.setAll(proxy.categoriasBuscarPorDescripcion(searchText));
+        } catch (Exception e) {
+            showAlert("Error", e.getMessage());
+        }
     }
 
+    // Sin id -> crear. Con id (fila seleccionada) -> actualizar.
     @FXML
     public void saveCategory() {
         String descripcion = txtDescripcion.getText().trim();
         String id = txtID.getText().trim();
 
-        // 1. Validar que la descripción no esté vacía
         if (descripcion.isEmpty()) {
             showAlert("Error", "Debe ingresar una descripción para la categoría.");
             return;
         }
 
         try {
-            // 2. Crear y guardar la categoría con el ID autogenerado que se muestra en pantalla
-            Categoria nuevaCategoria = new Categoria(id, descripcion);
-            categoryService.save(nuevaCategoria);
-
-            // 3. Recargar la tabla con la lista actualizada
+            String mensaje;
+            if (id.isEmpty()) {
+                Categoria creada = proxy.categoriaCrear(new Categoria(null, descripcion));
+                mensaje = "Categoría " + creada.getId() + " creada correctamente.";
+            } else {
+                proxy.categoriaActualizar(new Categoria(id, descripcion));
+                mensaje = "Categoría " + id + " actualizada correctamente.";
+            }
             loadCategories();
-
-            // 4. Limpiar el formulario (esto colocará automáticamente el próximo ID correlativo, ej. CAT-000005)
             clearForm();
-
-            showAlert("Éxito", "Categoría guardada correctamente.");
+            showAlert("Éxito", mensaje);
         } catch (Exception e) {
             showAlert("Error", e.getMessage());
         }
@@ -150,38 +129,50 @@ public class CategoriasAdministradorController {
             return;
         }
 
-        categoryService.delete(selectedCategory.getId());
+        Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmacion.setTitle("Eliminar categoría");
+        confirmacion.setHeaderText(null);
+        confirmacion.setContentText("¿Desea eliminar la categoría \"" + selectedCategory.getDescripcion() + "\"?");
+        Optional<ButtonType> respuesta = confirmacion.showAndWait();
+        if (respuesta.isEmpty() || respuesta.get() != ButtonType.OK) {
+            return;
+        }
 
-        loadCategories();
-        clearForm();
+        try {
+            proxy.categoriaEliminar(selectedCategory.getId());
+            loadCategories();
+            clearForm();
+            showAlert("Éxito", "Categoría eliminada correctamente.");
+        } catch (Exception e) {
+            showAlert("Error", e.getMessage());
+        }
     }
+
     @FXML
     private void clearForm() {
         txtDescripcion.clear();
         txtBuscarDescripcion.clear();
         tablaCategorias.getSelectionModel().clearSelection();
-
-        // Al limpiar, vuelve a mostrar el nuevo ID correlativo disponible
-        txtID.setText(obtenerSiguienteIdCategoria());
+        txtID.clear(); // vuelve a modo "crear"; el FXML muestra "Autogenerado"
     }
+
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
-
         alert.showAndWait();
     }
 
-    @FXML public void btnImprimir(){
+    @FXML
+    public void btnImprimir() {
         try {
             TablePDF nuevo = GeneradorPDFS.desdeTableView(tablaCategorias);
             ReportePDF reporte = new ReportePDF("Listado de Categorias", nuevo);
             GeneradorPDFS.generar(reporte, "Categorias.pdf");
             showAlert("Éxito", "PDF generado correctamente.");
-        }catch (Exception e){
-            showAlert("Error"," Error al generar PDF");
+        } catch (Exception e) {
+            showAlert("Error", " Error al generar PDF");
             e.printStackTrace();
         }
     }
