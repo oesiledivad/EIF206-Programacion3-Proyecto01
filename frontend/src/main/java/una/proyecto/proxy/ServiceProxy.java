@@ -3,12 +3,18 @@ package una.proyecto.proxy;
 import una.proyecto.model.DashboardData;
 import una.proyecto.model.LoginService;
 import una.proyecto.model.Usuario;
+import una.proyecto.model.Recurso;
+import una.proyecto.model.Reserva;
+import java.time.LocalDate;
 import una.proyecto.protocolo.Protocol;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import una.proyecto.model.Categoria;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ServiceProxy implements LoginService, AutoCloseable {
     private static final ServiceProxy INSTANCE = new ServiceProxy();
@@ -37,6 +43,60 @@ public class ServiceProxy implements LoginService, AutoCloseable {
 
     public DashboardData dashboard() { return (DashboardData) request(Protocol.DASHBOARD_RESUMEN); }
     public void changePassword(String actual, String nueva) { request(Protocol.AUTH_CAMBIAR_CLAVE, actual, nueva); }
+
+    // ================= Categorias =================
+
+    @SuppressWarnings("unchecked")
+    public List<Categoria> categoriasObtenerTodas() {
+        return (List<Categoria>) request(Protocol.CATEGORIA_LISTAR);
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<Categoria> categoriasBuscarPorDescripcion(String descripcion) {
+        return (List<Categoria>) request(Protocol.CATEGORIA_BUSCAR_DESCRIPCION, descripcion);
+    }
+
+    // Devuelve la categoría ya guardada, con el id que asignó MySQL.
+    public Categoria categoriaCrear(Categoria categoria) {
+        return (Categoria) request(Protocol.CATEGORIA_CREAR, categoria);
+    }
+
+    public void categoriaActualizar(Categoria categoria) {
+        request(Protocol.CATEGORIA_ACTUALIZAR, categoria);
+    }
+
+    public void categoriaEliminar(String id) {
+        request(Protocol.CATEGORIA_ELIMINAR, id);
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<Categoria> categoriasSinRecursos(List<Categoria> escogidas) {
+        return (List<Categoria>) request(Protocol.CATEGORIA_SIN_RECURSOS, new ArrayList<>(escogidas));
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<Categoria> categoriasConRecursos(List<Categoria> escogidas) {
+        return (List<Categoria>) request(Protocol.CATEGORIA_CON_RECURSOS, new ArrayList<>(escogidas));
+    }
+
+    // ================= Calendarizacion =================
+
+    @SuppressWarnings("unchecked")
+    public List<Recurso> calendarizacionRecursosPorCategoria(String idCategoria) {
+        return (List<Recurso>) request(Protocol.CALENDARIZACION_RECURSOS_CATEGORIA, idCategoria);
+    }
+
+    // Reservas activas de ese día que usan recursos de la categoría, con su encargado.
+    @SuppressWarnings("unchecked")
+    public List<Reserva> calendarizacionReservasDelDia(LocalDate fecha, String idCategoria) {
+        return (List<Reserva>) request(Protocol.CALENDARIZACION_RESERVAS_DIA, fecha, idCategoria);
+    }
+
+    // Reservas activas de la semana (lunes a domingo) de esa fecha, con su encargado.
+    @SuppressWarnings("unchecked")
+    public List<Reserva> calendarizacionReservasDeLaSemana(LocalDate fecha) {
+        return (List<Reserva>) request(Protocol.CALENDARIZACION_RESERVAS_SEMANA, fecha);
+    }
 
     public synchronized void logout() {
         if (socket == null) return;

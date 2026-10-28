@@ -4,11 +4,16 @@ import una.proyecto.model.Reserva;
 import una.proyecto.model.Usuario;
 import una.proyecto.model.DashboardData;
 import una.proyecto.model.Funcionario;
+import una.proyecto.model.Recurso;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import una.proyecto.protocolo.Protocol;
 import una.proyecto.service.ReservaService;
 import una.proyecto.service.Servicios;
+
+import una.proyecto.model.Categoria;
+import una.proyecto.service.CategoriaService;
+import java.util.List;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -146,13 +151,66 @@ public class Worker {
             // case Protocol.RECURSO_LISTAR:
             //     return ejecutarRecurso(operacion);
 
-            // Categoria:
-            //            // case Protocol.CATEGORIA_CREAR:
-            //            // case Protocol.CATEGORIA_LISTAR:
-            //            //     return ejecutarCATEGORIA(operacion);
+            // Categorias:
+            case Protocol.CATEGORIA_LISTAR:
+            case Protocol.CATEGORIA_BUSCAR_DESCRIPCION:
+            case Protocol.CATEGORIA_CREAR:
+            case Protocol.CATEGORIA_ACTUALIZAR:
+            case Protocol.CATEGORIA_ELIMINAR:
+            case Protocol.CATEGORIA_SIN_RECURSOS:
+            case Protocol.CATEGORIA_CON_RECURSOS:
+                return ejecutarCategoria(operacion);
             default:
                 throw new IllegalArgumentException("Operacion desconocida: " + operacion);
+
+            case Protocol.CALENDARIZACION_RECURSOS_CATEGORIA:
+            case Protocol.CALENDARIZACION_RESERVAS_DIA:
+            case Protocol.CALENDARIZACION_RESERVAS_SEMANA:
+                return ejecutarCalendarizacion(operacion);
         }
+
+    }
+    // ================= Calendarizacion =================
+
+    private Object ejecutarCalendarizacion(int operacion) throws IOException, ClassNotFoundException {
+        switch (operacion) {
+            case Protocol.CALENDARIZACION_RECURSOS_CATEGORIA: {
+                String idCategoria = (String) is.readObject();
+                requireSession();
+                if (idCategoria == null) throw new IllegalArgumentException("Debe indicar la categoría.");
+                return new ArrayList<Recurso>(servicios.getRecursoService().recursosPorCategoria(idCategoria));
+            }
+            case Protocol.CALENDARIZACION_RESERVAS_DIA: {
+                LocalDate fecha = (LocalDate) is.readObject();
+                String idCategoria = (String) is.readObject();
+                requireSession();
+                if (fecha == null || idCategoria == null) {
+                    throw new IllegalArgumentException("Debe indicar la fecha y la categoría.");
+                }
+                return conEncargado(servicios.getReservaService().filtrarReservasService(fecha, idCategoria));
+            }
+            case Protocol.CALENDARIZACION_RESERVAS_SEMANA: {
+                LocalDate fecha = (LocalDate) is.readObject();
+                requireSession();
+                if (fecha == null) throw new IllegalArgumentException("Debe indicar una fecha.");
+                return conEncargado(servicios.getCalendarizacionService().obtenerReservasDeLaSemana(fecha));
+            }
+            default:
+                throw new IllegalArgumentException("Operacion de calendarizacion desconocida: " + operacion);
+        }
+    }
+
+    // La BD solo guarda el id del funcionario, aquí se pone el objeto completo (sin clave)
+    // para que la pantalla muestre el nombre del encargado sin hacer más peticiones.
+    private ArrayList<Reserva> conEncargado(List<Reserva> reservas) {
+        List<Funcionario> funcionarios = servicios.getFuncionarioService().getAllEmployees();
+        for (Reserva reserva : reservas) {
+            funcionarios.stream()
+                    .filter(f -> f.getId().equals(reserva.getIdFuncionario()))
+                    .findFirst()
+                    .ifPresent(reserva::setFuncionarioReserva);
+        }
+        return new ArrayList<>(reservas);
     }
 
     // ================= Reservas =================
@@ -206,6 +264,56 @@ public class Worker {
         }
     }
 
+    // ================= Categorias =================
+
+    @SuppressWarnings("unchecked")
+    private Object ejecutarCategoria(int operacion) throws IOException, ClassNotFoundException {
+        CategoriaService categoriaService = servicios.getCategoriaService();
+        switch (operacion) {
+            case Protocol.CATEGORIA_LISTAR: {
+                requireSession();
+                return new ArrayList<Categoria>(categoriaService.obtenerTodas());
+            }
+            case Protocol.CATEGORIA_BUSCAR_DESCRIPCION: {
+                String descripcion = (String) is.readObject();
+                requireSession();
+                return new ArrayList<Categoria>(categoriaService.buscarPorDescripcion(descripcion));
+            }
+            case Protocol.CATEGORIA_CREAR: {
+                Categoria categoria = (Categoria) is.readObject();
+                requireAdmin(requireSession());
+                if (categoria == null) throw new IllegalArgumentException("La categoría es requerida.");
+                categoriaService.save(categoria);
+                return categoria; // ya trae el id que asignó MySQL
+            }
+            case Protocol.CATEGORIA_ACTUALIZAR: {
+                Categoria categoria = (Categoria) is.readObject();
+                requireAdmin(requireSession());
+                if (categoria == null) throw new IllegalArgumentException("La categoría es requerida.");
+                categoriaService.update(categoria);
+                return null;
+            }
+            case Protocol.CATEGORIA_ELIMINAR: {
+                String id = (String) is.readObject();
+                requireAdmin(requireSession());
+                categoriaService.delete(id);
+                return null;
+            }
+            case Protocol.CATEGORIA_SIN_RECURSOS: {
+                List<Categoria> escogidas = (List<Categoria>) is.readObject();
+                requireSession();
+                return new ArrayList<Categoria>(categoriaService.categoriaNoPoseeRecursos(escogidas));
+            }
+            case Protocol.CATEGORIA_CON_RECURSOS: {
+                List<Categoria> escogidas = (List<Categoria>) is.readObject();
+                requireSession();
+                return new ArrayList<Categoria>(categoriaService.categoriaConRecursos(escogidas));
+            }
+            default:
+                throw new IllegalArgumentException("Operacion de categoria desconocida: " + operacion);
+        }
+    }
+
     private synchronized Usuario requireSession() {
         Usuario sesion = usuario;
         Usuario vigente = sesion == null ? null : servicios.getAuthService().activeUser(sesion.getId());
@@ -220,6 +328,12 @@ public class Worker {
     private void requireFuncionario(Usuario sesion) {
         if (!"FUNCIONARIO".equals(sesion.getRole())) {
             throw new IllegalArgumentException("Esta operación requiere un funcionario.");
+        }
+    }
+
+    private void requireAdmin(Usuario sesion) {
+        if (!"ADMIN".equals(sesion.getRole())) {
+            throw new IllegalArgumentException("Esta operación requiere un administrador.");
         }
     }
 

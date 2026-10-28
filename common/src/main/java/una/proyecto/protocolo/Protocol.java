@@ -30,6 +30,20 @@ public final class Protocol {
     public static final int RESERVA_BUSCAR = 102;
     public static final int RESERVA_CANCELAR = 103;
 
+    // Categorias (200)
+    public static final int CATEGORIA_LISTAR = 200;
+    public static final int CATEGORIA_BUSCAR_DESCRIPCION = 201;
+    public static final int CATEGORIA_CREAR = 202;
+    public static final int CATEGORIA_ACTUALIZAR = 203;
+    public static final int CATEGORIA_ELIMINAR = 204;
+    public static final int CATEGORIA_SIN_RECURSOS = 205;
+    public static final int CATEGORIA_CON_RECURSOS = 206;
+
+    // Calendarizacion (300)
+    public static final int CALENDARIZACION_RECURSOS_CATEGORIA = 300;
+    public static final int CALENDARIZACION_RESERVAS_DIA = 301;
+    public static final int CALENDARIZACION_RESERVAS_SEMANA = 302;
+
     // Notificaciones asincronas (900)
     public static final int NOTIFICACION_RESERVA_CREADA = 900;
 

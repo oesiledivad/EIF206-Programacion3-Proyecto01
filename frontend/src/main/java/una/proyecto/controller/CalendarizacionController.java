@@ -1,7 +1,5 @@
 package una.proyecto.controller;
 
-import una.proyecto.bootstrap.AppFactory;
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -10,10 +8,11 @@ import una.proyecto.model.Categoria;
 import una.proyecto.model.FilaCalendarizacion;
 import una.proyecto.model.Recurso;
 import una.proyecto.model.Reserva;
-import una.proyecto.service.CategoriaService;
-import una.proyecto.service.RecursoService;
-import una.proyecto.service.ReservaService;
 import una.proyecto.utils.*;
+
+import una.proyecto.proxy.ServiceProxy;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -41,9 +40,7 @@ public class CalendarizacionController {
     private final ObservableList<Reserva> listaReservaUsuario = FXCollections.observableArrayList();
     private final ObservableList<Categoria> listaCategoria = FXCollections.observableArrayList();
 
-    private final ReservaService reservaService = AppFactory.createReservaService();
-    private final RecursoService recursoService = AppFactory.createRecursoDatos();
-    private final CategoriaService categoriaService = AppFactory.createCategoriaService();
+    private final ServiceProxy proxy = ServiceProxy.instance();
 
     @FXML
     private void initialize() {
@@ -62,7 +59,11 @@ public class CalendarizacionController {
     }
 
     private void configureChoiceBox() {
-        listaCategoria.setAll(categoriaService.obtenerTodas());
+        try {
+            listaCategoria.setAll(proxy.categoriasObtenerTodas());
+        } catch (Exception e) {
+            showAlert("Error", e.getMessage());
+        }
         choiceboxcategoria.setItems(listaCategoria);
 
         if (!listaCategoria.isEmpty()) {
@@ -79,26 +80,29 @@ public class CalendarizacionController {
     }
 
     private void handleButtonCargar() {
-
-        // Paso 1: leer los filtros
         LocalDate fecha = datepicker.getValue();
         Categoria categoriaSeleccionada = choiceboxcategoria.getValue();
         if (fecha == null || categoriaSeleccionada == null) {
+            showAlert("Aviso", "Debe seleccionar una fecha y una categoría.");
             return;
         }
 
-        // Paso 2 y 3: traer recursos de la categoria y reconstruir columnas
-        List<Recurso> recursos = recursoService.recursosPorCategoria(categoriaSeleccionada.getId());
-        reconstruirColumnas(recursos);
+        try {
+            // 1. Columnas: un recurso de la categoría por columna
+            List<Recurso> recursos = proxy.calendarizacionRecursosPorCategoria(categoriaSeleccionada.getId());
+            reconstruirColumnas(recursos);
 
-        // Paso 5: generar las filas de hora vacias
-        List<HoraRow> filas = generarFilasDeHora();
+            // 2. Filas de 00:00 a 23:00 vacías
+            List<HoraRow> filas = generarFilasDeHora();
 
-        // Paso 4, 6: filtrar reservas y llenar las filas correspondientes
-        llenarFilasConReservas(filas, fecha, categoriaSeleccionada.getId());
+            // 3. Reservas de ese día y categoría, ubicadas en su recurso y sus horas
+            List<Reserva> reservas = proxy.calendarizacionReservasDelDia(fecha, categoriaSeleccionada.getId());
+            llenarFilasConReservas(filas, reservas, recursos);
 
-        // Paso 7: cargar las filas ya llenas en la tabla
-        tableView.setItems(FXCollections.observableArrayList(filas));
+            tableView.setItems(FXCollections.observableArrayList(filas));
+        } catch (Exception e) {
+            showAlert("Error", e.getMessage());
+        }
     }
 
     private List<HoraRow> generarFilasDeHora() {
@@ -125,37 +129,23 @@ public class CalendarizacionController {
         }
     }
 
-    private void llenarFilasConReservas(List<HoraRow> filas, LocalDate fecha, String idCategoria) {
-
-        List<Reserva> reservas = reservaService.filtrarReservasService(fecha, idCategoria);
-        System.out.println("Reservas encontradas: " + reservas.size());
+    private void llenarFilasConReservas(List<HoraRow> filas, List<Reserva> reservas, List<Recurso> recursos) {
+        // Ids de los recursos que son columnas: así no hay que pedir cada recurso al servidor.
+        Set<String> idsColumnas = recursos.stream().map(Recurso::getId).collect(Collectors.toSet());
 
         for (Reserva reserva : reservas) {
-            System.out.println("Revisando reserva: " + reserva.getActividad());
+            String encargado = reserva.getFuncionarioReserva() != null
+                    ? reserva.getFuncionarioReserva().getName()
+                    : reserva.getIdFuncionario();
+            String texto = reserva.getActividad() + " - " + encargado;
 
             for (String idRecurso : reserva.getRecursosAsignadosIds()) {
-                System.out.println("  Recurso asignado id: " + idRecurso);
-
-                Recurso recurso = recursoService.recurPorId(idRecurso);
-                System.out.println("  Recurso encontrado: " + (recurso != null ? recurso.getDescripcion() : "NULL"));
-
-                if (recurso == null || !recurso.getIdCategoria().equals(idCategoria)) {
-                    System.out.println("  --> Descartado, categoria no coincide. idCategoria buscado=" + idCategoria
-                            + " vs recurso.getIdCategoria()=" + (recurso != null ? recurso.getIdCategoria() : "N/A"));
-                    continue;
+                if (!idsColumnas.contains(idRecurso)) {
+                    continue; // recurso de otra categoría (la reserva pidió varias)
                 }
-
-                String texto = reserva.getActividad() + " - " + reserva.getFuncionarioReserva().getName();
-
                 LocalTime hora = reserva.getHoraInicio();
                 while (hora.isBefore(reserva.getHoraFin())) {
-                    boolean encontrada = buscarFilaPorHora(filas, hora).isPresent();
-                    System.out.println("  Hora " + hora + " -> fila encontrada: " + encontrada);
-
-                    String idRecursoFinal = idRecurso;
-                    buscarFilaPorHora(filas, hora)
-                            .ifPresent(fila -> fila.setReserva(idRecursoFinal, texto));
-
+                    buscarFilaPorHora(filas, hora).ifPresent(fila -> fila.setReserva(idRecurso, texto));
                     hora = hora.plusHours(1);
                 }
             }

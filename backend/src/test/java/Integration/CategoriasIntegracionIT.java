@@ -1,112 +1,170 @@
 package Integration;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import una.proyecto.datos.CategoriaDatos;
+import una.proyecto.datos.Database;
 import una.proyecto.logic.CategoriaLogic;
 import una.proyecto.model.Categoria;
+import una.proyecto.model.Recurso;
 import una.proyecto.service.CategoriaService;
 import una.proyecto.service.RecursoService;
 
-import java.io.File;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Pruebas de integración reales: CategoriaService → CategoriaLogic → CategoriaDatos → XML.
- * Usa un archivo XML temporal en target/ para no tocar los datos originales del proyecto.
- * RecursoService se pasa como null ya que los tests de esta clase no ejercen esa dependencia.
+ * Pruebas de integración reales: CategoriaService → CategoriaLogic → CategoriaDatos → MySQL.
+ * Solo crea y borra categorías cuya descripción empieza con "IT-", para no tocar otros datos.
  */
 public class CategoriasIntegracionIT {
 
-    private static final String XML_TEST = "target/test-it-categorias.xml";
+    private static final String PREFIJO_PRUEBA = "IT-";
+
     private CategoriaService service;
 
     @BeforeEach
     void setUp() throws Exception {
-        new File("target").mkdirs();
-        new File(XML_TEST).delete();
+        limpiarDatosDePrueba();
+        // RecursoService vacío: estas pruebas no usan recursos.
         RecursoService sinRecursos = new RecursoService(null) {
-            @Override public List<una.proyecto.model.Recurso> obtenerTodosRecursos() {
-                return new java.util.ArrayList<>();
+            @Override public List<Recurso> obtenerTodosRecursos() {
+                return new ArrayList<>();
             }
         };
         service = new CategoriaService(new CategoriaLogic(new CategoriaDatos(), sinRecursos));
     }
 
     @AfterEach
-    void tearDown() {
-        new File(XML_TEST).delete();
+    void tearDown() throws Exception {
+        limpiarDatosDePrueba();
     }
 
-    // Integración CRUD: guardar una categoría y leerla desde el XML real
+    // Borrado físico (no lógico) de las filas de prueba, para dejar la tabla como estaba.
+    private void limpiarDatosDePrueba() throws Exception {
+        String sql = "delete from categorias where descripcion like ?";
+        try (PreparedStatement stm = Database.instance().prepareStatement(sql)) {
+            stm.setString(1, PREFIJO_PRUEBA + "%");
+            Database.instance().executeUpdate(stm);
+        }
+    }
+
+    private long contarCategoriasDePrueba() {
+        return service.obtenerTodas().stream()
+                .filter(c -> c.getDescripcion().startsWith(PREFIJO_PRUEBA))
+                .count();
+    }
+
+    // Lee "activo" directo de la tabla, sin pasar por el DAO (que oculta las inactivas).
+    private Boolean activoEnBaseDeDatos(String idCategoria) throws Exception {
+        int numero = Integer.parseInt(idCategoria.substring("CAT-".length()));
+        try (PreparedStatement stm = Database.instance()
+                .prepareStatement("select activo from categorias where id_categoria = ?")) {
+            stm.setInt(1, numero);
+            try (ResultSet rs = Database.instance().executeQuery(stm)) {
+                return rs.next() ? rs.getBoolean("activo") : null;
+            }
+        }
+    }
+
     @Test
-    void crearYLeerCategoriaDesdeXML() {
-        Categoria c = new Categoria(null, "Sala de prueba");
+    void crear_categoria_le_asigna_el_id_generado_por_mysql() {
+        Categoria c = new Categoria(null, "IT-Sala");
+
         service.save(c);
-        Categoria leida = service.buscarPorDescripcion("Sala de prueba").get(0);
-        assertNotNull(leida);
-        assertEquals("Sala de prueba", leida.getDescripcion());
+
+        assertNotNull(c.getId());
+        assertTrue(c.getId().matches("CAT-\\d{6}"), "Id recibido: " + c.getId());
     }
 
-    // Integración CRUD: crear varias categorías y obtenerlas todas desde el XML
     @Test
-    void crearVariasCategoriasYObtenerTodasDesdeXML() {
-        service.save(new Categoria(null, "Sala IT"));
-        service.save(new Categoria(null, "Laptop IT"));
-        assertEquals(2, service.obtenerTodas().size());
+    void crear_y_leer_categoria_conserva_sus_datos() {
+        Categoria c = new Categoria(null, "IT-Sala de prueba");
+        service.save(c);
+
+        List<Categoria> encontradas = service.buscarPorDescripcion("IT-Sala de prueba");
+
+        assertEquals(1, encontradas.size());
+        assertEquals(c.getId(), encontradas.get(0).getId());
+        assertEquals("IT-Sala de prueba", encontradas.get(0).getDescripcion());
     }
 
-    // Integración CRUD: los ids se generan de forma secuencial y persisten en el XML
     @Test
-    void crearCategoriasIdsSecuencialesPersistidosEnXML() {
-        Categoria c1 = new Categoria(null, "Sala IT");
-        Categoria c2 = new Categoria(null, "Laptop IT");
+    void dos_categorias_seguidas_reciben_ids_crecientes() {
+        Categoria c1 = new Categoria(null, "IT-Sala");
+        Categoria c2 = new Categoria(null, "IT-Laptop");
+
         service.save(c1);
         service.save(c2);
-        assertEquals("CAT-000001", c1.getId());
-        assertEquals("CAT-000002", c2.getId());
+
+        int n1 = Integer.parseInt(c1.getId().substring(4));
+        int n2 = Integer.parseInt(c2.getId().substring(4));
+        assertTrue(n2 > n1, "Ids recibidos: " + c1.getId() + ", " + c2.getId());
     }
 
-    // Integración CRUD: actualizar descripción y verificar cambio persistido en XML
     @Test
-    void actualizarCategoriaPersisteCambioEnXML() {
-        Categoria c = new Categoria(null, "Sala IT");
-        service.save(c);
-        service.update(new Categoria(c.getId(), "Sala de reuniones IT"));
-        assertEquals("Sala de reuniones IT",
-                service.buscarPorDescripcion("Sala de reuniones IT").get(0).getDescripcion());
-    }
+    void crear_descripcion_duplicada_no_guarda_segundo_registro() {
+        service.save(new Categoria(null, "IT-Sala"));
 
-    // Integración CRUD: eliminar una categoría y verificar que ya no existe en el XML
-    @Test
-    void eliminarCategoriaYaNoExisteEnXML() {
-        Categoria c = new Categoria(null, "Sala IT");
-        service.save(c);
-        service.delete(c.getId());
-        assertTrue(service.buscarPorDescripcion("Sala IT").isEmpty());
-    }
-
-    // Integración: buscar por descripción parcial encuentra categoría persistida en XML
-    @Test
-    void buscarPorDescripcionParcialEncuentraCategoriaEnXML() {
-        service.save(new Categoria(null, "Sala de reuniones IT"));
-        assertFalse(service.buscarPorDescripcion("Sala").isEmpty());
-    }
-
-    // Integración: buscar es insensible a mayúsculas sobre datos persistidos en XML
-    @Test
-    void buscarPorDescripcionInsensibleAMayusculasEnXML() {
-        service.save(new Categoria(null, "Proyector IT"));
-        assertFalse(service.buscarPorDescripcion("proyector it").isEmpty());
-    }
-
-    // Integración: descripción duplicada no genera un segundo registro en el XML
-    @Test
-    void crearDescripcionDuplicadaNoGuardaSegundoRegistroEnXML() {
-        service.save(new Categoria(null, "Sala IT"));
         assertThrows(IllegalArgumentException.class,
-                () -> service.save(new Categoria(null, "Sala IT")));
-        assertEquals(1, service.obtenerTodas().size());
+                () -> service.save(new Categoria(null, "it-sala")));
+        assertEquals(1, contarCategoriasDePrueba());
+    }
+
+
+    @Test
+    void obtener_todas_incluye_las_categorias_creadas() {
+        service.save(new Categoria(null, "IT-Sala"));
+        service.save(new Categoria(null, "IT-Laptop"));
+
+        assertEquals(2, contarCategoriasDePrueba());
+    }
+
+    @Test
+    void buscar_por_descripcion_parcial_e_insensible_a_mayusculas() {
+        service.save(new Categoria(null, "IT-Proyector HD"));
+
+        assertFalse(service.buscarPorDescripcion("it-proyector").isEmpty());
+    }
+
+
+    @Test
+    void actualizar_categoria_persiste_el_cambio() {
+        Categoria c = new Categoria(null, "IT-Sala");
+        service.save(c);
+
+        service.update(new Categoria(c.getId(), "IT-Sala de reuniones"));
+
+        List<Categoria> encontradas = service.buscarPorDescripcion("IT-Sala de reuniones");
+        assertEquals(1, encontradas.size());
+        assertEquals(c.getId(), encontradas.get(0).getId());
+    }
+
+    @Test
+    void actualizar_categoria_inexistente_lanza_excepcion() {
+        assertThrows(IllegalArgumentException.class,
+                () -> service.update(new Categoria("CAT-999999", "IT-No existe")));
+    }
+
+
+    @Test
+    void eliminar_categoria_la_oculta_pero_conserva_la_fila() throws Exception {
+        Categoria c = new Categoria(null, "IT-Sala");
+        service.save(c);
+
+        service.delete(c.getId());
+
+        assertEquals(0, contarCategoriasDePrueba());
+        assertEquals(Boolean.FALSE, activoEnBaseDeDatos(c.getId()));
+    }
+
+    @Test
+    void eliminar_categoria_inexistente_lanza_excepcion() {
+        assertThrows(IllegalArgumentException.class, () -> service.delete("CAT-999999"));
     }
 }
