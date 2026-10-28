@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import una.proyecto.protocolo.Protocol;
 import una.proyecto.service.ReservaService;
+import una.proyecto.service.RecursoService;
 import una.proyecto.service.Servicios;
 
 import una.proyecto.model.Categoria;
@@ -147,9 +148,14 @@ public class Worker {
                 return ejecutarReserva(operacion);
 
             // Recursos:
-            // case Protocol.RECURSO_CREAR:
-            // case Protocol.RECURSO_LISTAR:
-            //     return ejecutarRecurso(operacion);
+            case Protocol.RECURSO_LISTAR:
+            case Protocol.RECURSO_BUSCAR:
+            case Protocol.RECURSO_FILTRAR:
+            case Protocol.RECURSO_CREAR:
+            case Protocol.RECURSO_ACTUALIZAR:
+            case Protocol.RECURSO_ELIMINAR:
+                return ejecutarRecurso(operacion);
+
 
             // Categorias:
             case Protocol.CATEGORIA_LISTAR:
@@ -311,6 +317,50 @@ public class Worker {
             }
             default:
                 throw new IllegalArgumentException("Operacion de categoria desconocida: " + operacion);
+        }
+    }
+    // ================= Recursos =================
+
+    private Object ejecutarRecurso(int operacion) throws IOException, ClassNotFoundException {
+        RecursoService recursoService = servicios.getRecursoService();
+        switch (operacion) {
+            case Protocol.RECURSO_LISTAR: {
+                requireSession();
+                return new ArrayList<Recurso>(recursoService.obtenerTodosRecursos());
+            }
+            case Protocol.RECURSO_BUSCAR: {
+                String id = (String) is.readObject();
+                requireSession();
+                return recursoService.recurPorId(id);
+            }
+            case Protocol.RECURSO_FILTRAR: {
+                Categoria categoria = (Categoria) is.readObject();
+                String descripcion = (String) is.readObject();
+                requireSession();
+                return new ArrayList<Recurso>(recursoService.buscarPorFiltros(categoria, descripcion));
+            }
+            case Protocol.RECURSO_CREAR: {
+                Recurso recurso = (Recurso) is.readObject();
+                requireAdmin(requireSession());
+                if (recurso == null) throw new IllegalArgumentException("El recurso es requerido.");
+                recursoService.save(recurso);
+                return recurso;
+            }
+            case Protocol.RECURSO_ACTUALIZAR: {
+                Recurso recurso = (Recurso) is.readObject();
+                requireAdmin(requireSession());
+                if (recurso == null) throw new IllegalArgumentException("El recurso es requerido.");
+                recursoService.update(recurso);
+                return null;
+            }
+            case Protocol.RECURSO_ELIMINAR: {
+                String id = (String) is.readObject();
+                requireAdmin(requireSession());
+                recursoService.delete(id);
+                return null;
+            }
+            default:
+                throw new IllegalArgumentException("Operacion de recurso desconocida: " + operacion);
         }
     }
 

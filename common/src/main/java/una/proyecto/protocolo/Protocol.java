@@ -47,6 +47,19 @@ public final class Protocol {
     // Notificaciones asincronas (900)
     public static final int NOTIFICACION_RESERVA_CREADA = 900;
 
+
+
+
+
+    // Recursos (400)
+    public static final int RECURSO_LISTAR = 400;
+    public static final int RECURSO_BUSCAR = 401;
+    public static final int RECURSO_FILTRAR = 402;
+    public static final int RECURSO_CREAR = 403;
+    public static final int RECURSO_ACTUALIZAR = 404;
+    public static final int RECURSO_ELIMINAR = 405;
+
+
     private Protocol() {
     }
 }
