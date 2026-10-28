@@ -39,6 +39,11 @@ public final class Protocol {
     public static final int CATEGORIA_SIN_RECURSOS = 205;
     public static final int CATEGORIA_CON_RECURSOS = 206;
 
+    // Calendarizacion (300)
+    public static final int CALENDARIZACION_RECURSOS_CATEGORIA = 300;
+    public static final int CALENDARIZACION_RESERVAS_DIA = 301;
+    public static final int CALENDARIZACION_RESERVAS_SEMANA = 302;
+
     // Notificaciones asincronas (900)
     public static final int NOTIFICACION_RESERVA_CREADA = 900;
 

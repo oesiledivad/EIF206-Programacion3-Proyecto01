@@ -4,6 +4,7 @@ import una.proyecto.model.Reserva;
 import una.proyecto.model.Usuario;
 import una.proyecto.model.DashboardData;
 import una.proyecto.model.Funcionario;
+import una.proyecto.model.Recurso;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import una.proyecto.protocolo.Protocol;
@@ -161,7 +162,55 @@ public class Worker {
                 return ejecutarCategoria(operacion);
             default:
                 throw new IllegalArgumentException("Operacion desconocida: " + operacion);
+
+            case Protocol.CALENDARIZACION_RECURSOS_CATEGORIA:
+            case Protocol.CALENDARIZACION_RESERVAS_DIA:
+            case Protocol.CALENDARIZACION_RESERVAS_SEMANA:
+                return ejecutarCalendarizacion(operacion);
         }
+
+    }
+    // ================= Calendarizacion =================
+
+    private Object ejecutarCalendarizacion(int operacion) throws IOException, ClassNotFoundException {
+        switch (operacion) {
+            case Protocol.CALENDARIZACION_RECURSOS_CATEGORIA: {
+                String idCategoria = (String) is.readObject();
+                requireSession();
+                if (idCategoria == null) throw new IllegalArgumentException("Debe indicar la categoría.");
+                return new ArrayList<Recurso>(servicios.getRecursoService().recursosPorCategoria(idCategoria));
+            }
+            case Protocol.CALENDARIZACION_RESERVAS_DIA: {
+                LocalDate fecha = (LocalDate) is.readObject();
+                String idCategoria = (String) is.readObject();
+                requireSession();
+                if (fecha == null || idCategoria == null) {
+                    throw new IllegalArgumentException("Debe indicar la fecha y la categoría.");
+                }
+                return conEncargado(servicios.getReservaService().filtrarReservasService(fecha, idCategoria));
+            }
+            case Protocol.CALENDARIZACION_RESERVAS_SEMANA: {
+                LocalDate fecha = (LocalDate) is.readObject();
+                requireSession();
+                if (fecha == null) throw new IllegalArgumentException("Debe indicar una fecha.");
+                return conEncargado(servicios.getCalendarizacionService().obtenerReservasDeLaSemana(fecha));
+            }
+            default:
+                throw new IllegalArgumentException("Operacion de calendarizacion desconocida: " + operacion);
+        }
+    }
+
+    // La BD solo guarda el id del funcionario, aquí se pone el objeto completo (sin clave)
+    // para que la pantalla muestre el nombre del encargado sin hacer más peticiones.
+    private ArrayList<Reserva> conEncargado(List<Reserva> reservas) {
+        List<Funcionario> funcionarios = servicios.getFuncionarioService().getAllEmployees();
+        for (Reserva reserva : reservas) {
+            funcionarios.stream()
+                    .filter(f -> f.getId().equals(reserva.getIdFuncionario()))
+                    .findFirst()
+                    .ifPresent(reserva::setFuncionarioReserva);
+        }
+        return new ArrayList<>(reservas);
     }
 
     // ================= Reservas =================

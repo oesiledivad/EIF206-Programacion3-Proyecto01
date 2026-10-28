@@ -5,15 +5,11 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import una.proyecto.model.FilaCalendarizacion;
 import una.proyecto.model.Reserva;
-import una.proyecto.service.CalendarizacionService;
 import una.proyecto.model.EstadoReserva;
 import una.proyecto.utils.GeneradorPDFS;
 import una.proyecto.utils.ReportePDF;
 import una.proyecto.utils.TablePDF;
-import una.proyecto.model.Funcionario;
-import una.proyecto.service.FuncionarioService;
-import una.proyecto.bootstrap.AppFactory;
-
+import una.proyecto.proxy.ServiceProxy;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -58,14 +54,11 @@ public class CalendarizacionActividadesController {
     @FXML
     private TreeTableColumn<FilaCalendarizacion, String> tblColumDomingo;
 
-    private final CalendarizacionService calendarizacionService =
-            new CalendarizacionService();
+    private final ServiceProxy proxy = ServiceProxy.instance();
 
     private final DateTimeFormatter formatoHora =
             DateTimeFormatter.ofPattern("HH:mm");
 
-    private final FuncionarioService funcionarioService =
-            AppFactory.createFuncionarioService();
 
     @FXML
     public void initialize() {
@@ -148,11 +141,14 @@ public class CalendarizacionActividadesController {
         // Actualizar los encabezados de los días
         actualizarEncabezados(lunes);
 
-        // Obtener las reservas de esa semana
-        List<Reserva> reservas =
-                calendarizacionService.obtenerReservasDeLaSemana(
-                        fechaSeleccionada
-                );
+        // Obtener las reservas de esa semana (ya vienen con su encargado)
+        List<Reserva> reservas;
+        try {
+            reservas = proxy.calendarizacionReservasDeLaSemana(fechaSeleccionada);
+        } catch (Exception e) {
+            mostrarAlerta("Error", e.getMessage());
+            return;
+        }
 
         // Crear la raíz de la tabla
         TreeItem<FilaCalendarizacion> raiz =
@@ -192,16 +188,9 @@ public class CalendarizacionActividadesController {
                 if (!horaActual.isBefore(reserva.getHoraInicio())
                         && horaActual.isBefore(reserva.getHoraFin())) {
 
-                    Funcionario funcionario =
-                            funcionarioService.obetenerUsuarioPorId(
-                                    reserva.getIdFuncionario()
-                            );
-
-                    String nombreFuncionario = "";
-
-                    if (funcionario != null) {
-                        nombreFuncionario = funcionario.getName();
-                    }
+                    String nombreFuncionario = reserva.getFuncionarioReserva() != null
+                            ? reserva.getFuncionarioReserva().getName()
+                            : reserva.getIdFuncionario();
 
                     String informacion =
                             reserva.getActividad()
