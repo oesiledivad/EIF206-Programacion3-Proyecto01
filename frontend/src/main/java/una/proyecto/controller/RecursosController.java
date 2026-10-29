@@ -14,6 +14,7 @@ import una.proyecto.bootstrap.AppFactory;
 import una.proyecto.utils.GeneradorPDFS;
 import una.proyecto.utils.ReportePDF;
 import una.proyecto.utils.TablePDF;
+import una.proyecto.proxy.ServiceProxy;
 
 import java.util.List;
 
@@ -58,12 +59,9 @@ public class RecursosController {
     @FXML private TableColumn<Recurso, String> tableColumDescripcion;
 
 
-
-    private final RecursoService recursoService  = AppFactory.createRecursoDatos();
+    private final ServiceProxy proxy = ServiceProxy.instance();
     private final ObservableList<Recurso> listaObservable = FXCollections.observableArrayList();
-    private final CategoriaService categoriaService = AppFactory.createCategoriaService();
     private final ObservableList<Categoria> listaCategorias = FXCollections.observableArrayList();
-
 
     @FXML
     public void initialize(){
@@ -98,11 +96,20 @@ public class RecursosController {
         tableViewRecursos.setItems(listaObservable);
     }
     private void cargarCategorias(){
-        listaCategorias.setAll(categoriaService.obtenerTodas());
+        try {
+            listaCategorias.setAll(proxy.categoriasObtenerTodas());
+        } catch (Exception e) {
+            showAlert("Error", e.getMessage());
+        }
     }
     private void cargarTodoRecursos(){
-        listaObservable.setAll(recursoService.obtenerTodosRecursos());
+        try {
+            listaObservable.setAll(proxy.recursosObtenerTodos());
+        } catch (Exception e) {
+            showAlert("Error", e.getMessage());
+        }
     }
+
     private void configureComboBoxFiltro(){
         comboBoxCategoriaFiltro.setItems(listaCategorias);
         comboBoxCategoriaFiltro.setConverter(crearConverter());
@@ -138,8 +145,11 @@ public class RecursosController {
     @FXML public void  btnBuscarRecurso(){
         String descripcion = txtFieldDescripcionFiltro.getText();
         Categoria nueva = comboBoxCategoriaFiltro.getValue();
-        List<Recurso> listaRecursosEspecificos = recursoService.buscarPorFiltros(nueva, descripcion);
-        listaObservable.setAll(listaRecursosEspecificos);
+        try {
+            listaObservable.setAll(proxy.recursosBuscarPorFiltros(nueva, descripcion));
+        } catch (Exception e) {
+            showAlert("Error", e.getMessage());
+        }
     }
     @FXML public void  btnLimpiarCasilla(){
         clearForm();
@@ -152,9 +162,14 @@ public class RecursosController {
             return;
         }
 
-        recursoService.delete(seleccionado.getId());
-        listaObservable.setAll(recursoService.obtenerTodosRecursos());
-        clearForm();
+        try {
+            proxy.recursoEliminar(seleccionado.getId());
+            cargarTodoRecursos();
+            clearForm();
+            showAlert("Éxito", "Recurso eliminado correctamente.");
+        } catch (Exception e) {
+            showAlert("Error", e.getMessage());
+        }
     }
     @FXML public void btnGuardarRecurso() {
         String idActivo = textFieldID.getText().trim();
@@ -169,11 +184,11 @@ public class RecursosController {
 
         try {
             Recurso r1 = new Recurso(idActivo, tipoCategoria.getId(), descripcion);
-            recursoService.save(r1);
-            listaObservable.setAll(recursoService.obtenerTodosRecursos());
+            proxy.recursoCrear(r1);
+            cargarTodoRecursos();
             clearForm();
             showAlert("Éxito", "Recurso registrado correctamente.");
-        } catch (IllegalArgumentException e) {
+        } catch (Exception e) {
             showAlert("Error", e.getMessage());
         }
     }

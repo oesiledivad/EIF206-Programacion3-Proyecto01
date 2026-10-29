@@ -154,6 +154,8 @@ public class Worker {
             case Protocol.RECURSO_CREAR:
             case Protocol.RECURSO_ACTUALIZAR:
             case Protocol.RECURSO_ELIMINAR:
+            case Protocol.RECURSO_POR_CATEGORIA:
+            case Protocol.RECURSO_TEXTO_POR_CATEGORIAS:
                 return ejecutarRecurso(operacion);
 
 
@@ -320,7 +322,7 @@ public class Worker {
         }
     }
     // ================= Recursos =================
-
+    @SuppressWarnings("unchecked")
     private Object ejecutarRecurso(int operacion) throws IOException, ClassNotFoundException {
         RecursoService recursoService = servicios.getRecursoService();
         switch (operacion) {
@@ -358,6 +360,18 @@ public class Worker {
                 requireAdmin(requireSession());
                 recursoService.delete(id);
                 return null;
+            }
+            case Protocol.RECURSO_POR_CATEGORIA: {
+                String idCategoria = (String) is.readObject();
+                requireSession();
+                if (idCategoria == null) throw new IllegalArgumentException("Debe indicar la categoría.");
+                return new ArrayList<Recurso>(recursoService.recursosPorCategoria(idCategoria));
+            }
+            case Protocol.RECURSO_TEXTO_POR_CATEGORIAS: {
+                List<Categoria> categorias = (List<Categoria>) is.readObject();
+                requireSession();
+                if (categorias == null) throw new IllegalArgumentException("Debe indicar las categorías.");
+                return recursoService.obtenerRecursosParaTabe(categorias);
             }
             default:
                 throw new IllegalArgumentException("Operacion de recurso desconocida: " + operacion);

@@ -1,5 +1,6 @@
 package una.proyecto.proxy;
 
+import una.proyecto.logic.RecursoLogic;
 import una.proyecto.model.DashboardData;
 import una.proyecto.model.LoginService;
 import una.proyecto.model.Usuario;
@@ -15,6 +16,9 @@ import java.net.Socket;
 import una.proyecto.model.Categoria;
 import java.util.ArrayList;
 import java.util.List;
+
+import static una.proyecto.protocolo.Protocol.RECURSO_ACTUALIZAR;
+import static una.proyecto.protocolo.Protocol.RECURSO_LISTAR;
 
 public class ServiceProxy implements LoginService, AutoCloseable {
     private static final ServiceProxy INSTANCE = new ServiceProxy();
@@ -97,6 +101,63 @@ public class ServiceProxy implements LoginService, AutoCloseable {
     public List<Reserva> calendarizacionReservasDeLaSemana(LocalDate fecha) {
         return (List<Reserva>) request(Protocol.CALENDARIZACION_RESERVAS_SEMANA, fecha);
     }
+//===============================================Reserva=====================================================
+
+
+    // ================= Recursos =================
+
+    @SuppressWarnings("unchecked")
+    public List<Recurso> recursosObtenerTodos() {
+        return (List<Recurso>) request(Protocol.RECURSO_LISTAR);
+    }
+
+    public Recurso recursoBuscarPorId(String id) {
+        return (Recurso) request(Protocol.RECURSO_BUSCAR, id);
+    }
+
+    // La categoria puede ser null: en ese caso filtra solo por descripcion.
+    @SuppressWarnings("unchecked")
+    public List<Recurso> recursosBuscarPorFiltros(Categoria categoria, String descripcion) {
+        return (List<Recurso>) request(Protocol.RECURSO_FILTRAR, categoria, descripcion);
+    }
+
+    // Devuelve el recurso ya guardado.
+    public Recurso recursoCrear(Recurso recurso) {
+        return (Recurso) request(Protocol.RECURSO_CREAR, recurso);
+    }
+
+    public void recursoActualizar(Recurso recurso) {
+        request(Protocol.RECURSO_ACTUALIZAR, recurso);
+    }
+
+    public void recursoEliminar(String id) {
+        request(Protocol.RECURSO_ELIMINAR, id);
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<Recurso> recursosPorCategoria(String idCategoria) {
+        return (List<Recurso>) request(Protocol.RECURSO_POR_CATEGORIA, idCategoria);
+    }
+
+    public String recursosTextoPorCategorias(List<Categoria> categorias) {
+        return (String) request(Protocol.RECURSO_TEXTO_POR_CATEGORIAS, new ArrayList<>(categorias));
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     public synchronized void logout() {
         if (socket == null) return;
@@ -105,6 +166,25 @@ public class ServiceProxy implements LoginService, AutoCloseable {
             // Cerrar el socket también revoca la sesión del servidor.
         } finally { close(); }
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     private synchronized Object request(int operation, Object... parameters) {
         try {
