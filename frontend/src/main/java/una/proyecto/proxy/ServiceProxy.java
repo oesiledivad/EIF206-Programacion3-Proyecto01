@@ -7,6 +7,7 @@ import una.proyecto.model.Usuario;
 import una.proyecto.model.Recurso;
 import una.proyecto.model.Reserva;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import una.proyecto.protocolo.Protocol;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -101,8 +102,42 @@ public class ServiceProxy implements LoginService, AutoCloseable {
     public List<Reserva> calendarizacionReservasDeLaSemana(LocalDate fecha) {
         return (List<Reserva>) request(Protocol.CALENDARIZACION_RESERVAS_SEMANA, fecha);
     }
-//===============================================Reserva=====================================================
+    // ================= Reservas =================
 
+    // Funcionario: sus propias reservas. Administrador: todas.
+    // Llegan con sus categorias ya cargadas.
+    @SuppressWarnings("unchecked")
+    public List<Reserva> reservasObtener() {
+        return (List<Reserva>) request(Protocol.RESERVA_LISTAR);
+    }
+
+    public Reserva reservaBuscarPorId(String id) {
+        return (Reserva) request(Protocol.RESERVA_BUSCAR, id);
+    }
+
+    // Envia solo lo que lleno el usuario. El servidor valida las horas,
+    // asigna los recursos, toma el funcionario de la sesion y devuelve
+    // la reserva guardada, con su id y sus recursos.
+    public Reserva reservaCrear(String actividad, LocalDate fecha, LocalTime horaInicio,
+                                LocalTime horaFin, List<Categoria> categorias) {
+        Reserva datos = new Reserva();
+        datos.setActividad(actividad);
+        datos.setFecha(fecha);
+        datos.setHoraInicio(horaInicio);
+        datos.setHoraFin(horaFin);
+        datos.setCategoriasDeRecursos(new ArrayList<>(categorias));
+        return (Reserva) request(Protocol.RESERVA_CREAR, datos);
+    }
+
+    public void reservaCancelar(String id) {
+        request(Protocol.RESERVA_CANCELAR, id);
+    }
+
+    // Interpreta una frase con IA en el servidor y devuelve una reserva sugerida
+    // (actividad, fecha, horas y categorias). No guarda nada.
+    public Reserva reservaExtraerConIA(String frase) {
+        return (Reserva) request(Protocol.RESERVA_EXTRAER_IA, frase);
+    }
 
     // ================= Recursos =================
 
@@ -209,7 +244,7 @@ public class ServiceProxy implements LoginService, AutoCloseable {
         if (socket != null) return;
         socket = new Socket();
         socket.connect(new InetSocketAddress(host, port), 3000);
-        socket.setSoTimeout(10_000);
+        socket.setSoTimeout(30_000);
         output = new ObjectOutputStream(socket.getOutputStream());
         output.flush();
         input = new ObjectInputStream(socket.getInputStream());

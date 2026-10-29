@@ -29,6 +29,7 @@ public final class Protocol {
     public static final int RESERVA_LISTAR = 101;
     public static final int RESERVA_BUSCAR = 102;
     public static final int RESERVA_CANCELAR = 103;
+    public static final int RESERVA_EXTRAER_IA = 104;
 
     // Categorias (200)
     public static final int CATEGORIA_LISTAR = 200;
