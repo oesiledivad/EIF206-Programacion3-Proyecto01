@@ -56,7 +56,7 @@ public class DashboardController {
         if (colActividad != null) colActividad.setCellValueFactory(new PropertyValueFactory<>("actividad"));
         if (colFecha != null) colFecha.setCellValueFactory(new PropertyValueFactory<>("fecha"));
         if (colEstado != null) colEstado.setCellValueFactory(new PropertyValueFactory<>("estado"));
-
+        if (colEstado != null) colEstado.setCellValueFactory(new PropertyValueFactory<>("estadoActual"));
         if (colHora != null) {
             colHora.setCellValueFactory(cellData -> {
                 Reserva r = cellData.getValue();
