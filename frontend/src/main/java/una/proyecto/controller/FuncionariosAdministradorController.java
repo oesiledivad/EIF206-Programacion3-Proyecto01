@@ -4,16 +4,18 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import una.proyecto.model.Funcionario;
-import una.proyecto.service.FuncionarioService;
+import una.proyecto.proxy.ServiceProxy;
 import una.proyecto.utils.GeneradorPDFS;
 import una.proyecto.utils.ReportePDF;
 import una.proyecto.utils.TablePDF;
-import una.proyecto.bootstrap.AppFactory;
+
+import java.util.Optional;
 
 public class FuncionariosAdministradorController {
 
@@ -44,164 +46,99 @@ public class FuncionariosAdministradorController {
     @FXML
     private TableColumn<Funcionario, String> colTelefono;
 
-    private final FuncionarioService funcionarioService = AppFactory.createFuncionarioService();
+    // El controller ya no conoce el backend: todo pasa por el proxy (sockets).
+    private final ServiceProxy proxy = ServiceProxy.instance();
 
-    private final ObservableList<Funcionario> listaObservable =
-            FXCollections.observableArrayList();
+    private final ObservableList<Funcionario> listaObservable = FXCollections.observableArrayList();
 
     @FXML
     public void initialize() {
-
         configureTable();
         configureSelectionListener();
         configureSearchListeners();
         loadFuncionarios();
     }
 
-    /**
-     * Configura la tabla de funcionarios.
-     */
     private void configureTable() {
-
-        colID.setCellValueFactory(
-                new PropertyValueFactory<>("id")
-        );
-
-        colNombre.setCellValueFactory(
-                new PropertyValueFactory<>("name")
-        );
-
-        colTelefono.setCellValueFactory(
-                new PropertyValueFactory<>("phone")
-        );
-
+        colID.setCellValueFactory(new PropertyValueFactory<>("id"));
+        colNombre.setCellValueFactory(new PropertyValueFactory<>("name"));
+        colTelefono.setCellValueFactory(new PropertyValueFactory<>("phone"));
         tblFuncionarios.setItems(listaObservable);
     }
 
-    /**
-     * Carga a todos los funcionarios desde el archivo usuarios.xml.
-     */
     private void loadFuncionarios() {
-
-        listaObservable.setAll(funcionarioService.getAllEmployees());
+        try {
+            listaObservable.setAll(proxy.funcionariosObtenerTodos());
+        } catch (Exception e) {
+            showAlert("Error", e.getMessage());
+        }
     }
 
-    /**
-     * Configura el table selection listener.
-     */
+    // Al seleccionar una fila, el formulario pasa a modo "editar": la cédula no se puede cambiar.
     private void configureSelectionListener() {
-
-        tblFuncionarios.getSelectionModel()
-                .selectedItemProperty()
-                .addListener((observable, oldValue, newValue) -> {
-
-                    if (newValue == null) {
-                        return;
-                    }
-
-                    txtID.setText(newValue.getId());
-                    txtNombre.setText(newValue.getName());
-                    txtTelefono.setText(newValue.getPhone());
-
-                    txtID.setEditable(false);
-                });
+        tblFuncionarios.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == null) {
+                return;
+            }
+            txtID.setText(newValue.getId());
+            txtNombre.setText(newValue.getName());
+            txtTelefono.setText(newValue.getPhone());
+            txtID.setEditable(false);
+        });
     }
 
-    /**
-     * Configura los campos de búsqueda.
-     */
     private void configureSearchListeners() {
-
-        txtBuscarID.textProperty().addListener(
-                (observable, oldValue, newValue) ->
-                        searchFuncionarios()
-        );
-
-        txtBuscarNombre.textProperty().addListener(
-                (observable, oldValue, newValue) ->
-                        searchFuncionarios()
-        );
+        txtBuscarID.textProperty().addListener((observable, oldValue, newValue) -> searchFuncionarios());
+        txtBuscarNombre.textProperty().addListener((observable, oldValue, newValue) -> searchFuncionarios());
     }
 
-    /**
-     * Busca funcionarios por ID o nombre.
-     */
     private void searchFuncionarios() {
-
         String id = txtBuscarID.getText().trim();
         String name = txtBuscarNombre.getText().trim();
-
-        if (!id.isEmpty()) {
-
-            listaObservable.setAll(funcionarioService.findById(id));
-
-        } else if (!name.isEmpty()) {
-
-            listaObservable.setAll(funcionarioService.findByName(name));
-
-        } else {
-
-            loadFuncionarios();
+        try {
+            if (!id.isEmpty()) {
+                listaObservable.setAll(proxy.funcionariosBuscarPorId(id));
+            } else if (!name.isEmpty()) {
+                listaObservable.setAll(proxy.funcionariosBuscarPorNombre(name));
+            } else {
+                listaObservable.setAll(proxy.funcionariosObtenerTodos());
+            }
+        } catch (Exception e) {
+            showAlert("Error", e.getMessage());
         }
     }
 
     /**
-     * Crea un nuevo funcionario.
-     * <p>
-     * La contraseña inicial del funcionario la asigna automáticamente
-     * FuncionarioService utilizando el ID del empleado.
+     * Sin fila seleccionada -> crea (la clave inicial = cédula la pone el servidor).
+     * Con fila seleccionada -> actualiza nombre y teléfono (la clave se conserva).
      */
     @FXML
     private void guardarFuncionario() {
-
         String id = txtID.getText().trim();
         String name = txtNombre.getText().trim();
         String phone = txtTelefono.getText().trim();
+        boolean editando = tblFuncionarios.getSelectionModel().getSelectedItem() != null;
 
         Funcionario funcionario = new Funcionario(id, "FUNCIONARIO", name, phone);
 
         try {
-            funcionarioService.addEmployee(funcionario);
-            loadFuncionarios();
+            String mensaje;
+            if (editando) {
+                proxy.funcionarioActualizar(funcionario);
+                mensaje = "Funcionario " + id + " actualizado correctamente.";
+            } else {
+                proxy.funcionarioCrear(funcionario);
+                mensaje = "Funcionario " + id + " creado. Su clave inicial es su cédula.";
+            }
             clearForm();
-            showAlert("Funcionario", "Funcionario guardado correctamente.");
-        } catch (IllegalArgumentException e) {
+            showAlert("Funcionario", mensaje);
+        } catch (Exception e) {
             showAlert("Error", e.getMessage());
         }
     }
 
-    /**
-     * Actualiza al funcionario seleccionado.
-     */
-    @FXML
-    private void editarFuncionario() {
-
-        Funcionario selected = tblFuncionarios.getSelectionModel().getSelectedItem();
-
-        if (selected == null) {
-            showAlert("Aviso", "Debe seleccionar un funcionario de la tabla.");
-            return;
-        }
-
-        selected.setName(txtNombre.getText().trim());
-        selected.setPhone(txtTelefono.getText().trim());
-
-        try {
-            funcionarioService.updateEmployee(selected);
-            loadFuncionarios();
-            clearForm();
-            showAlert("Funcionario", "Funcionario actualizado correctamente.");
-        } catch (IllegalArgumentException e) {
-            showAlert("Error", e.getMessage());
-        }
-    }
-
-    /**
-     * Elimina al funcionario seleccionado.
-     */
     @FXML
     private void eliminarFuncionario() {
-
         Funcionario selected = tblFuncionarios.getSelectionModel().getSelectedItem();
 
         if (selected == null) {
@@ -209,72 +146,54 @@ public class FuncionariosAdministradorController {
             return;
         }
 
+        Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmacion.setTitle("Eliminar funcionario");
+        confirmacion.setHeaderText(null);
+        confirmacion.setContentText("¿Desea eliminar a " + selected.getName() + " (" + selected.getId() + ")?");
+        Optional<ButtonType> respuesta = confirmacion.showAndWait();
+        if (respuesta.isEmpty() || respuesta.get() != ButtonType.OK) {
+            return;
+        }
+
         try {
-            funcionarioService.deleteEmployee(selected.getId());
-            loadFuncionarios();
+            proxy.funcionarioEliminar(selected.getId());
             clearForm();
             showAlert("Funcionario", "Funcionario eliminado correctamente.");
-        } catch (IllegalArgumentException e) {
+        } catch (Exception e) {
             showAlert("Error", e.getMessage());
         }
     }
 
-    /**
-     * Borra el formulario y los campos de búsqueda.
-     */
     @FXML
     private void clearForm() {
-
         txtID.clear();
         txtID.setEditable(true);
-
         txtNombre.clear();
         txtTelefono.clear();
-
         txtBuscarID.clear();
         txtBuscarNombre.clear();
-
         tblFuncionarios.getSelectionModel().clearSelection();
-
         loadFuncionarios();
     }
 
-    /**
-     * Muestra un cuadro de diálogo informativo.
-     */
     private void showAlert(String title, String message) {
-
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
-
         alert.showAndWait();
     }
-    @FXML public void btnImprimir(){
+
+    @FXML
+    public void btnImprimir() {
         try {
-            TablePDF tabla =
-                    GeneradorPDFS.desdeTableView(
-                            tblFuncionarios
-                    );
-
-            ReportePDF reporte =
-                    new ReportePDF(
-                            "Reporte de Funcionarios",
-                            tabla
-                    );
-
-            GeneradorPDFS.generar(
-                    reporte,
-                    "funcionarios.pdf"
-            );
-
+            TablePDF tabla = GeneradorPDFS.desdeTableView(tblFuncionarios);
+            ReportePDF reporte = new ReportePDF("Reporte de Funcionarios", tabla);
+            GeneradorPDFS.generar(reporte, "funcionarios.pdf");
             showAlert("Éxito", "PDF generado correctamente.");
-        }catch (Exception e){
-            showAlert("Error"," Error al generar PDF");
+        } catch (Exception e) {
+            showAlert("Error", " Error al generar PDF");
             e.printStackTrace();
         }
     }
 }
-

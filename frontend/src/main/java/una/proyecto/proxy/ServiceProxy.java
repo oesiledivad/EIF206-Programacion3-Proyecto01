@@ -1,11 +1,11 @@
 package una.proyecto.proxy;
 
-import una.proyecto.logic.RecursoLogic;
 import una.proyecto.model.DashboardData;
 import una.proyecto.model.LoginService;
 import una.proyecto.model.Usuario;
 import una.proyecto.model.Recurso;
 import una.proyecto.model.Reserva;
+import una.proyecto.model.Funcionario;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import una.proyecto.protocolo.Protocol;
@@ -102,6 +102,37 @@ public class ServiceProxy implements LoginService, AutoCloseable {
     public List<Reserva> calendarizacionReservasDeLaSemana(LocalDate fecha) {
         return (List<Reserva>) request(Protocol.CALENDARIZACION_RESERVAS_SEMANA, fecha);
     }
+
+    // ================= Funcionarios =================
+
+    @SuppressWarnings("unchecked")
+    public List<Funcionario> funcionariosObtenerTodos() {
+        return (List<Funcionario>) request(Protocol.FUNCIONARIO_LISTAR);
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<Funcionario> funcionariosBuscarPorId(String id) {
+        return (List<Funcionario>) request(Protocol.FUNCIONARIO_BUSCAR_ID, id);
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<Funcionario> funcionariosBuscarPorNombre(String nombre) {
+        return (List<Funcionario>) request(Protocol.FUNCIONARIO_BUSCAR_NOMBRE, nombre);
+    }
+
+    // La clave inicial (= cédula) la asigna el servidor; la clave nunca viaja (es transient).
+    public void funcionarioCrear(Funcionario funcionario) {
+        request(Protocol.FUNCIONARIO_CREAR, funcionario);
+    }
+
+    public void funcionarioActualizar(Funcionario funcionario) {
+        request(Protocol.FUNCIONARIO_ACTUALIZAR, funcionario);
+    }
+
+    public void funcionarioEliminar(String id) {
+        request(Protocol.FUNCIONARIO_ELIMINAR, id);
+    }
+
     // ================= Reservas =================
 
     // Funcionario: sus propias reservas. Administrador: todas.
