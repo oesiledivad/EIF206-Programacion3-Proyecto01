@@ -6,16 +6,12 @@ import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import una.proyecto.logic.ia.aiGenerator;
+
 import una.proyecto.model.Categoria;
 import una.proyecto.model.EstadoReserva;
 import una.proyecto.model.Funcionario;
 import una.proyecto.model.Reserva;
-import una.proyecto.service.CategoriaService;
-import una.proyecto.service.FuncionarioService;
-import una.proyecto.service.RecursoService;
-import una.proyecto.service.ReservaService;
-import una.proyecto.bootstrap.AppFactory;
+import una.proyecto.proxy.ServiceProxy;
 import una.proyecto.utils.SessionManager;
 import javafx.scene.control.SelectionMode;
 
@@ -59,11 +55,9 @@ public class ReservasController {
     private final ObservableList<Reserva> listaReservaUsuario = FXCollections.observableArrayList();
     private final ObservableList<Categoria> listaCategoria = FXCollections.observableArrayList();
 
-    private final ReservaService reservaService = AppFactory.createReservaService();
-    private final RecursoService recursoService = AppFactory.createRecursoDatos();
-    private final CategoriaService categoriaService = AppFactory.createCategoriaService();
+    private final ServiceProxy proxy = ServiceProxy.instance();
     private final SessionManager sessionManager = SessionManager.getInstance();
-    private final FuncionarioService serviceFuncionario =AppFactory.createFuncionarioService();
+
     @FXML
     public void initialize() {
         configurarChoiceBox();
@@ -128,7 +122,7 @@ public class ReservasController {
 
     private void cargarCategorias() {
         try {
-            listaCategoria.setAll(categoriaService.obtenerTodas());
+            listaCategoria.setAll(proxy.categoriasObtenerTodas());
         } catch (Exception e) {
             e.printStackTrace();
             showAlert("Error", "No se pudieron cargar las categorías: " + e.getMessage());
@@ -147,8 +141,7 @@ public class ReservasController {
             }
 
             // Obtener reservas del usuario
-            List<Reserva> reservas = reservaService.obtenerReservasPorFuncionario(idUsuario);
-            reservaService.repoblarCategoriasService(reservas, listaCategoria);
+            List<Reserva> reservas = proxy.reservasObtener();
 
             listaReservaUsuario.setAll(reservas);
             tableviewmisreservas.refresh();
@@ -159,9 +152,7 @@ public class ReservasController {
         }
     }
 
-    /**
-     * Recarga las reservas del usuario
-     */
+
     private void recargarReservas() {
         cargarReservasUsuario();
     }
@@ -180,30 +171,28 @@ public class ReservasController {
             showAlert("Error", "Solo los funcionarios pueden realizar reservas.");
             return;
         }
-         String id= sessionManager.getId();
-        Funcionario funcionario = serviceFuncionario.obetenerUsuarioPorId(id);
+
         // 3. Obtener datos del formulario
         String actividad = txtareaactividad.getText().trim();
         LocalDate fecha = datapickerfecha.getValue();
         LocalTime horaInicio = choiceboxhorainicio.getValue();
         LocalTime horaFin = choiceboxhorafin.getValue();
-        String idUsuario = sessionManager.getId();
         List<Categoria> categoriasSeleccionadas = new ArrayList<>(
                 listviewcategorias.getSelectionModel().getSelectedItems()
         );
 
-        // 4. Validar campos básicos ANTES de tocar categorías/recursos
+        // 4. Validar campos básicos antes de consultar al servidor
         if (actividad.isEmpty() || fecha == null || horaInicio == null || horaFin == null || categoriasSeleccionadas.isEmpty()) {
             showAlert("Error", "Por favor, complete todos los campos y seleccione al menos una categoría.");
             return;
         }
 
-        // 5. Filtrar categorías según si poseen recursos o no
+        // 5. Separar las categorías que tienen recursos de las que no
         List<Categoria> categoriasSinRecursos;
         List<Categoria> categoriasConRecursos;
         try {
-            categoriasSinRecursos = categoriaService.categoriaNoPoseeRecursos(categoriasSeleccionadas);
-            categoriasConRecursos = categoriaService.categoriaConRecursos(categoriasSeleccionadas);
+            categoriasSinRecursos = proxy.categoriasSinRecursos(categoriasSeleccionadas);
+            categoriasConRecursos = proxy.categoriasConRecursos(categoriasSeleccionadas);
         } catch (RuntimeException e) {
             showAlert("Error", e.getMessage());
             return;
@@ -223,39 +212,19 @@ public class ReservasController {
                     .collect(Collectors.joining(", ")));
         }
 
-        // 6. Validar horas
+        // 6. Crear la reserva. El servidor valida las horas, asigna los recursos y la guarda.
         try {
-            reservaService.verificarHorasService(fecha, horaInicio, horaFin);
-        } catch (RuntimeException e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error de validación");
-            alert.setHeaderText("Error en las horas seleccionadas");
-            alert.setContentText(e.getMessage());
-            alert.showAndWait();
-            return;
-        }
-
-        // 7. Crear y guardar reserva (SOLO con las categorías que sí tienen recursos)
-        try {
-            Reserva nueva = reservaService.crearReserva(
-                    actividad,
-                    fecha,
-                    horaInicio,
-                    horaFin,
-                    idUsuario,
-                    categoriasConRecursos,
-                    EstadoReserva.ACTIVA,
-                    funcionario
-            );
-
-            reservaService.save(nueva);
+            Reserva creada = proxy.reservaCrear(actividad, fecha, horaInicio, horaFin, categoriasConRecursos);
 
             recargarReservas();
             limpiarFormulario();
-            showAlert("Éxito", "La reserva ha sido registrada exitosamente.");
+
+            String recursos = creada.getRecursosAsignadosIds() == null
+                    ? "" : String.join(", ", creada.getRecursosAsignadosIds());
+            showAlert("Éxito", "La reserva " + creada.getId() + " ha sido registrada exitosamente."
+                    + (recursos.isEmpty() ? "" : "\nRecursos asignados: " + recursos));
 
         } catch (Exception e) {
-            e.printStackTrace();
             showAlert("Error", "No se pudo realizar la reserva: " + e.getMessage());
         }
     }
@@ -292,7 +261,7 @@ public class ReservasController {
 
         // 5. Eliminar reserva
         try {
-            reservaService.delete(reserva.getId());
+            proxy.reservaCancelar(reserva.getId());
             recargarReservas();
             showAlert("Éxito", "La reserva ha sido cancelada correctamente.");
 
@@ -317,27 +286,34 @@ public class ReservasController {
             showAlert("Información", "Ingrese una frase para extraer información.");
             return;
         }
-        List<Categoria> disponibles = categoriaService.obtenerTodas();
 
         Task<Reserva> task = new Task<>() {
             @Override
-            protected Reserva call() throws Exception {
-                return aiGenerator.extraeInformacion(frase, disponibles);
+            protected Reserva call() {
+                return proxy.reservaExtraerConIA(frase);
             }
         };
 
         task.setOnSucceeded(event -> {
-            Reserva estraidaAI = task.getValue();
+            Reserva extraida = task.getValue();
 
-            txtareaactividad.setText(estraidaAI.getActividad());
-            datapickerfecha.setValue(estraidaAI.getFecha());
-            choiceboxhorainicio.setValue(estraidaAI.getHoraInicio());
-            choiceboxhorafin.setValue(estraidaAI.getHoraFin());
+            txtareaactividad.setText(extraida.getActividad());
+            datapickerfecha.setValue(extraida.getFecha());
+            choiceboxhorainicio.setValue(extraida.getHoraInicio());
+            choiceboxhorafin.setValue(extraida.getHoraFin());
 
-            List<Categoria> categoriasExtraidas = estraidaAI.getCategoriasDeRecursos();
+            // Las categorías llegan como objetos nuevos desde el servidor:
+            // se seleccionan las de la lista que tengan el mismo id.
             listviewcategorias.getSelectionModel().clearSelection();
-            for (Categoria cat : categoriasExtraidas) {
-                listviewcategorias.getSelectionModel().select(cat);
+            List<Categoria> categoriasExtraidas = extraida.getCategoriasDeRecursos();
+            if (categoriasExtraidas != null) {
+                for (Categoria extraidaCat : categoriasExtraidas) {
+                    for (Categoria disponible : listaCategoria) {
+                        if (disponible.getId().equals(extraidaCat.getId())) {
+                            listviewcategorias.getSelectionModel().select(disponible);
+                        }
+                    }
+                }
             }
         });
 

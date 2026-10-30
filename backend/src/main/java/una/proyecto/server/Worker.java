@@ -9,7 +9,16 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import una.proyecto.protocolo.Protocol;
 import una.proyecto.service.ReservaService;
+import una.proyecto.service.RecursoService;
 import una.proyecto.service.Servicios;
+
+
+
+
+import una.proyecto.model.EstadoReserva;
+import una.proyecto.logic.ia.aiGenerator;
+import java.util.Collections;
+
 
 import una.proyecto.model.Categoria;
 import una.proyecto.service.CategoriaService;
@@ -144,12 +153,20 @@ public class Worker {
             case Protocol.RESERVA_LISTAR:
             case Protocol.RESERVA_BUSCAR:
             case Protocol.RESERVA_CANCELAR:
+            case Protocol.RESERVA_EXTRAER_IA:
                 return ejecutarReserva(operacion);
 
             // Recursos:
-            // case Protocol.RECURSO_CREAR:
-            // case Protocol.RECURSO_LISTAR:
-            //     return ejecutarRecurso(operacion);
+            case Protocol.RECURSO_LISTAR:
+            case Protocol.RECURSO_BUSCAR:
+            case Protocol.RECURSO_FILTRAR:
+            case Protocol.RECURSO_CREAR:
+            case Protocol.RECURSO_ACTUALIZAR:
+            case Protocol.RECURSO_ELIMINAR:
+            case Protocol.RECURSO_POR_CATEGORIA:
+            case Protocol.RECURSO_TEXTO_POR_CATEGORIAS:
+                return ejecutarRecurso(operacion);
+
 
             // Categorias:
             case Protocol.CATEGORIA_LISTAR:
@@ -219,25 +236,37 @@ public class Worker {
         ReservaService reservaService = servicios.getReservaService();
         switch (operacion) {
             case Protocol.RESERVA_CREAR: {
-                Reserva reserva = (Reserva) is.readObject();
+                Reserva datos = (Reserva) is.readObject();
                 Usuario sesion = requireSession();
                 requireFuncionario(sesion);
-                if (reserva == null) throw new IllegalArgumentException("La reserva es requerida.");
-                if (reserva.getIdFuncionario() != null
-                        && !sesion.getId().equalsIgnoreCase(reserva.getIdFuncionario())) {
-                    throw new IllegalArgumentException("No puede reservar para otro funcionario.");
+                if (datos == null) throw new IllegalArgumentException("La reserva es requerida.");
+                List<Categoria> categorias = datos.getCategoriasDeRecursos();
+                if (categorias == null || categorias.isEmpty()) {
+                    throw new IllegalArgumentException("Debe seleccionar al menos una categoría.");
                 }
-                reserva.setIdFuncionario(sesion.getId());
-                reservaService.verificarHorasService(reserva.getFecha(), reserva.getHoraInicio(), reserva.getHoraFin());
-                reservaService.save(reserva);
+                reservaService.verificarHorasService(datos.getFecha(), datos.getHoraInicio(), datos.getHoraFin());
+
+                Reserva reserva;
+                // Asignar recursos y guardar deben ocurrir juntos: si dos funcionarios
+                // reservan al mismo tiempo, el segundo debe ver lo que guardo el primero.
+                synchronized (reservaService) {
+                    reserva = reservaService.crearReserva(datos.getActividad(), datos.getFecha(),
+                            datos.getHoraInicio(), datos.getHoraFin(), sesion.getId(), categorias,
+                            EstadoReserva.ACTIVA, null);
+                    reservaService.save(reserva);
+                }
+                conEncargado(Collections.singletonList(reserva));
                 server.notificarReservaCreada(this, reserva);
                 return reserva;
             }
+
             case Protocol.RESERVA_LISTAR: {
                 Usuario sesion = requireSession();
-                return new ArrayList<Reserva>("ADMIN".equals(sesion.getRole())
+                List<Reserva> reservas = "ADMIN".equals(sesion.getRole())
                         ? reservaService.obtenerTodasReservas()
-                        : reservaService.obtenerReservasPorFuncionario(sesion.getId()));
+                        : reservaService.obtenerReservasPorFuncionario(sesion.getId());
+                reservaService.repoblarCategoriasService(reservas, servicios.getCategoriaService().obtenerTodas());
+                return new ArrayList<Reserva>(reservas);
             }
             case Protocol.RESERVA_BUSCAR: {
                 String id = (String) is.readObject();
@@ -258,6 +287,19 @@ public class Worker {
                 if (!futura) throw new IllegalArgumentException("Solo puede cancelar reservas futuras.");
                 reservaService.delete(id);
                 return null;
+            }
+            case Protocol.RESERVA_EXTRAER_IA: {
+                String frase = (String) is.readObject();
+                Usuario sesion = requireSession();
+                requireFuncionario(sesion);
+                if (frase == null || frase.isBlank()) {
+                    throw new IllegalArgumentException("Ingrese una frase para extraer información.");
+                }
+                try {
+                    return aiGenerator.extraeInformacion(frase, servicios.getCategoriaService().obtenerTodas());
+                } catch (Exception e) {
+                    throw new IllegalStateException("No se pudo extraer la información: " + e.getMessage(), e);
+                }
             }
             default:
                 throw new IllegalArgumentException("Operacion de reserva desconocida: " + operacion);
@@ -311,6 +353,62 @@ public class Worker {
             }
             default:
                 throw new IllegalArgumentException("Operacion de categoria desconocida: " + operacion);
+        }
+    }
+    // ================= Recursos =================
+    @SuppressWarnings("unchecked")
+    private Object ejecutarRecurso(int operacion) throws IOException, ClassNotFoundException {
+        RecursoService recursoService = servicios.getRecursoService();
+        switch (operacion) {
+            case Protocol.RECURSO_LISTAR: {
+                requireSession();
+                return new ArrayList<Recurso>(recursoService.obtenerTodosRecursos());
+            }
+            case Protocol.RECURSO_BUSCAR: {
+                String id = (String) is.readObject();
+                requireSession();
+                return recursoService.recurPorId(id);
+            }
+            case Protocol.RECURSO_FILTRAR: {
+                Categoria categoria = (Categoria) is.readObject();
+                String descripcion = (String) is.readObject();
+                requireSession();
+                return new ArrayList<Recurso>(recursoService.buscarPorFiltros(categoria, descripcion));
+            }
+            case Protocol.RECURSO_CREAR: {
+                Recurso recurso = (Recurso) is.readObject();
+                requireAdmin(requireSession());
+                if (recurso == null) throw new IllegalArgumentException("El recurso es requerido.");
+                recursoService.save(recurso);
+                return recurso;
+            }
+            case Protocol.RECURSO_ACTUALIZAR: {
+                Recurso recurso = (Recurso) is.readObject();
+                requireAdmin(requireSession());
+                if (recurso == null) throw new IllegalArgumentException("El recurso es requerido.");
+                recursoService.update(recurso);
+                return null;
+            }
+            case Protocol.RECURSO_ELIMINAR: {
+                String id = (String) is.readObject();
+                requireAdmin(requireSession());
+                recursoService.delete(id);
+                return null;
+            }
+            case Protocol.RECURSO_POR_CATEGORIA: {
+                String idCategoria = (String) is.readObject();
+                requireSession();
+                if (idCategoria == null) throw new IllegalArgumentException("Debe indicar la categoría.");
+                return new ArrayList<Recurso>(recursoService.recursosPorCategoria(idCategoria));
+            }
+            case Protocol.RECURSO_TEXTO_POR_CATEGORIAS: {
+                List<Categoria> categorias = (List<Categoria>) is.readObject();
+                requireSession();
+                if (categorias == null) throw new IllegalArgumentException("Debe indicar las categorías.");
+                return recursoService.obtenerRecursosParaTabe(categorias);
+            }
+            default:
+                throw new IllegalArgumentException("Operacion de recurso desconocida: " + operacion);
         }
     }
 

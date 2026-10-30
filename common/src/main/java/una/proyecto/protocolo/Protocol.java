@@ -29,6 +29,7 @@ public final class Protocol {
     public static final int RESERVA_LISTAR = 101;
     public static final int RESERVA_BUSCAR = 102;
     public static final int RESERVA_CANCELAR = 103;
+    public static final int RESERVA_EXTRAER_IA = 104;
 
     // Categorias (200)
     public static final int CATEGORIA_LISTAR = 200;
@@ -46,6 +47,16 @@ public final class Protocol {
 
     // Notificaciones asincronas (900)
     public static final int NOTIFICACION_RESERVA_CREADA = 900;
+
+    // Recursos (400)
+    public static final int RECURSO_LISTAR = 400;
+    public static final int RECURSO_BUSCAR = 401;
+    public static final int RECURSO_FILTRAR = 402;
+    public static final int RECURSO_CREAR = 403;
+    public static final int RECURSO_ACTUALIZAR = 404;
+    public static final int RECURSO_ELIMINAR = 405;
+    public static final int RECURSO_POR_CATEGORIA = 406;
+    public static final int RECURSO_TEXTO_POR_CATEGORIAS = 407;
 
     private Protocol() {
     }

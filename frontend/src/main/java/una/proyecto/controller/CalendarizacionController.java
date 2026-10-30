@@ -37,7 +37,7 @@ public class CalendarizacionController {
     @FXML
     private TableColumn<HoraRow, String> colHoras;
 
-    private final ObservableList<Reserva> listaReservaUsuario = FXCollections.observableArrayList();
+
     private final ObservableList<Categoria> listaCategoria = FXCollections.observableArrayList();
 
     private final ServiceProxy proxy = ServiceProxy.instance();
@@ -139,7 +139,8 @@ public class CalendarizacionController {
                     : reserva.getIdFuncionario();
             String texto = reserva.getActividad() + " - " + encargado;
 
-            for (String idRecurso : reserva.getRecursosAsignadosIds()) {
+            List<String> recursosReserva = reserva.getRecursosAsignadosIds();
+            for (String idRecurso : recursosReserva == null ? List.<String>of() : recursosReserva) {
                 if (!idsColumnas.contains(idRecurso)) {
                     continue; // recurso de otra categoría (la reserva pidió varias)
                 }
@@ -171,39 +172,19 @@ public class CalendarizacionController {
 
     @FXML
     public void btnImprimir() {
+        if (tableView.getItems().isEmpty()) {
+            showAlert("Aviso", "Primero cargue la calendarización.");
+            return;
+        }
         try {
-            TablePDF nuevo = new TablePDF();
-
-            // Encabezados
-            nuevo.setEncabezados(List.of(
-                    colHoras.getText()
-            ));
-
-            // Filas;
-            for (HoraRow fila : tableView.getItems()) {
-
-                nuevo.agregarFila(List.of(
-                        fila.getHora()
-                ));
-            }
-            System.out.println("PDF preparado");
-            LocalDate fechaSeleccionada = datepicker.getValue();
-
-            ReportePDF reporte = new ReportePDF("Reporte de actividades Calendario", nuevo);
+            TablePDF tabla = GeneradorPDFS.desdeTableView(tableView);
+            String titulo = "Calendarización " + choiceboxcategoria.getValue()
+                    + " - " + datepicker.getValue();
+            ReportePDF reporte = new ReportePDF(titulo, tabla);
             GeneradorPDFS.generar(reporte, "Calendarizacion.pdf");
-
-            showAlert(
-                    "Éxito",
-                    "PDF generado correctamente."
-            );
-
+            showAlert("Éxito", "PDF generado correctamente.");
         } catch (Exception e) {
-            showAlert(
-                    "Error",
-                    "Error al generar PDF."
-            );
-
-            e.printStackTrace();
+            showAlert("Error", "Error al generar PDF: " + e.getMessage());
         }
     }
-}
+    }
