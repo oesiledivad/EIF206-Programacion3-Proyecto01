@@ -2,6 +2,7 @@ package una.proyecto.datos;
 
 import una.proyecto.model.EstadoReserva;
 import una.proyecto.model.Reserva;
+import una.proyecto.model.Funcionario;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -17,9 +18,12 @@ public class ReservaDatos {
 
     private static final String PREFIJO_RESERVA = "RES-";
     private static final String PREFIJO_CATEGORIA = "CAT-";
+    // Se une con usuarios para traer el nombre del encargado,
+    // aunque esté dado de baja (el historial debe seguir mostrándolo).
     private static final String COLUMNAS =
-            "id_reserva, id_funcionario, actividad, fecha, hora_inicio, hora_fin, estado";
-
+            "r.id_reserva, r.id_funcionario, r.actividad, r.fecha, r.hora_inicio, r.hora_fin, r.estado, u.nombre";
+    private static final String DESDE =
+            " from reservas r join usuarios u on u.id_usuario = r.id_funcionario ";
     private final Database db;
 
     public ReservaDatos() {
@@ -88,8 +92,8 @@ public class ReservaDatos {
     // Devuelve la reserva activa con ese id (con sus recursos), o null si no existe o esta cancelada.
     public Reserva leerPorId(String id) {
         int num = obtenerIdReserva(id);
-        String sql = "select " + COLUMNAS + " from reservas "
-                + "where id_reserva = ? and estado = 'ACTIVA'";
+        String sql = "select " + COLUMNAS + DESDE
+                + "where r.id_reserva = ? and r.estado = 'ACTIVA'";
         try (PreparedStatement stm = db.prepareStatement(sql)) {
             stm.setInt(1, num);
             Reserva reserva = null;
@@ -109,8 +113,8 @@ public class ReservaDatos {
 
     // Devuelve todas las reservas activas (con sus recursos), ordenadas por fecha y hora.
     public List<Reserva> obtenerTodos() {
-        String sql = "select " + COLUMNAS + " from reservas "
-                + "where estado = 'ACTIVA' order by fecha, hora_inicio";
+        String sql = "select " + COLUMNAS + DESDE
+                + "where r.estado = 'ACTIVA' order by r.fecha, r.hora_inicio";
         List<Reserva> resultado = new ArrayList<>();
         try (PreparedStatement stm = db.prepareStatement(sql)) {
             try (ResultSet rs = db.executeQuery(stm)) {
@@ -155,6 +159,9 @@ public class ReservaDatos {
         reserva.setEstado(EstadoReserva.valueOf(rs.getString("estado")));
         reserva.setRecursosAsignadosIds(new ArrayList<>());
         reserva.setCategoriasDeRecursosIds(new ArrayList<>());
+        // Encargado: solo id y nombre (sin teléfono ni clave).
+        reserva.setFuncionarioReserva(
+                new Funcionario(reserva.getIdFuncionario(), "FUNCIONARIO", rs.getString("nombre"), null));
         return reserva;
     }
 
