@@ -8,17 +8,15 @@ import una.proyecto.model.Recurso;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import una.proyecto.protocolo.Protocol;
+
 import una.proyecto.service.ReservaService;
 import una.proyecto.service.RecursoService;
 import una.proyecto.service.Servicios;
-
-
-
+import una.proyecto.service.FuncionarioService;
 
 import una.proyecto.model.EstadoReserva;
 import una.proyecto.logic.ia.aiGenerator;
 import java.util.Collections;
-
 
 import una.proyecto.model.Categoria;
 import una.proyecto.service.CategoriaService;
@@ -184,6 +182,14 @@ public class Worker {
             case Protocol.CALENDARIZACION_RESERVAS_DIA:
             case Protocol.CALENDARIZACION_RESERVAS_SEMANA:
                 return ejecutarCalendarizacion(operacion);
+
+            case Protocol.FUNCIONARIO_LISTAR:
+            case Protocol.FUNCIONARIO_BUSCAR_ID:
+            case Protocol.FUNCIONARIO_BUSCAR_NOMBRE:
+            case Protocol.FUNCIONARIO_CREAR:
+            case Protocol.FUNCIONARIO_ACTUALIZAR:
+            case Protocol.FUNCIONARIO_ELIMINAR:
+                return ejecutarFuncionario(operacion);
         }
 
     }
@@ -214,6 +220,51 @@ public class Worker {
             }
             default:
                 throw new IllegalArgumentException("Operacion de calendarizacion desconocida: " + operacion);
+        }
+    }
+
+    // ================= Funcionarios =================
+
+    private Object ejecutarFuncionario(int operacion) throws IOException, ClassNotFoundException {
+        FuncionarioService funcionarioService = servicios.getFuncionarioService();
+        switch (operacion) {
+            case Protocol.FUNCIONARIO_LISTAR: {
+                requireAdmin(requireSession());
+                return new ArrayList<Funcionario>(funcionarioService.getAllEmployees());
+            }
+            case Protocol.FUNCIONARIO_BUSCAR_ID: {
+                String id = (String) is.readObject();
+                requireAdmin(requireSession());
+                return new ArrayList<Funcionario>(funcionarioService.findById(id));
+            }
+            case Protocol.FUNCIONARIO_BUSCAR_NOMBRE: {
+                String nombre = (String) is.readObject();
+                requireAdmin(requireSession());
+                return new ArrayList<Funcionario>(funcionarioService.findByName(nombre));
+            }
+            case Protocol.FUNCIONARIO_CREAR: {
+                Funcionario funcionario = (Funcionario) is.readObject();
+                requireAdmin(requireSession());
+                if (funcionario == null) throw new IllegalArgumentException("El funcionario es requerido.");
+                funcionarioService.addEmployee(funcionario); // la lógica pone rol y clave inicial = cédula
+                return null;
+            }
+            case Protocol.FUNCIONARIO_ACTUALIZAR: {
+                Funcionario funcionario = (Funcionario) is.readObject();
+                requireAdmin(requireSession());
+                if (funcionario == null) throw new IllegalArgumentException("El funcionario es requerido.");
+                funcionarioService.updateEmployee(funcionario); // la lógica conserva la clave actual
+                return null;
+            }
+            case Protocol.FUNCIONARIO_ELIMINAR: {
+                String id = (String) is.readObject();
+                Usuario sesion = requireSession();
+                requireAdmin(sesion);
+                funcionarioService.deleteEmployee(id);
+                return null;
+            }
+            default:
+                throw new IllegalArgumentException("Operacion de funcionario desconocida: " + operacion);
         }
     }
 

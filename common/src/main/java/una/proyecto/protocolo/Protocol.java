@@ -58,6 +58,14 @@ public final class Protocol {
     public static final int RECURSO_POR_CATEGORIA = 406;
     public static final int RECURSO_TEXTO_POR_CATEGORIAS = 407;
 
+    // Funcionarios (500)
+    public static final int FUNCIONARIO_LISTAR = 500;
+    public static final int FUNCIONARIO_BUSCAR_ID = 501;
+    public static final int FUNCIONARIO_BUSCAR_NOMBRE = 502;
+    public static final int FUNCIONARIO_CREAR = 503;
+    public static final int FUNCIONARIO_ACTUALIZAR = 504;
+    public static final int FUNCIONARIO_ELIMINAR = 505;
+
     private Protocol() {
     }
 }
