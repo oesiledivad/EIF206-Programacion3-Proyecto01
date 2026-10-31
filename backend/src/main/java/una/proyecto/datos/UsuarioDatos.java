@@ -5,6 +5,9 @@ import una.proyecto.model.Funcionario;
 import una.proyecto.model.Usuario;
 import una.proyecto.security.PasswordHasher;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -137,13 +140,41 @@ public class UsuarioDatos {
         }
     }
 
+    // Baja lógica del usuario. En la misma transacción cancela sus reservas FUTURAS
+    // (las pasadas quedan como historial). Un usuario inactivo ya no puede autenticarse.
     public boolean deleteUser(String id) {
         if (id == null || id.isBlank()) return false;
-        try (Connection connection = db.openConnection();
-             PreparedStatement statement = connection.prepareStatement(
-                     "UPDATE usuarios SET activo = FALSE WHERE id_usuario = ? AND activo = TRUE")) {
-            statement.setString(1, id);
-            return statement.executeUpdate() == 1;
+        try (Connection connection = db.openConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                int filas;
+                try (PreparedStatement statement = connection.prepareStatement(
+                        "UPDATE usuarios SET activo = FALSE WHERE id_usuario = ? AND activo = TRUE")) {
+                    statement.setString(1, id);
+                    filas = statement.executeUpdate();
+                }
+                if (filas != 1) {
+                    connection.rollback();
+                    return false;
+                }
+
+                LocalDate hoy = LocalDate.now();
+                try (PreparedStatement statement = connection.prepareStatement(
+                        "UPDATE reservas SET estado = 'CANCELADA' "
+                                + "WHERE id_funcionario = ? AND estado = 'ACTIVA' "
+                                + "AND (fecha > ? OR (fecha = ? AND hora_inicio > ?))")) {
+                    statement.setString(1, id);
+                    statement.setObject(2, hoy);
+                    statement.setObject(3, hoy);
+                    statement.setObject(4, LocalTime.now());
+                    statement.executeUpdate();
+                }
+                connection.commit();
+                return true;
+            } catch (SQLException e) {
+                connection.rollback();
+                throw e;
+            }
         } catch (SQLException e) {
             throw failure("desactivar el usuario", e);
         }

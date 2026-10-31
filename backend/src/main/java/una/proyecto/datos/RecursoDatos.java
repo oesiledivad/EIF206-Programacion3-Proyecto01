@@ -1,4 +1,7 @@
 package una.proyecto.datos;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
 import una.proyecto.model.Recurso;
 import java.io.File;
 import java.sql.Connection;
@@ -32,13 +35,30 @@ public class RecursoDatos {
         return e.getErrorCode() == ERROR_LLAVE_FORANEA
                 || e.getErrorCode() == ERROR_LLAVE_FORANEA_SIN_DETALLE;
     }
+    // Si el id pertenece a un recurso dado de baja, lo reactiva con los datos nuevos
+    // (el número de activo identifica al mismo equipo físico). Si no, lo inserta.
     public void crear(Recurso nuevoDto) {
-        String sql = "insert into recursos (id_recurso, descripcion, id_categoria) values (?, ?, ?)";
-        try (PreparedStatement stm = theInstance.prepareStatement(sql)) {
-            stm.setString(1, nuevoDto.getId());
-            stm.setString(2, nuevoDto.getDescripcion());
-            stm.setInt(3, categoriaAId(nuevoDto.getIdCategoria()));
-            theInstance.executeUpdate(stm);
+        String sqlReactivar = "update recursos set descripcion = ?, id_categoria = ?, activo = true "
+                + "where id_recurso = ? and activo = false";
+        String sqlInsertar = "insert into recursos (id_recurso, descripcion, id_categoria) values (?, ?, ?)";
+        try {
+            int idCategoria = categoriaAId(nuevoDto.getIdCategoria());
+
+            try (PreparedStatement stm = theInstance.prepareStatement(sqlReactivar)) {
+                stm.setString(1, nuevoDto.getDescripcion());
+                stm.setInt(2, idCategoria);
+                stm.setString(3, nuevoDto.getId());
+                if (theInstance.executeUpdate(stm) == 1) {
+                    return; // estaba dado de baja: quedó reactivado
+                }
+            }
+
+            try (PreparedStatement stm = theInstance.prepareStatement(sqlInsertar)) {
+                stm.setString(1, nuevoDto.getId());
+                stm.setString(2, nuevoDto.getDescripcion());
+                stm.setInt(3, idCategoria);
+                theInstance.executeUpdate(stm);
+            }
         } catch (SQLIntegrityConstraintViolationException e) {
             if (e.getErrorCode() == ERROR_DUPLICADO) {
                 throw new RuntimeException("Ya existe un recurso con el id " + nuevoDto.getId(), e);
@@ -99,13 +119,40 @@ public class RecursoDatos {
         }
     }
 
+    // Baja lógica del recurso. En la misma transacción cancela sus reservas FUTURAS:
+    // un recurso dado de baja no puede seguir comprometido. Las pasadas quedan como historial.
     public void eliminar(String id) {
-        String sql = "update recursos set activo = false where id_recurso = ? and activo = true";
-        try (PreparedStatement stm = theInstance.prepareStatement(sql)) {
-            stm.setString(1, id);
-            int filas = theInstance.executeUpdate(stm);
-            if (filas == 0) {
-                throw new RuntimeException("No existe un recurso activo con el id " + id);
+        String sqlBaja = "update recursos set activo = false where id_recurso = ? and activo = true";
+        String sqlCancelar = "update reservas r join reserva_recurso rr on rr.id_reserva = r.id_reserva "
+                + "set r.estado = 'CANCELADA' "
+                + "where rr.id_recurso = ? and r.estado = 'ACTIVA' "
+                + "and (r.fecha > ? or (r.fecha = ? and r.hora_inicio > ?))";
+
+        try (Connection cnx = theInstance.openConnection()) {
+            cnx.setAutoCommit(false);
+            try {
+                int filas;
+                try (PreparedStatement stm = cnx.prepareStatement(sqlBaja)) {
+                    stm.setString(1, id);
+                    filas = stm.executeUpdate();
+                }
+                if (filas == 0) {
+                    cnx.rollback();
+                    throw new RuntimeException("No existe un recurso activo con el id " + id);
+                }
+
+                LocalDate hoy = LocalDate.now();
+                try (PreparedStatement stm = cnx.prepareStatement(sqlCancelar)) {
+                    stm.setString(1, id);
+                    stm.setObject(2, hoy);
+                    stm.setObject(3, hoy);
+                    stm.setObject(4, LocalTime.now());
+                    stm.executeUpdate();
+                }
+                cnx.commit();
+            } catch (SQLException e) {
+                cnx.rollback();
+                throw e;
             }
         } catch (SQLException e) {
             throw new RuntimeException("Error al eliminar el recurso " + id + ": " + e.getMessage(), e);

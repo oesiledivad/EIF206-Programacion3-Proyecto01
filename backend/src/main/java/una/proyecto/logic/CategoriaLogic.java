@@ -87,6 +87,17 @@ public class CategoriaLogic {
             throw new IllegalArgumentException("La categoría con id " + id + " no existe");
         }
 
+        // Regla: una categoría con recursos activos no se puede dar de baja,
+        // porque sus recursos y sus reservas quedarían apuntando a una categoría inexistente.
+        long recursosActivos = recursoService.obtenerTodosRecursos().stream()
+                .filter(r -> id.equals(r.getIdCategoria()))
+                .count();
+        if (recursosActivos > 0) {
+            throw new IllegalArgumentException("No se puede eliminar la categoría \"" + existente.getDescripcion()
+                    + "\": tiene " + recursosActivos + " recurso(s) activo(s). "
+                    + "Elimínelos o cámbielos de categoría primero.");
+        }
+
         categoriaDatos.eliminar(id);
     }
     // ya no se debe generarSiguienteId() porque dos usuarios podrian calcular la misma CAT0001 a la vez

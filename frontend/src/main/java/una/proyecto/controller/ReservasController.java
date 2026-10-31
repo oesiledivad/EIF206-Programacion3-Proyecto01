@@ -82,7 +82,7 @@ public class ReservasController {
         columActividad.setCellValueFactory(new PropertyValueFactory<>("actividad"));
         columFecha.setCellValueFactory(new PropertyValueFactory<>("fecha"));
         columHora.setCellValueFactory(new PropertyValueFactory<>("horario"));
-        columEstado.setCellValueFactory(new PropertyValueFactory<>("estado"));
+        columEstado.setCellValueFactory(new PropertyValueFactory<>("estadoActual"));
 
         columRecurso.setCellValueFactory(cellData -> {
             Reserva reserva = cellData.getValue();
@@ -378,7 +378,7 @@ public class ReservasController {
                         reserva.getFecha().toString(),
                         reserva.getHorario(),
                         recursos,
-                        reserva.getEstado().toString()
+                        reserva.getEstadoActual()
                 ));
             }
 

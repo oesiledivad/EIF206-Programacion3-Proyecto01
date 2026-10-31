@@ -9,6 +9,7 @@ import una.proyecto.serialization.LocalDateAdapter;
 import una.proyecto.serialization.LocalTimeAdapter;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -107,6 +108,17 @@ public class Reserva implements Serializable {
     }
 
     public EstadoReserva getEstado(){return this.estado;}
+
+    // Estado para mostrar en pantallas y PDF (no se guarda en la BD):
+    // una reserva ACTIVA cuya hora de fin ya pasó se muestra como FINALIZADA.
+    public String getEstadoActual() {
+        if (estado == null) return "";
+        if (estado == EstadoReserva.ACTIVA && fecha != null && horaFin != null
+                && !LocalDateTime.of(fecha, horaFin).isAfter(LocalDateTime.now())) {
+            return "FINALIZADA";
+        }
+        return estado.name();
+    }
 
     public String getNombreFuncionario() {
         return funcionarioReserva.getName();
