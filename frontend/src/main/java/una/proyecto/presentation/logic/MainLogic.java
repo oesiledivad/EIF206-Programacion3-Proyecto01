@@ -2,6 +2,14 @@ package una.proyecto.presentation.logic;
 
 import una.proyecto.utils.SessionManager;
 import una.proyecto.proxy.ServiceProxy;
+import una.proyecto.model.Recurso;
+import una.proyecto.model.Reserva;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import java.util.List;
 
@@ -50,6 +58,42 @@ public class MainLogic {
         SessionManager.getInstance().logout();
     }
 
+    /**
+     * Abre el canal de alertas del Backend. Se llama una vez iniciada la sesión.
+     * El listener se ejecuta en un hilo de red: quien lo reciba debe pasar a la interfaz.
+     */
+    public void iniciarAlertas(Consumer<Reserva> alAlertar) {
+        ServiceProxy.instance().iniciarAlertas(alAlertar);
+    }
+
+    /**
+     * Convierte los ids de recursos de una reserva en sus descripciones.
+     * Si un id no se encuentra, se muestra el id tal cual.
+     */
+    public List<String> descripcionesDeRecursos(Reserva reserva) {
+        List<String> ids = reserva.getRecursosAsignadosIds();
+        if (ids == null || ids.isEmpty()) {
+            return List.of();
+        }
+        Map<String, String> descripcionPorId = new HashMap<>();
+        List<Recurso> recursos = ServiceProxy.instance().recursosObtenerTodos();
+
+        for (Recurso recurso : recursos) {
+            if (!descripcionPorId.containsKey(recurso.getId())) {
+                descripcionPorId.put(recurso.getId(), recurso.getDescripcion());
+            }
+        }
+
+        List<String> resultado = new ArrayList<>();
+        for (String id : ids) {
+            if (descripcionPorId.containsKey(id)) {
+                resultado.add(descripcionPorId.get(id));
+            } else {
+                resultado.add(id);
+            }
+        }
+        return resultado;
+    }
     /**
      * Verifica si un usuario tiene acceso a una vista específica
      */

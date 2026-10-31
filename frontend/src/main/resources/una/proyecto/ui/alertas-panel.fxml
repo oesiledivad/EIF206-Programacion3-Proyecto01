@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox prefWidth="300.0" minWidth="260.0" spacing="8.0" styleClass="card"
+      xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="una.proyecto.controller.AlertasController">
+    <padding>
+        <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
+    </padding>
+    <children>
+        <Label text="Alertas" />
+        <TableView fx:id="tablaAlertas" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="colActividad" prefWidth="170.0" sortable="false" text="Actividad" />
+                <TableColumn fx:id="colVer" prefWidth="50.0" resizable="false" sortable="false" text="Ver" />
+                <TableColumn fx:id="colDescartar" prefWidth="55.0" resizable="false" sortable="false" text="Desc." />
+            </columns>
+            <placeholder>
+                <Label text="Sin alertas" />
+            </placeholder>
+        </TableView>
+    </children>
+</VBox>
