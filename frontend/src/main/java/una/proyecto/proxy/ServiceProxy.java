@@ -17,7 +17,7 @@ import java.net.Socket;
 import una.proyecto.model.Categoria;
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.function.Consumer;
 import static una.proyecto.protocolo.Protocol.RECURSO_ACTUALIZAR;
 import static una.proyecto.protocolo.Protocol.RECURSO_LISTAR;
 
@@ -28,6 +28,11 @@ public class ServiceProxy implements LoginService, AutoCloseable {
     private Socket socket;
     private ObjectOutputStream output;
     private ObjectInputStream input;
+
+     //NOTIFICACIONES
+    private volatile String sid;
+    private ReceptorNotificaciones receptor;
+    private final Object lockAlertas = new Object();
 
     public ServiceProxy() {
         this(System.getenv().getOrDefault("SERVER_HOST", Protocol.SERVER),
@@ -179,7 +184,36 @@ public class ServiceProxy implements LoginService, AutoCloseable {
     }
 
 
+    // ================= Alertas =================
 
+    // Abre el canal asincrono. Debe llamarse DESPUES del login: el servidor
+    // rechaza el canal si la conexion no tiene sesion.
+    public void iniciarAlertas(Consumer<Reserva> alAlertar) {
+        String sidActual = sid;
+        if (sidActual == null) {
+            throw new IllegalStateException("Debe iniciar sesión antes de abrir el canal de alertas.");
+        }
+        ReceptorNotificaciones nuevo = new ReceptorNotificaciones(host, port, sidActual, alAlertar);
+        try {
+            nuevo.iniciar();
+        } catch (IOException e) {
+            nuevo.close();
+            throw new IllegalStateException("No se pudo abrir el canal de alertas: " + e.getMessage(), e);
+        }
+        synchronized (lockAlertas) {
+            if (receptor != null) receptor.close();
+            receptor = nuevo;
+        }
+    }
+
+    public void detenerAlertas() {
+        synchronized (lockAlertas) {
+            if (receptor != null) {
+                receptor.close();
+                receptor = null;
+            }
+        }
+    }
 
 
 
@@ -250,11 +284,12 @@ public class ServiceProxy implements LoginService, AutoCloseable {
         input = new ObjectInputStream(socket.getInputStream());
         output.writeInt(Protocol.SYNC);
         output.flush();
-        if (!(input.readObject() instanceof String)) throw new IOException("Saludo inválido");
+        if (!(input.readObject() instanceof String saludo)) throw new IOException("Saludo inválido");sid = saludo;
     }
 
     @Override
     public synchronized void close() {
+        detenerAlertas();
         if (socket != null) {
             try { socket.close(); } catch (IOException ignored) { }
         }
