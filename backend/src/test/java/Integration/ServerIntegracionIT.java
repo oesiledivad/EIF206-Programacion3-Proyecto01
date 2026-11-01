@@ -4,6 +4,7 @@ import org.junit.jupiter.api.*;
 import una.proyecto.datos.Database;
 import una.proyecto.datos.UsuarioDatos;
 import una.proyecto.model.Administrador;
+import una.proyecto.model.Categoria;
 import una.proyecto.model.Funcionario;
 import una.proyecto.model.Reserva;
 import una.proyecto.model.Usuario;
@@ -15,6 +16,7 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -26,6 +28,8 @@ class ServerIntegracionIT {
     private static final String OTRO = "IT-FUNC-OTRO";
     private static final String ADMIN = "IT-ADMIN-SRV";
     private static final String CLAVE = "clavePrueba";
+    private static final String RECURSO = "IT-RECURSO-SRV";
+    private int categoriaId;
     private static Server server;
     private static Thread serverThread;
     private Cliente cliente;
@@ -54,6 +58,23 @@ class ServerIntegracionIT {
         Administrador admin = new Administrador(ADMIN, "ADMIN", "Administrador de prueba");
         admin.setPassword(CLAVE);
         assertTrue(datos.addUser(admin));
+        try (Connection connection = Database.instance().openConnection();
+             PreparedStatement categoria = connection.prepareStatement(
+                     "INSERT INTO categorias (descripcion) VALUES (?)", Statement.RETURN_GENERATED_KEYS)) {
+            categoria.setString(1, "Categoria de prueba servidor");
+            categoria.executeUpdate();
+            try (var keys = categoria.getGeneratedKeys()) {
+                assertTrue(keys.next());
+                categoriaId = keys.getInt(1);
+            }
+            try (PreparedStatement recurso = connection.prepareStatement(
+                    "INSERT INTO recursos (id_recurso, id_categoria, descripcion) VALUES (?, ?, ?)")) {
+                recurso.setString(1, RECURSO);
+                recurso.setInt(2, categoriaId);
+                recurso.setString(3, "Recurso de prueba servidor");
+                recurso.executeUpdate();
+            }
+        }
         cliente = new Cliente();
     }
 
@@ -78,6 +99,15 @@ class ServerIntegracionIT {
                     statement.executeUpdate();
                 }
             }
+            try (PreparedStatement recurso = connection.prepareStatement("DELETE FROM recursos WHERE id_recurso = ?")) {
+                recurso.setString(1, RECURSO);
+                recurso.executeUpdate();
+            }
+            try (PreparedStatement categoria = connection.prepareStatement("DELETE FROM categorias WHERE id_categoria = ?")) {
+                categoria.setInt(1, categoriaId);
+                categoria.executeUpdate();
+            }
+            categoriaId = 0;
         }
     }
 
@@ -140,6 +170,8 @@ class ServerIntegracionIT {
         assertEquals(Protocol.STATUS_NO_ERROR, response.codigo(), String.valueOf(response.objeto()));
         Reserva created = (Reserva) response.objeto();
         assertNotNull(created.getId());
+        assertEquals(ID, created.getIdFuncionario());
+        assertEquals(List.of(RECURSO), created.getRecursosAsignadosIds());
         assertEquals(Protocol.STATUS_NO_ERROR, cliente.enviar(Protocol.RESERVA_BUSCAR, created.getId()).codigo());
         try (Cliente otro = new Cliente()) {
             otro.login(OTRO, CLAVE);
@@ -150,16 +182,29 @@ class ServerIntegracionIT {
         assertEquals(Protocol.STATUS_NO_ERROR, cliente.enviar(Protocol.RESERVA_CANCELAR, created.getId()).codigo());
     }
 
-    @Test void noPermiteSuplantarFuncionarioNiCrearComoAdministrador() throws Exception {
+    @Test void usaFuncionarioDeSesionYNoPermiteCrearComoAdministrador() throws Exception {
         cliente.login(ID, CLAVE);
-        assertEquals(Protocol.STATUS_ERROR, cliente.enviar(Protocol.RESERVA_CREAR, reserva(OTRO)).codigo());
+        Mensaje response = cliente.enviar(Protocol.RESERVA_CREAR, reserva(OTRO));
+        assertEquals(Protocol.STATUS_NO_ERROR, response.codigo(), String.valueOf(response.objeto()));
+        assertEquals(ID, assertInstanceOf(Reserva.class, response.objeto()).getIdFuncionario());
         cliente.login(ADMIN, CLAVE);
         assertEquals(Protocol.STATUS_ERROR, cliente.enviar(Protocol.RESERVA_CREAR, reserva(ADMIN)).codigo());
     }
 
+    @Test void rechazaReservaSinCategorias() throws Exception {
+        cliente.login(ID, CLAVE);
+        Reserva sinCategorias = reserva(ID);
+        sinCategorias.setCategoriasDeRecursos(List.of());
+        Mensaje response = cliente.enviar(Protocol.RESERVA_CREAR, sinCategorias);
+        assertEquals(Protocol.STATUS_ERROR, response.codigo());
+        assertEquals("Debe seleccionar al menos una categoría.", response.objeto());
+    }
+
     @Test void noPermiteCancelarReservasPasadas() throws Exception {
         cliente.login(ID, CLAVE);
-        Reserva created = (Reserva) cliente.enviar(Protocol.RESERVA_CREAR, reserva(ID)).objeto();
+        Mensaje response = cliente.enviar(Protocol.RESERVA_CREAR, reserva(ID));
+        assertEquals(Protocol.STATUS_NO_ERROR, response.codigo(), String.valueOf(response.objeto()));
+        Reserva created = assertInstanceOf(Reserva.class, response.objeto());
         try (Connection connection = Database.instance().openConnection();
              PreparedStatement statement = connection.prepareStatement("UPDATE reservas SET fecha = ? WHERE id_funcionario = ?")) {
             statement.setObject(1, LocalDate.now().minusDays(1));
@@ -180,7 +225,8 @@ class ServerIntegracionIT {
             otro.login(OTRO, CLAVE);
             mismaCuenta.login(ID, CLAVE);
             try (CanalAsync destino = new CanalAsync(otro.sid); CanalAsync propio = new CanalAsync(mismaCuenta.sid)) {
-                cliente.enviar(Protocol.RESERVA_CREAR, reserva(ID));
+                Mensaje response = cliente.enviar(Protocol.RESERVA_CREAR, reserva(ID));
+                assertEquals(Protocol.STATUS_NO_ERROR, response.codigo(), String.valueOf(response.objeto()));
                 assertEquals(Protocol.NOTIFICACION_RESERVA_CREADA, destino.input.readInt());
                 assertInstanceOf(Reserva.class, destino.input.readObject());
                 assertThrows(SocketTimeoutException.class, propio.input::readInt);
@@ -203,6 +249,8 @@ class ServerIntegracionIT {
         r.setFecha(LocalDate.now().plusDays(7));
         r.setHoraInicio(LocalTime.of(9, 0));
         r.setHoraFin(LocalTime.of(10, 0));
+        r.setCategoriasDeRecursos(List.of(new Categoria(
+                String.format("CAT-%06d", categoriaId), "Categoria de prueba servidor")));
         return r;
     }
 
