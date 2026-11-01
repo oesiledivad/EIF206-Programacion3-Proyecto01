@@ -541,6 +541,9 @@ $env:SERVER_PORT = "1234"
 
 ### 8. ✅ Verificar la conexión
 
+La [guía de pruebas funcionales](docs/pruebas-funcionales.md) describe el recorrido
+por las nueve funcionalidades, los reportes PDF y las alertas con varios clientes.
+
 Los objetivos Maven habituales funcionan desde la raíz, con JDK 17 o superior
 (JDK 21 recomendado). Si tienes Maven instalado, puedes usar `mvn` en lugar de
 `.\mvnw.cmd`; ambos leen el mismo `pom.xml`.
