@@ -33,10 +33,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GeneradorPDFS {
-    private static final String RUTA_REGULAR = "src/main/resources/fonts/JetBrainsMono.ttf";
-    private static final String RUTA_BOLD = "src/main/resources/fonts/JetBrainsMono-Bold.ttf";
-    private static final String RUTA_ITALIC = "src/main/resources/fonts/JetBrainsMono-Italic.ttf";
-    private static final String RUTA_BOLD_ITALIC = "src/main/resources/fonts/JetBrainsMono-BoldItalic.ttf";
+    private static final String RUTA_REGULAR = "/una/proyecto/fonts/JetBrainsMono.ttf";
+    private static final String RUTA_BOLD = "/una/proyecto/fonts/JetBrainsMono-Bold.ttf";
+    private static final String RUTA_ITALIC = "/una/proyecto/fonts/JetBrainsMono-Italic.ttf";
+    private static final String RUTA_BOLD_ITALIC = "/una/proyecto/fonts/JetBrainsMono-BoldItalic.ttf";
 
     private static final float MARGEN = 50;
     private static final float ANCHO_PAGINA = PDRectangle.A4.getWidth();
@@ -347,10 +347,10 @@ public class GeneradorPDFS {
     ) {
 
         if (reporte.tieneRangoFechas()) {
-            return ALTO_PAGINA - 115;
+            return ALTO_PAGINA - MARGEN - 90;
         }
 
-        return ALTO_PAGINA - 95;
+        return ALTO_PAGINA - MARGEN - 72;
     }
 
 
