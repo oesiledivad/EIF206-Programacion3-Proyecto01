@@ -16,6 +16,7 @@ import javafx.animation.Timeline;
 import javafx.animation.KeyFrame;
 import org.kordamp.ikonli.javafx.FontIcon;
 import una.proyecto.presentation.logic.LoginLogic;
+import una.proyecto.proxy.ServiceProxy;
 import una.proyecto.utils.Navigation;
 import una.proyecto.utils.ThemeManager;
 
@@ -64,12 +65,38 @@ public class LoginController {
         setupClock();
         setupTheme();
         setupKeyboardShortcuts();
+        conectarAlIniciar();
 
         Platform.runLater(() -> txtUserId.requestFocus());
     }
 
     private void setupUIComponents() {
         lblError.setVisible(false);
+    }
+
+    private void conectarAlIniciar() {
+        btnLogin.setDisable(true);
+        btnLogin.setText("Conectando...");
+        btnCambiarContrasena.setDisable(true);
+        Task<Void> tarea = new Task<>() {
+            @Override protected Void call() {
+                ServiceProxy.instance().conectar();
+                return null;
+            }
+        };
+        Runnable terminar = () -> {
+            btnLogin.setDisable(false);
+            btnLogin.setText("Iniciar Sesión");
+            btnCambiarContrasena.setDisable(false);
+        };
+        tarea.setOnSucceeded(event -> terminar.run());
+        tarea.setOnFailed(event -> {
+            terminar.run();
+            showError(tarea.getException().getMessage() + " Puede reintentar al ingresar.");
+        });
+        Thread hilo = new Thread(tarea, "Conexion-Inicial-Backend");
+        hilo.setDaemon(true);
+        hilo.start();
     }
 
     private void setupEventHandlers() {
