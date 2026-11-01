@@ -7,10 +7,11 @@ import una.proyecto.model.EstadisticaItem;
 import una.proyecto.model.Reserva;
 
 import java.time.LocalDate;
-import java.time.temporal.WeekFields;
+import java.time.DayOfWeek;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAdjusters;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -58,12 +59,17 @@ public class EstadisticasLogic {
     public List<EstadisticaItem> obtenerEstadisticasActividades(LocalDate desde, LocalDate hasta) {
         List<Reserva> reservas = reservaDatos.obtenerTodos();
         Map<String, Integer> conteoPorSemana = new LinkedHashMap<>();
-        WeekFields weekFields = WeekFields.of(Locale.getDefault());
+        LocalDate primeraSemana = desde.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate ultimaSemana = hasta.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        long semanas = ChronoUnit.WEEKS.between(primeraSemana, ultimaSemana);
+        for (long indice = 0; indice <= semanas; indice++) {
+            conteoPorSemana.put(primeraSemana.plusWeeks(indice).toString(), 0);
+        }
 
         for (Reserva reserva : reservas) {
             if (reserva.getFecha() != null && !reserva.getFecha().isBefore(desde) && !reserva.getFecha().isAfter(hasta)) {
 
-                LocalDate inicioSemana = reserva.getFecha().with(weekFields.dayOfWeek(), 1);
+                LocalDate inicioSemana = reserva.getFecha().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
                 String etiquetaSemana = inicioSemana.toString();
 
                 conteoPorSemana.put(
