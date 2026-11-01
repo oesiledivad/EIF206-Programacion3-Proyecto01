@@ -38,6 +38,14 @@ public class AlertasController {
         return cantidadAlertas;
     }
 
+    public void enfocarAlertas() {
+        if (!alertas.isEmpty()) {
+            listaAlertas.getSelectionModel().select(0);
+            listaAlertas.scrollTo(0);
+        }
+        listaAlertas.requestFocus();
+    }
+
     @FXML
     public void initialize() {
         listaAlertas.setCellFactory(lista -> new AlertaCelda());

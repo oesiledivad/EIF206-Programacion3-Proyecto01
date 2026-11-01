@@ -2,10 +2,7 @@ package una.proyecto.controller;
 
 import javafx.event.ActionEvent;
 import javafx.animation.PauseTransition;
-import javafx.animation.RotateTransition;
-import javafx.css.PseudoClass;
 import javafx.util.Duration;
-import org.kordamp.ikonli.javafx.FontIcon;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
@@ -68,14 +65,9 @@ public class MainViewController {
     public Button btnChangePassword;
     @FXML
     public VBox panelAlertas;
-    @FXML private ToggleButton btnAlertas;
     @FXML private AlertasController panelAlertasController;
-    @FXML private Label contadorAlertasBoton;
-    @FXML private FontIcon campanaAlertas;
     @FXML private HBox avisoNuevaAlerta;
     private final PauseTransition ocultarAviso = new PauseTransition(Duration.seconds(6));
-    private RotateTransition animacionCampana;
-    private static final PseudoClass ALERTAS_NUEVAS = PseudoClass.getPseudoClass("nuevas");
 
     @FXML
     public void initialize() {
@@ -87,45 +79,29 @@ public class MainViewController {
     }
 
     private void configurarIndicadorAlertas() {
-        contadorAlertasBoton.textProperty().bind(panelAlertasController.cantidadAlertasProperty().asString());
         avisoNuevaAlerta.managedProperty().bind(avisoNuevaAlerta.visibleProperty());
-        animacionCampana = new RotateTransition(Duration.millis(120), campanaAlertas);
-        animacionCampana.setFromAngle(-12);
-        animacionCampana.setToAngle(12);
-        animacionCampana.setCycleCount(6);
-        animacionCampana.setAutoReverse(true);
-        animacionCampana.setOnFinished(event -> campanaAlertas.setRotate(0));
         ocultarAviso.setOnFinished(event -> avisoNuevaAlerta.setVisible(false));
         panelAlertasController.cantidadAlertasProperty().addListener((observable, anterior, actual) -> {
             if (actual.intValue() > anterior.intValue()) {
-                animacionCampana.playFromStart();
-                if (!btnAlertas.isSelected()) {
-                    btnAlertas.pseudoClassStateChanged(ALERTAS_NUEVAS, true);
-                    avisoNuevaAlerta.setVisible(true);
-                    ocultarAviso.playFromStart();
-                }
-            }
-        });
-        btnAlertas.selectedProperty().addListener((observable, anterior, abierta) -> {
-            if (abierta) {
-                btnAlertas.pseudoClassStateChanged(ALERTAS_NUEVAS, false);
+                avisoNuevaAlerta.setVisible(true);
+                ocultarAviso.playFromStart();
+            } else if (actual.intValue() == 0) {
                 avisoNuevaAlerta.setVisible(false);
                 ocultarAviso.stop();
-                animacionCampana.stop();
-                campanaAlertas.setRotate(0);
             }
         });
         mainLayout.sceneProperty().addListener((observable, anterior, actual) -> {
             if (actual == null) {
                 ocultarAviso.stop();
-                animacionCampana.stop();
             }
         });
     }
 
     @FXML
     private void mostrarAlertas() {
-        btnAlertas.setSelected(true);
+        panelAlertasController.enfocarAlertas();
+        avisoNuevaAlerta.setVisible(false);
+        ocultarAviso.stop();
     }
 
     private void setupMenuGroup() {

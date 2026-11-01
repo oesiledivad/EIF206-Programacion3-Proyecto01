@@ -6,10 +6,8 @@
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.control.ToggleGroup?>
-<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
@@ -71,20 +69,6 @@
                            <graphic>
                               <FontIcon iconLiteral="fa-bar-chart" styleClass="icon-primary" />
                            </graphic></ToggleButton>
-                        <Separator />
-                        <ToggleButton fx:id="btnAlertas" alignment="CENTER_LEFT" maxWidth="Infinity"
-                                      selected="false" styleClass="menu-item, alertas-menu"
-                                      accessibleText="Mostrar u ocultar el panel de alertas">
-                           <graphic>
-                              <HBox alignment="CENTER_LEFT" spacing="12.0" prefWidth="160.0" mouseTransparent="true">
-                                 <FontIcon fx:id="campanaAlertas" iconLiteral="fa-bell-o" styleClass="icon-primary" />
-                                 <Label text="Alertas" />
-                                 <Region HBox.hgrow="ALWAYS" />
-                                 <Label fx:id="contadorAlertasBoton" text="0" styleClass="alertas-contador" />
-                              </HBox>
-                           </graphic>
-                           <tooltip><Tooltip text="Mostrar u ocultar el panel de alertas" /></tooltip>
-                        </ToggleButton>
                      </children>
                   </VBox>
                </children>
@@ -127,7 +111,7 @@
       </StackPane>
    </center>
    <right>
-      <VBox visible="${btnAlertas.selected}" managed="${btnAlertas.selected}">
+      <VBox>
          <fx:include fx:id="panelAlertas" source="alertas-panel.fxml" VBox.vgrow="ALWAYS" />
       </VBox>
    </right>
