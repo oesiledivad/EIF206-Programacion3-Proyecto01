@@ -180,8 +180,11 @@ public class EstadisticasController {
         try {
             // Gráfico Recursos
             CategoryAxis xAxisRes = (CategoryAxis) barChartRecursos.getXAxis();
+            barChartRecursos.setAnimated(false);
+            xAxisRes.setAnimated(false);
             xAxisRes.setLabel("Categoría");
             NumberAxis yAxisRes = (NumberAxis) barChartRecursos.getYAxis();
+            yAxisRes.setAnimated(false);
             yAxisRes.setLabel("Cantidad de reservas");
 
             resourceSeries.setName("Recursos Reservados");
@@ -190,8 +193,11 @@ public class EstadisticasController {
 
             // Gráfico Actividades
             CategoryAxis xAxisAct = (CategoryAxis) barChartActividades.getXAxis();
+            barChartActividades.setAnimated(false);
+            xAxisAct.setAnimated(false);
             xAxisAct.setLabel("Semana");
             NumberAxis yAxisAct = (NumberAxis) barChartActividades.getYAxis();
+            yAxisAct.setAnimated(false);
             yAxisAct.setLabel("Cantidad de actividades");
 
             activitySeries.setName("Actividades Programadas");
@@ -297,16 +303,14 @@ public class EstadisticasController {
     }
 
     private void updateChartSeries(XYChart.Series<String, Number> series, List<EstadisticaItem> items) {
-        Platform.runLater(() -> {
-            series.getData().clear();
-            if (items != null) {
-                for (EstadisticaItem item : items) {
-                    if (item != null && item.getNombre() != null) {
-                        series.getData().add(new XYChart.Data<>(item.getNombre(), item.getCantidad()));
-                    }
+        series.getData().clear();
+        if (items != null) {
+            for (EstadisticaItem item : items) {
+                if (item != null && item.getNombre() != null) {
+                    series.getData().add(new XYChart.Data<>(item.getNombre(), item.getCantidad()));
                 }
             }
-        });
+        }
     }
 
     // MANEJO DE ERRORES
