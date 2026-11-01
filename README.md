@@ -400,6 +400,10 @@ Las ventanas deben utilizar **usuarios distintos**: el servidor no notifica al
 mismo usuario que creó la reserva. Las alertas son temporales y se reciben
 mientras el cliente está conectado.
 
+El panel de alertas permanece visible a la derecha al cambiar de pantalla.
+Al recibir una reserva aparece un aviso temporal de seis segundos; **Ver alerta**
+enfoca la tarjeta más reciente del panel. Para abrir sus datos, utiliza **Ver detalle**.
+
 Cierra primero los frontends adicionales y al final la aplicación iniciada sin
 `-SoloFrontend`: esta última detiene backend y MySQL cuando se cierra.
 

@@ -61,6 +61,8 @@ Para otro destino, agregar `-ServidorBackend` y `-PuertoBackend`.
 Cerrar esta ventana adicional conserva los servicios en ejecución.
 
 Las alertas se muestran como una `ListView` con tarjetas FXML y estilos CSS.
+El panel derecho siempre está visible, independientemente de la pantalla actual.
+La notificación emergente permite enfocar la alerta más reciente sin cambiar de vista.
 Para probar su recepción, ingresar con usuarios distintos en las dos ventanas
 y crear una reserva desde un funcionario. La
 [guía de múltiples clientes](../README.md#-abrir-otro-frontend-y-probar-las-alertas)
