@@ -98,6 +98,26 @@ public class IAgeneratorTest {
     }
 
     @Test
+    void categoriasExtraidasConservanElCatalogoRecibido() throws Exception {
+        String contenido = "{\"actividad\":\"Reunión\",\"fecha\":\"" + LocalDate.now()
+                + "\",\"horaInicio\":\"9:00\",\"horaFin\":\"10:00\","
+                + "\"categorias\":[\"Proyector\",\"No disponible\"]}";
+        String respuesta = new org.json.JSONObject().put("choices", new org.json.JSONArray()
+                .put(new org.json.JSONObject().put("message", new org.json.JSONObject()
+                        .put("content", contenido)))).toString();
+        HttpResponse<String> mockResponse = Mockito.mock(HttpResponse.class);
+        doReturn(200).when(mockResponse).statusCode();
+        doReturn(respuesta).when(mockResponse).body();
+        doReturn(mockResponse).when(mockHttpClient).send(any(), any());
+
+        Reserva reserva = aiGenerator.extraeInformacion("Necesito un proyector", categorias);
+
+        assertEquals(1, reserva.getCategoriasDeRecursos().size());
+        assertSame(categorias.get(0), reserva.getCategoriasDeRecursos().get(0));
+        assertEquals(java.time.LocalTime.of(9, 0), reserva.getHoraInicio());
+    }
+
+    @Test
     void sin_categorias_disponibles_simulado() throws Exception {
         String jsonSimulado = "{\"choices\": [{\"message\": {\"content\": \"{\\\"actividad\\\": \\\"Reunion\\\", \\\"fecha\\\": \\\"" + LocalDate.now() + "\\\", \\\"horaInicio\\\": \\\"09:00\\\", \\\"horaFin\\\": \\\"10:00\\\", \\\"categorias\\\": [\\\"Proyector\\\"]}\"}}]}";
 
