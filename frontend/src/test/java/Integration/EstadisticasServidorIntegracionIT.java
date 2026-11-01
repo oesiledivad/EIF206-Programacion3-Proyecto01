@@ -143,6 +143,26 @@ class EstadisticasServidorIntegracionIT {
         assertTrue(items.stream().allMatch(i -> LocalDate.parse(i.getNombre()).isBefore(FECHA.plusDays(8))));
     }
 
+    @Test void actividadesIncluyenSemanasVaciasEnOrdenConInicioLunes() {
+        assertNotNull(proxy.authenticate(FUNCIONARIO, CLAVE));
+        LocalDate lunes = FECHA.with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY));
+        List<EstadisticaItem> items = proxy.estadisticasActividades(lunes.minusWeeks(1), lunes.plusWeeks(3));
+        assertEquals(List.of(lunes.minusWeeks(1).toString(), lunes.toString(), lunes.plusWeeks(1).toString(),
+                        lunes.plusWeeks(2).toString(), lunes.plusWeeks(3).toString()),
+                items.stream().map(EstadisticaItem::getNombre).toList());
+        assertEquals(List.of(0, 1, 1, 0, 0), items.stream().map(EstadisticaItem::getCantidad).toList());
+    }
+
+    @Test void periodoSinActividadesDevuelveSuSemanaConCero() {
+        assertNotNull(proxy.authenticate(ADMIN, CLAVE));
+        LocalDate sinReservas = FECHA.plusYears(1);
+        var items = proxy.estadisticasActividades(sinReservas, sinReservas);
+        assertEquals(1, items.size());
+        assertEquals(sinReservas.with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY)).toString(),
+                items.get(0).getNombre());
+        assertEquals(0, items.get(0).getCantidad());
+    }
+
     @Test void sinSesionRechazaAmbasConsultasYPermiteLoginPosterior() {
         assertThrows(ServiceProxy.RemoteException.class, () -> proxy.estadisticasRecursos(FECHA, FECHA));
         assertThrows(ServiceProxy.RemoteException.class, () -> proxy.estadisticasActividades(FECHA, FECHA));

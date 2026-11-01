@@ -31,6 +31,10 @@ Las consultas de estadísticas requieren una sesión activa, tanto de administra
 como de funcionario. El backend valida que ambas fechas estén presentes y que
 `desde` no sea posterior a `hasta`. Los límites del período son inclusivos y
 las reservas canceladas no se incluyen. Cada elemento contiene `nombre` y `cantidad`.
+Las semanas comienzan el lunes, se devuelven en orden cronológico e incluyen
+las semanas sin actividades con cantidad cero. La etiqueta es la fecha del lunes
+de cada semana, aunque ese lunes sea anterior al inicio del período. Solo se
+cuentan las actividades cuya fecha está dentro de los límites solicitados.
 
 Después de enviar cada petición, ejecutar `flush()`. Se recomienda `reset()` del
 stream al terminar cada envío para evitar reutilizar versiones anteriores de
