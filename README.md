@@ -31,292 +31,135 @@ Sistema de escritorio para la **gestión integral de reservas de recursos instit
 
 ---
 
-## Módulos del repositorio
+## Contenido
 
-| Módulo | Documentación |
-| --- | --- |
-| Frontend | [Interfaz JavaFX, configuración y ejecución](frontend/README.md) |
-| Backend | [Servicios, datos y pruebas](backend/README.md) |
-| Common | [Modelos y serialización compartidos](common/README.md) |
-| Base de datos | [MER y scripts MySQL](database/README.md) |
-
-Consulta la [guía de arquitectura](docs/organizacion-proyecto-02.md) para conocer
-las dependencias entre módulos y los comandos del proyecto.
-
----
-
-## Características Principales
-
-### 🔐 Autenticación y Gestión de Usuarios
-- **Autenticación segura:** Inicio de sesión mediante credenciales de acceso.
-- **Gestión de roles:** Soporte estructurado para perfiles de **Administrador** y **Funcionario**.
-- **Gestión de sesiones:** Control dinámico de la sesión activa y restricciones según los privilegios del usuario.
-- **Cambio de contraseña:** Opción segura para la actualización de credenciales.
-
-### 📅 Gestión de Reservas
-- **Creación de reservas:** Registro asistido de nuevos apartados de recursos institucionales.
-- **Consulta de reservas:** Visualización en tiempo real y filtrado de reservas vigentes o pasadas.
-- **Cancelación:** Opción exclusiva para que los funcionarios cancelen reservas futuras.
-- **Validación de disponibilidad:** Control automático de conflictos e interbloqueos de recursos antes de confirmar.
-- **Asignación inteligente:** Selección automatizada del primer recurso disponible que cumpla con los requisitos.
-
-### 🤖 Asistente de Inteligencia Artificial (LLM)
-- **Procesamiento de lenguaje natural:** Capacidad de describir actividades usando lenguaje cotidiano y descriptivo.
-- **Generación automática:** Interpretación de solicitudes para rellenar de forma inteligente los formularios de reserva.
-- **Extracción de recursos:** Identificación precisa de categorías y componentes solicitados en texto libre.
-- **Integración con Groq:** Enlace directo con modelos LLM de alto rendimiento a través de la API de Groq.
-
-### 🏢 Mantenimiento del Sistema (CRUD)
-Operaciones completas de alta, consulta, modificación y baja para:
-- **Funcionarios:** Información de usuario, nombre completo y número de teléfono.
-- **Categorías de recursos:** Identificadores y descripciones generales.
-- **Recursos físicos:** Control de números de activo, asociación por llave foránea (FK) y descripciones detalladas.
-
-### 🗓️ Calendarización y Programación
-- **Matriz de recursos:** Selección por fecha y categoría, visualizando filas de horarios y columnas de recursos físicos.
-- **Programación semanal:** Vista matricial por horas y días de la semana con el detalle de los responsables y actividades.
-
-### 📊 Estadísticas y Reportes PDF
-- **Estadísticas dinámicas:** Rangos de fechas para recursos (categorías, cantidades) y actividades con gráficos de barras interactivos.
-- **Reportes profesionales:** Generación automatizada de reportes en PDF integrados en todas las vistas principales del sistema.
-
-### 💾 Persistencia y Calidad
-- **Persistencia MySQL:** Repositorios JDBC y esquema relacional para usuarios, funcionarios, categorías, recursos y reservas.
-- **Pruebas Automatizadas:** Suite completa de pruebas unitarias (JUnit 5) e integración (Mockito).
+- [Requisitos](#requisitos)
+- [Compilación y ejecución](#compilación-y-ejecución)
+- [Otros clientes y alertas](#otros-clientes-y-alertas)
+- [Configuración](#configuración)
+- [Pruebas](#pruebas)
+- [Problemas de conexión](#-problemas-de-conexión)
+- [Funcionalidades](#funcionalidades)
+- [Arquitectura y módulos](#arquitectura-y-módulos)
+- [Documentación](#documentación)
 
 ---
 
-## Acceso inicial
+## Requisitos
 
-Crear el administrador con la [utilidad del backend](database/USUARIOS.md).
-Los funcionarios reciben su identificación como contraseña inicial y pueden
-cambiarla desde la aplicación. Las credenciales se almacenan como hashes en MySQL.
+| Componente | Equipo con backend y MySQL | Equipo que solo ejecuta frontend |
+| --- | --- | --- |
+| JDK 17 o superior (21 recomendado) | Sí | Sí |
+| Docker Desktop con contenedores Linux y Compose | Sí, para el arranque automático | No |
+| MySQL Community Server 8.4 | Docker lo instala; instalación propia para ejecutar sin Docker | No |
+| Repositorio con la misma versión del código | Sí | Sí |
 
-La base también puede ejecutarse con [Docker Compose](database/DOCKER.md).
+Maven Wrapper está incluido: `mvnw.cmd` en Windows y `mvnw` en Linux/macOS.
+Descarga Maven en su primera ejecución; no necesitas instalarlo por separado.
+Necesitas acceso a Internet para descargar Maven, sus dependencias y, al usar
+Docker, la imagen de MySQL. JavaFX y el conector JDBC se resuelven con Maven.
 
----
+### ☕ Instalar Java
 
-## Arquitectura del Sistema
+1. Descarga **Eclipse Temurin JDK 21** para tu sistema y arquitectura desde
+   [Adoptium](https://adoptium.net/temurin/releases/?version=21). Instala el JDK completo, que incluye `javac`.
+2. En Windows, ejecuta el MSI y habilita las opciones para agregar Java al `PATH`
+   y configurar `JAVA_HOME`, según la [guía del instalador](https://adoptium.net/installation/windows/).
+3. Cierra y vuelve a abrir PowerShell. Comprueba:
 
-El proyecto organiza sus capas en módulos Maven. La interfaz pertenece a `frontend`, los servicios, la lógica y el acceso a datos a `backend`, y los modelos compartidos a `common`. El ingreso, el cambio de contraseña y el panel inicial se comunican con el servidor mediante sockets. El backend utiliza MySQL. El diseño relacional y los scripts MySQL se encuentran en `database/`.
-
-```text
-┌─────────────────────────────────────────────┐
-│           INTERFAZ DE USUARIO               │
-│          JavaFX · FXML · CSS                │
-│            Views + Controllers               │
-└──────────────────────┬──────────────────────┘
-                       │
-                       ▼
-┌─────────────────────────────────────────────┐
-│                 SERVICIOS                   │
-│      Autenticación · Reservas · Sesiones    │
-│       Usuarios · Recursos · Reportes        │
-└──────────────────────┬──────────────────────┘
-                       │
-                       ▼
-┌─────────────────────────────────────────────┐
-│              LÓGICA DE NEGOCIO              │
-│     Validaciones · Reglas · Disponibilidad  │
-│              Integración con IA             │
-└──────────────────────┬──────────────────────┘
-                       │
-                       ▼
-┌─────────────────────────────────────────────┐
-│                   DATOS                     │
-│         MySQL · JDBC · Repositorios         │
-└──────────────────────┬──────────────────────┘
-                       │
-                       ▼
-┌─────────────────────────────────────────────┐
-│              MODELOS / DTO                  │
-│       Entidades y objetos de transferencia  │
-└─────────────────────────────────────────────┘
-
+```powershell
+java -version
+javac -version
+$env:JAVA_HOME
 ```
 
-### Organización por Capas
+Ambos comandos deben mostrar el JDK elegido. `JAVA_HOME` debe apuntar a su
+carpeta de instalación, sin agregar `bin`. Si tienes varias versiones de Java,
+revisa también qué JDK muestra `.\mvnw.cmd -version` al obtener el repositorio.
 
-| Capa                    | Responsabilidad                                                                                               |
-|-------------------------|---------------------------------------------------------------------------------------------------------------|
-| **Interfaz de Usuario** | Vistas JavaFX, archivos FXML, hojas de estilo CSS y controladores de eventos.                                 |
-| **Servicios**           | Orquestación de operaciones de la aplicación y conexión lógica con controladores.                             |
-| **Lógica**              | Reglas de negocio, validaciones de disponibilidad y submódulo de IA (`aiGenerator`).                          |
-| **Datos**               | Operaciones CRUD mediante JDBC sobre las tablas MySQL.                                       |
-| **Modelos**             | Clases de dominio principales (`Administrador`, `Categoria`, `Funcionario`, `Recurso`, `Reserva`, `Usuario`). |
+### 🔧 Instalar Git y obtener el proyecto
 
-### Tecnologías e Integraciones Clave
+Instala [Git para Windows](https://git-scm.com/install/windows), abre una nueva
+terminal y comprueba `git --version`. Obtén el proyecto o usa tu copia actual:
 
-* 🤖 **Groq API:** Procesamiento e inferencia mediante modelos LLM avanzados.
-* 💾 **MySQL y JDBC:** Almacenamiento relacional y acceso a datos.
-* 📄 **Apache PDFBox + EasyTable:** Renderizado y exportación de reportes institucionales en PDF.
-* 🔐 **Dotenv Java:** Manejo seguro de configuraciones y variables de entorno.
 
----
-
-## Configuración del Archivo `.env`
-
-Para habilitar la funcionalidad del asistente de Inteligencia Artificial, debes crear un archivo llamado **`.env`** en la raíz absoluta del proyecto (junto al archivo `pom.xml`).
-
-El archivo debe tener la siguiente estructura exacta:
-
-```env
-GROQ_API_KEY=tu_api_key_de_groq_aqui
-GROQ_URL=https://api.groq.com/openai/v1/chat/completions
-GROQ_MODEL=nombre_del_modelo_qwen
+```powershell
+git clone --branch develop https://github.com/oesiledivad/EIF206-Programacion3-Proyecto01.git
+cd EIF206-Programacion3-Proyecto01
+.\mvnw.cmd -version
 ```
 
-### Descripción de Variables
+Maven debe mostrar Java 17 o superior. Si muestra otra versión, ajusta
+`JAVA_HOME` y agrega la carpeta `bin` del JDK al `PATH` de esa terminal.
 
-* **`GROQ_API_KEY`**: Clave de autenticación personal obtenida en la plataforma de Groq.
-* **`GROQ_URL`**: Endpoint oficial de la API de Groq consumido por la aplicación.
-* **`GROQ_MODEL`**: Identificador del modelo de lenguaje utilizado por el sistema.
+### 📦 Maven Wrapper e instalación de Maven
 
-> **Nota Importante:** Se recomienda emplear modelos de la familia **Qwen** disponibles en Groq por su excelente desempeño en la extracción estructurada de datos. Como los catálogos cambian con el tiempo, verifica el modelo activo en tu cuenta de Groq antes de ejecutar. El archivo `.env` está protegido por defecto y **nunca debe subirse al control de versiones**.
+La opción recomendada es utilizar el Wrapper del repositorio:
 
----
-
-
-## Configuración del Archivo `.config/docker.env`
-
-Docker Compose utiliza este archivo para crear MySQL. Si ejecutas `iniciar.ps1`,
-se genera automáticamente con contraseñas locales. Para configurarlo manualmente,
-copia `.config/docker.env.example` como `.config/docker.env` y completa:
-
-```env
-MYSQL_PORT=3307
-MYSQL_PASSWORD=tu_clave_de_reservas_app
-MYSQL_ROOT_PASSWORD=tu_clave_de_root
+```powershell
+.\mvnw.cmd -version
 ```
 
-### Descripción de Variables
+Si prefieres instalar Maven en Windows, descarga el **Binary zip archive** desde
+[Apache Maven](https://maven.apache.org/download.cgi), extráelo y agrega su
+carpeta `bin` al `PATH`. Abre otra terminal y comprueba `mvn -version`, siguiendo
+la [guía de instalación](https://maven.apache.org/install.html).
+Los comandos `mvn` y `.\mvnw.cmd` utilizan el mismo `pom.xml`.
 
-* **`MYSQL_PORT`**: Puerto de MySQL en tu computadora; el contenedor utiliza internamente el puerto `3306`.
-* **`MYSQL_PASSWORD`**: Contraseña del usuario MySQL `reservas_app`, utilizado por el backend.
-* **`MYSQL_ROOT_PASSWORD`**: Contraseña del administrador de MySQL, independiente del usuario `admin` de la aplicación.
+En Linux/macOS puedes usar `./mvnw` o instalar Maven con el gestor del sistema:
 
-Estas contraseñas se establecen al inicializar un volumen vacío. Editar el archivo
-después no cambia las credenciales de una base existente.
-
----
-
-## Configuración del Archivo `.config/database.env`
-
-El backend utiliza este archivo para conectarse a MySQL. `iniciar.ps1` lo genera
-con los datos de Docker cuando no existe. Para configurarlo manualmente, copia
-`.config/database.docker.env.example` como `.config/database.env` y completa:
-
-```env
-DB_URL=jdbc:mysql://127.0.0.1:3307/sistema_reservas
-DB_USER=reservas_app
-DB_PASSWORD=tu_clave_de_reservas_app
-```
-
-### Descripción de Variables
-
-* **`DB_URL`**: Dirección JDBC de la base. El puerto debe coincidir con `MYSQL_PORT` de `.config/docker.env`.
-* **`DB_USER`**: Usuario MySQL de conexión; Docker crea `reservas_app`.
-* **`DB_PASSWORD`**: Debe ser exactamente la misma contraseña que `MYSQL_PASSWORD`.
-
-Para MySQL instalado directamente en el sistema, utiliza como plantilla
-`.config/database.env.example` y ajusta el puerto, usuario y contraseña a esa
-instalación. El script de inicio automático utiliza la configuración de Docker.
-
----
-
-## Configuración del Archivo `.config/admin.env`
-
-El script de inicio utiliza este archivo para crear el administrador de la
-aplicación cuando no existe. Puedes copiar `.config/admin.env.example` como
-`.config/admin.env`; si no existe, el script lo genera con este contenido:
-
-```env
-APP_ADMIN_PASSWORD=admin
-```
-
-### Descripción de Variables
-
-* **`APP_ADMIN_PASSWORD`**: Contraseña inicial del usuario de aplicación `admin`. Acepta `admin` o una contraseña personalizada de al menos seis caracteres.
-
-El acceso inicial por defecto es **admin / admin**. Cambiar este archivo no
-restablece la contraseña de un administrador existente; el cambio de contraseña
-se realiza desde la aplicación.
-
-Los tres archivos `.config/*.env` anteriores están excluidos de Git. Las
-plantillas `.example` documentan su estructura y se incluyen en el repositorio.
-La configuración de Groq es independiente y no es necesaria para iniciar sesión.
-
----
-
-## Requisitos Previos e Instalación de Maven
-
-Asegúrate de tener instalado en tu entorno de desarrollo:
-
-1. **Java Development Kit (JDK) 17 o superior** (se recomienda fuertemente JDK 21).
-2. **Docker Desktop** iniciado, con contenedores Linux y Docker Compose.
-3. **Maven Wrapper** incluido en el repositorio (`mvnw.cmd` en Windows y `mvnw` en Linux/macOS). Descarga Maven 3.9.16 en la primera ejecución; no requiere instalar Maven por separado.
-
-### Maven instalado en el sistema (opcional)
-
-* **En Linux (Ubuntu/Debian):**
 ```bash
+# Ubuntu / Debian
 sudo apt update
 sudo apt install maven
-```
 
-
-* **En macOS (usando Homebrew):**
-```bash
+# macOS con Homebrew
 brew install maven
 ```
 
+### 🐳 Instalar Docker Desktop
 
-* **En Windows:**
-1. Descarga el binario comprimido de Maven desde el [sitio web oficial](https://maven.apache.org/download.cgi).
-2. Extrae el contenido en una ruta de tu preferencia (ej. `C:\Program Files\Apache\maven`).
-3. Añade la ruta de la carpeta `bin` a las **Variables de Entorno** del sistema (`PATH`).
-4. Verifica la instalación ejecutando en tu terminal:
-```bash
-mvn -version
+Para el arranque automático, instala [Docker Desktop para Windows](https://docs.docker.com/desktop/setup/install/windows-install/)
+con el backend de **WSL 2** y utiliza contenedores Linux. Sigue los requisitos
+del instalador para tu versión de Windows, incluida la virtualización.
+Si necesitas instalar WSL, ejecuta PowerShell como administrador:
+
+```powershell
+wsl --install
 ```
----
 
-## Estructura del Proyecto
+Reinicia si se solicita, abre Docker Desktop y espera a que el motor esté
+iniciado. En una nueva terminal comprueba:
 
-```text
-pom.xml                         # POM padre: agrega los tres módulos
-mvnw / mvnw.cmd                 # Maven Wrapper
-iniciar.ps1                     # Arranque y cierre local de JavaFX, backend y MySQL
-compose.yaml                    # MySQL 8.4 con volumen persistente
-.config/                        # Ejemplos de configuración local
-common/
-├── pom.xml
-└── src/main/java/              # Modelos y adaptadores compartidos
-backend/
-├── pom.xml
-└── src/
-    ├── main/                   # Servicios, lógica, IA y datos MySQL
-    └── test/                   # Pruebas de negocio y persistencia
-frontend/
-├── pom.xml
-└── src/
-    ├── main/                   # JavaFX, presentación y reportes PDF
-    └── test/                   # Pruebas de login y lógica de presentación
-database/                       # MER DBML, esquema MySQL y catálogo de ejemplo
-docs/                           # Documentación de arquitectura
-data/xml/                       # Archivos de datos del proyecto 01
+```powershell
+docker version
+docker compose version
+docker info
 ```
+
+`docker info` debe comunicarse con el motor. Docker Compose viene incluido en
+Docker Desktop. Solo el equipo que aloja MySQL necesita Docker en este recorrido.
+
+### 💾 MySQL: con Docker o instalado en el sistema
+
+Con `iniciar.ps1`, **no instales MySQL por separado**: Compose descarga MySQL 8.4,
+crea la base y publica el puerto local `3307`. Los datos se conservan en un volumen.
+
+Para ejecutar sin Docker, descarga **MySQL Community Server 8.4 LTS** desde
+[MySQL](https://dev.mysql.com/downloads/mysql/8.4.html). En Windows utiliza el MSI
+del servidor y MySQL Configurator, de acuerdo con la
+[guía de instalación](https://dev.mysql.com/doc/refman/8.4/en/windows-installation.html).
+Configura el puerto `3306`, una contraseña de root y el servidor como servicio
+de Windows. MySQL Workbench es opcional; instalarlo solo no instala el servidor.
+
+La [guía sin Docker](docs/ejecucion-sin-docker.md) incluye la creación del esquema,
+el usuario de conexión, la compilación y el arranque de ambas aplicaciones.
 
 ---
 
 ## Compilación y Ejecución
 
-El recorrido de inicio es **JavaFX → sockets → Backend → MySQL en Docker**.
-`common` es una biblioteca compartida: se compila con el proyecto y no se ejecuta
-como una aplicación independiente.
-
-Los siguientes pasos usan **PowerShell**, desde la raíz del repositorio.
-En Linux/macOS, el comando de Maven Wrapper es `./mvnw`.
+Los comandos usan PowerShell desde la raíz del repositorio.
 
 ### 🚀 Inicio automático en Windows
 
@@ -330,9 +173,6 @@ PowerShell en la raíz del repositorio y ejecuta:
 El script configura los archivos locales cuando no existen, inicia MySQL,
 compila `common`, `backend` y `frontend`, crea el administrador si no existe y
 abre JavaFX conectado al backend. Conserva las credenciales y los datos existentes.
-En una instalación nueva, entra con el usuario **admin** y la contraseña **admin**.
-La clave inicial se guarda en `.config/admin.env`, un archivo local excluido de Git.
-Si ya existe un administrador o ese archivo tiene otra clave, se conserva su configuración.
 
 Al cerrar JavaFX, el script detiene el backend que inició y el servicio MySQL de
 este proyecto, incluso si MySQL ya estaba encendido. También los detiene al
@@ -359,7 +199,28 @@ Si PowerShell bloquea los scripts, puedes habilitar únicamente esta ejecución:
 powershell -NoProfile -ExecutionPolicy Bypass -File .\iniciar.ps1
 ```
 
-### 🪟 Abrir otro frontend y probar las alertas
+### Acceso inicial
+
+El administrador se crea con **admin / admin** en una instalación nueva. La
+clave inicial se guarda en `.config/admin.env`, excluido de Git. Si el usuario
+ya existe o ese archivo define otra clave, se conserva su configuración.
+Los funcionarios reciben su ID como clave inicial y pueden cambiarla desde la
+aplicación. Consulta la [configuración del administrador](#configadminenv) para
+personalizar su clave inicial.
+
+### Elegir otra forma de ejecución
+
+| Modalidad | Instrucciones |
+| --- | --- |
+| Script automático con MySQL en Docker | Inicio automático de esta sección |
+| MySQL en Docker y procesos iniciados por separado | [Ejecución manual con Docker](docs/ejecucion-manual.md) |
+| MySQL instalado en el sistema, sin Docker | [Compilación y ejecución sin Docker](docs/ejecucion-sin-docker.md) |
+
+---
+
+## Otros clientes y alertas
+
+### Otro frontend en la misma computadora
 
 Mantén la primera aplicación abierta con `iniciar.ps1`. Desde **otra terminal
 PowerShell**, en la raíz del mismo repositorio, abre otra ventana:
@@ -372,11 +233,10 @@ Esta opción reutiliza la compilación del primer arranque y conecta el nuevo
 frontend al backend en `127.0.0.1:1234`. No inicia ni detiene backend o MySQL,
 y puedes repetir el comando en más terminales para abrir otros clientes.
 
-Si el backend usa otro puerto o está en otra computadora:
+Si el backend usa otro puerto:
 
 ```powershell
 .\iniciar.ps1 -SoloFrontend -PuertoBackend 1235
-.\iniciar.ps1 -SoloFrontend -ServidorBackend 192.168.1.20 -PuertoBackend 1234
 ```
 
 Para comprobar únicamente que el puerto del backend acepta conexiones:
@@ -384,32 +244,6 @@ Para comprobar únicamente que el puerto del backend acepta conexiones:
 ```powershell
 .\iniciar.ps1 -SoloFrontend -Comprobar
 ```
-
-Para probar las alertas con dos ventanas:
-
-1. En la primera, ingresa como administrador y crea un funcionario activo,
-   una categoría y un recurso disponible de esa categoría.
-2. En la segunda, ingresa con ese funcionario; su contraseña inicial es su ID.
-3. Crea una reserva con una categoría que tenga recursos disponibles en el horario elegido.
-4. Comprueba que en la primera ventana aparezca una tarjeta con la actividad,
-   funcionario y horario, y que aumente el contador de alertas.
-5. Usa **Ver detalle** para consultar la reserva y la **×** para descartarla.
-   Descartar el aviso solo lo retira de la lista local; la reserva se conserva.
-
-Las ventanas deben utilizar **usuarios distintos**: el servidor no notifica al
-mismo usuario que creó la reserva. Las alertas son temporales y se reciben
-mientras el cliente está conectado.
-
-El panel de alertas permanece visible a la derecha al cambiar de pantalla.
-Al recibir una reserva aparece un aviso temporal de seis segundos; **Ver alerta**
-enfoca la tarjeta más reciente del panel. Para abrir sus datos, utiliza **Ver detalle**.
-
-Si se pierde la conexión de alertas, el panel muestra el aviso y el botón
-**Reconectar alertas**, conservando las tarjetas recibidas. Si se reinició el
-backend, vuelve a iniciar sesión. El cierre de sesión no genera este aviso.
-
-Cierra primero los frontends adicionales y al final la aplicación iniciada sin
-`-SoloFrontend`: esta última detiene backend y MySQL cuando se cierra.
 
 ### 🌐 Conectar dos computadoras en la misma red
 
@@ -451,155 +285,152 @@ backend, utiliza ese mismo puerto en el cliente. `localhost` y `127.0.0.1`
 apuntan a la propia computadora, por lo que no sirven para localizar el otro equipo.
 
 Si Windows solicita acceso para Java en el equipo del backend, permite la
-conexión en **redes privadas**. Si el cliente no logra conectarse, ejecuta desde
-la segunda computadora:
+conexión en **redes privadas**. Para comprobar la comunicación, consulta
+[Problemas de conexión](#-problemas-de-conexión).
 
-```powershell
-Test-NetConnection 192.168.1.20 -Port 1234
+Ingresa con usuarios distintos en ambos equipos y sigue la prueba de alertas
+de la sección siguiente.
+
+### 🪟 Abrir otro frontend y probar las alertas
+
+Para probar las alertas con dos ventanas:
+
+1. En la primera, ingresa como administrador y crea un funcionario activo,
+   una categoría y un recurso disponible de esa categoría.
+2. En la segunda, ingresa con ese funcionario; su contraseña inicial es su ID.
+3. Crea una reserva con una categoría que tenga recursos disponibles en el horario elegido.
+4. Comprueba que en la primera ventana aparezca una tarjeta con la actividad,
+   funcionario y horario, y que aumente el contador de alertas.
+5. Usa **Ver detalle** para consultar la reserva y la **×** para descartarla.
+   Descartar el aviso solo lo retira de la lista local; la reserva se conserva.
+
+Las ventanas deben utilizar **usuarios distintos**: el servidor no notifica al
+mismo usuario que creó la reserva. Las alertas son temporales y se reciben
+mientras el cliente está conectado.
+
+El panel de alertas permanece visible a la derecha al cambiar de pantalla.
+Al recibir una reserva aparece un aviso temporal de seis segundos; **Ver alerta**
+enfoca la tarjeta más reciente del panel. Para abrir sus datos, utiliza **Ver detalle**.
+
+Si se pierde la conexión de alertas, el panel muestra el aviso y el botón
+**Reconectar alertas**, conservando las tarjetas recibidas. Si se reinició el
+backend, vuelve a iniciar sesión. El cierre de sesión no genera este aviso.
+
+Cierra primero los frontends adicionales y al final la aplicación iniciada sin
+`-SoloFrontend`: esta última detiene backend y MySQL cuando se cierra.
+
+---
+
+## Configuración
+
+`iniciar.ps1` genera los archivos locales que no existen. Para configurarlos
+a mano, utiliza las plantillas de `.config/`. Los ejemplos siguientes muestran
+qué escribir en cada archivo.
+
+### `.config/docker.env`
+
+Docker Compose utiliza este archivo para crear MySQL. Si ejecutas `iniciar.ps1`,
+se genera automáticamente con contraseñas locales. Para configurarlo manualmente,
+copia `.config/docker.env.example` como `.config/docker.env` y completa:
+
+```env
+MYSQL_PORT=3307
+MYSQL_PASSWORD=tu_clave_de_reservas_app
+MYSQL_ROOT_PASSWORD=tu_clave_de_root
 ```
 
-`TcpTestSucceeded : True` confirma que el puerto es accesible. Si devuelve
-`False`, revisa la IP, el puerto, que el backend siga abierto y las reglas del
-firewall del servidor para Java o para ese puerto TCP. Comprueba también que
-la red permita conexiones entre ambos equipos.
+* **`MYSQL_PORT`**: Puerto de MySQL en tu computadora; el contenedor utiliza internamente el puerto `3306`.
+* **`MYSQL_PASSWORD`**: Contraseña del usuario MySQL `reservas_app`, utilizado por el backend.
+* **`MYSQL_ROOT_PASSWORD`**: Contraseña del administrador de MySQL, independiente del usuario `admin` de la aplicación.
 
-Para validar el funcionamiento, ingresa con **usuarios distintos** en las dos
-computadoras y crea una reserva desde el funcionario. Debe aparecer en sus
-reservas y llegar como alerta al otro usuario. Puedes seguir los pasos de
-**Ver detalle** y descarte descritos en la sección anterior.
+Estas contraseñas se establecen al inicializar un volumen vacío. Editar el archivo
+después no cambia las credenciales de una base existente.
 
-También puedes ejecutar cada paso manualmente como se describe a continuación.
+### `.config/database.env`
 
-### 1. 📥 Obtener el proyecto y comprobar Java
+El backend utiliza este archivo para conectarse a MySQL. `iniciar.ps1` lo genera
+con los datos de Docker cuando no existe. Para configurarlo manualmente, copia
+`.config/database.docker.env.example` como `.config/database.env` y completa:
 
-```powershell
-git clone --branch develop https://github.com/oesiledivad/EIF206-Programacion3-Proyecto01.git
-cd EIF206-Programacion3-Proyecto01
-.\mvnw.cmd -version
-docker compose version
+```env
+DB_URL=jdbc:mysql://127.0.0.1:3307/sistema_reservas
+DB_USER=reservas_app
+DB_PASSWORD=tu_clave_de_reservas_app
 ```
 
-Si ya tienes el repositorio, utiliza tu copia de trabajo. Maven debe indicar
-**Java 17 o superior**, preferiblemente **JDK 21**. Si muestra Java 8, configura
-`JAVA_HOME` con la ruta de tu JDK y agrega su carpeta `bin` al `PATH`. Comprueba
-la versión en cada terminal usada para ejecutar el proyecto.
+* **`DB_URL`**: Dirección JDBC de la base. El puerto debe coincidir con `MYSQL_PORT` de `.config/docker.env`.
+* **`DB_USER`**: Usuario MySQL de conexión; Docker crea `reservas_app`.
+* **`DB_PASSWORD`**: Debe ser exactamente la misma contraseña que `MYSQL_PASSWORD`.
 
-### 2. ⚙️ Configurar MySQL
+Para MySQL instalado directamente en el sistema, utiliza como plantilla
+`.config/database.env.example` y ajusta el puerto, usuario y contraseña a esa
+instalación. El script de inicio automático utiliza la configuración de Docker.
 
-Crear los archivos locales solo si no existen:
+### `.config/admin.env`
 
-```powershell
-if (-not (Test-Path .config/docker.env)) {
-    Copy-Item .config/docker.env.example .config/docker.env
-}
-if (-not (Test-Path .config/database.env)) {
-    Copy-Item .config/database.docker.env.example .config/database.env
-}
+El script de inicio utiliza este archivo para crear el administrador de la
+aplicación cuando no existe. Puedes copiar `.config/admin.env.example` como
+`.config/admin.env`; si no existe, el script lo genera con este contenido:
+
+```env
+APP_ADMIN_PASSWORD=admin
 ```
 
-Editar ambos archivos con los siguientes datos:
+* **`APP_ADMIN_PASSWORD`**: Contraseña inicial del usuario de aplicación `admin`. Acepta `admin` o una contraseña personalizada de al menos seis caracteres.
 
-| Archivo | Configuración |
-| --- | --- |
-| `.config/docker.env` | `MYSQL_PORT=3307`, contraseña de `reservas_app` en `MYSQL_PASSWORD` y contraseña de MySQL root en `MYSQL_ROOT_PASSWORD` |
-| `.config/database.env` | `DB_URL=jdbc:mysql://127.0.0.1:3307/sistema_reservas`, `DB_USER=reservas_app` y la misma contraseña de aplicación en `DB_PASSWORD` |
+El acceso inicial por defecto es **admin / admin**. Cambiar este archivo no
+restablece la contraseña de un administrador existente; el cambio de contraseña
+se realiza desde la aplicación.
 
-Las contraseñas de ejemplo deben sustituirse por valores locales. Estos archivos
-están excluidos de Git. El usuario MySQL `reservas_app` es la cuenta de conexión
-del backend; el usuario `admin` del sistema se crea en el paso 5.
+Los tres archivos `.config/*.env` anteriores están excluidos de Git. Las
+plantillas `.example` documentan su estructura y se incluyen en el repositorio.
+La configuración de Groq es independiente y no es necesaria para iniciar sesión.
 
-### 3. 🐳 Iniciar MySQL
+### `.env` — asistente de IA
 
-Con Docker Desktop abierto:
+Para utilizar el asistente, crea `.env` junto al `pom.xml` de la raíz. El backend
+lee esta configuración; el frontend no necesita la clave de Groq.
 
-```powershell
-docker compose --env-file .config/docker.env config --quiet
-docker compose --env-file .config/docker.env up -d --wait
-docker compose --env-file .config/docker.env ps
+```env
+GROQ_API_KEY=tu_api_key_de_groq_aqui
+GROQ_URL=https://api.groq.com/openai/v1/chat/completions
+GROQ_MODEL=identificador_del_modelo_disponible_en_tu_cuenta
 ```
 
-El servicio debe aparecer como **healthy**. La base `sistema_reservas` y sus seis
-tablas se crean automáticamente al inicializar un volumen vacío. MySQL publica
-`127.0.0.1:3307`, por lo que puede convivir con otra instalación local en `3306`.
+#### Descripción de Variables
 
-Para cargar las dos categorías y los dos recursos de demostración:
+- **`GROQ_API_KEY`**: Clave de autenticación personal obtenida en la plataforma de Groq.
+- **`GROQ_URL`**: Endpoint oficial de la API de Groq consumido por la aplicación.
+- **`GROQ_MODEL`**: Identificador del modelo de lenguaje utilizado por el sistema.
 
-```powershell
-Get-Content -Raw database/seed.sql | docker compose --env-file .config/docker.env exec -T mysql sh -c 'MYSQL_PWD="$MYSQL_PASSWORD" mysql -u "$MYSQL_USER" "$MYSQL_DATABASE"'
-```
+> **Nota Importante:** Se recomienda emplear modelos de la familia **Qwen**
+> disponibles en Groq por su excelente desempeño en la extracción estructurada
+> de datos. Como los catálogos cambian con el tiempo, verifica el modelo activo
+> en tu cuenta de Groq antes de ejecutar. El archivo `.env` está excluido de Git
+> y **nunca debe subirse al control de versiones**.
 
-El catálogo es opcional; el login también funciona con un catálogo vacío.
+Obtén la clave desde [Groq Console](https://console.groq.com/keys) y copia en
+`GROQ_MODEL` el identificador exacto de un [modelo disponible](https://console.groq.com/docs/models).
+El valor del ejemplo es un marcador que debes reemplazar. La IA es opcional
+para iniciar sesión y crear reservas manualmente. Reinicia el backend después
+de cambiar su configuración de Groq.
 
-### 4. 🔨 Compilar los tres módulos
+### Conexión del frontend
 
-```powershell
-.\mvnw.cmd install -DskipTests
-```
-
-Este comando compila e instala `common`, `backend` y `frontend` en el repositorio
-Maven local. Ejecutarlo también después de cambiar clases compartidas.
-
-### 5. 🔐 Crear el administrador
-
-Ejecutar una vez para la base de datos elegida. La contraseña solicitada será la
-que usarás en la pantalla de login; debe tener al menos seis caracteres.
-
-```powershell
-$claveAdmin = Read-Host "Contraseña para admin" -AsSecureString
-$env:APP_ADMIN_PASSWORD = [System.Net.NetworkCredential]::new("", $claveAdmin).Password
-try {
-    .\mvnw.cmd -pl backend exec:java "-Dexec.mainClass=una.proyecto.bootstrap.CrearAdministrador"
-} finally {
-    Remove-Item Env:APP_ADMIN_PASSWORD -ErrorAction SilentlyContinue
-    $claveAdmin.Dispose()
-}
-```
-
-El resultado es **Administrador creado.** Si `admin` ya existe, la utilidad
-conserva su contraseña y su estado. Usar la contraseña definida cuando se creó;
-las credenciales se almacenan como hashes en MySQL.
-
-### 6. 🖥️ Ejecutar el backend — terminal 1
-
-```powershell
-.\mvnw.cmd -pl backend exec:java
-```
-
-Mantener esa terminal abierta. Debe mostrar:
-
-```text
-Servidor escuchando en el puerto 1234
-```
-
-### 7. 📅 Ejecutar el frontend — terminal 2
-
-Abrir otra terminal en la misma raíz del repositorio, con el JDK configurado:
-
-```powershell
-.\mvnw.cmd -pl frontend javafx:run
-```
-
-Ingresar con **ID `admin`** y la contraseña del paso 5. Debe abrirse el panel
-principal con el nombre **Administrador** y los contadores leídos desde el backend.
-Si se cargó el catálogo, el panel mostrará **2 recursos**.
-
-Las operaciones de datos utilizan el proxy de sockets. El frontend no requiere
-configuración MySQL ni incluye el backend entre sus dependencias de ejecución.
-Las operaciones de red de login, carga del panel y estadísticas se realizan en
-segundo plano para mantener la interfaz disponible.
-
-Para conectar ese frontend a un backend en otra computadora, definir antes de
-arrancarlo:
+Con el script, usa `-ServidorBackend` y `-PuertoBackend`. Si ejecutas JavaFX
+manualmente, define las variables en esa terminal antes de iniciarlo:
 
 ```powershell
 $env:SERVER_HOST = "IP_DEL_EQUIPO_BACKEND"
 $env:SERVER_PORT = "1234"
 ```
 
-### 8. ✅ Verificar la conexión
+El frontend solo necesita el destino del backend. Las credenciales de MySQL y
+Groq corresponden al servidor.
 
-La [guía de pruebas funcionales](docs/pruebas-funcionales.md) describe el recorrido
-por las nueve funcionalidades, los reportes PDF y las alertas con varios clientes.
+---
+
+## Pruebas
 
 Los objetivos Maven habituales funcionan desde la raíz, con JDK 17 o superior
 (JDK 21 recomendado). Si tienes Maven instalado, puedes usar `mvn` en lugar de
@@ -663,22 +494,20 @@ normal. No se necesitan secretos de Groq ni archivos de configuración personale
 Los reportes se publican como artefacto **reportes-pruebas** y MySQL de CI se
 elimina al terminar la ejecución.
 
-### 9. ⏹️ Detener la ejecución
+---
 
-Con `iniciar.ps1`, basta con cerrar la ventana JavaFX: el script detiene el
-backend y MySQL automáticamente.
+## 🛠️ Problemas de conexión
 
-Si seguiste los pasos manuales, cierra JavaFX, detén el backend con `Ctrl+C` y
-apaga MySQL:
+Desde el equipo cliente, sustituye la IP y el puerto por los del backend:
 
 ```powershell
-docker compose --env-file .config/docker.env down
+Test-NetConnection 192.168.1.20 -Port 1234
 ```
 
-El volumen conserva los datos. Los scripts de inicialización y las contraseñas
-de creación de MySQL solo se aplican a un volumen vacío.
-
-### 🛠️ Problemas de conexión
+`TcpTestSucceeded : True` confirma que el puerto es accesible. Si devuelve
+`False`, revisa que el backend esté abierto, la IP, el puerto y las reglas del
+firewall del servidor para Java o ese puerto TCP. La red debe permitir conexiones
+entre ambos equipos.
 
 | Mensaje o síntoma | Comprobación |
 | --- | --- |
@@ -687,9 +516,90 @@ de creación de MySQL solo se aplican a un volumen vacío.
 | MySQL no aparece `healthy` | Consultar `docker compose --env-file .config/docker.env logs mysql` |
 | `Access denied` de MySQL | Comparar `DB_PASSWORD` con la contraseña usada al crear el volumen; editar un archivo no cambia las credenciales de una base existente |
 | No se pudo comunicar con el servidor | Iniciar primero el backend y comprobar host y puerto `1234` |
-| Credenciales incorrectas | Usar el usuario de aplicación `admin`, no `reservas_app`, y la contraseña del paso 5 |
+| Credenciales incorrectas | Usar el usuario de aplicación `admin`, no `reservas_app`, y la contraseña con la que se creó el administrador |
 | Dependencia `common` o `backend` no encontrada | Ejecutar `.\mvnw.cmd install -DskipTests` desde la raíz |
 
-Más información: [Docker y persistencia](database/DOCKER.md),
-[usuarios y credenciales](database/USUARIOS.md) y
-[protocolo de autenticación](docs/protocolo-autenticacion.md).
+---
+
+## Funcionalidades
+
+| Área | Funciones |
+| --- | --- |
+| 🔐 Usuarios | Login, roles de administrador y funcionario, cambio de contraseña y hashes en MySQL |
+| 📅 Reservas | Creación, consulta, asignación de recursos disponibles y cancelación de reservas propias futuras |
+| 🏢 Mantenimiento | Gestión de funcionarios, categorías y recursos |
+| 🗓️ Calendarios | Disponibilidad por recurso y programación semanal de actividades |
+| 📊 Estadísticas | Consultas por categoría y semana, gráficos y exportación a PDF |
+| 🔔 Alertas | Reservas de otros usuarios, detalle en ventana emergente y descarte local con confirmación |
+| 🤖 Asistente de IA | Extracción de actividad, fecha, horario y categorías desde texto mediante Groq |
+
+El [recorrido funcional](docs/pruebas-funcionales.md) explica cómo comprobar
+estas funciones con varios clientes.
+
+---
+
+## Arquitectura y módulos
+
+El frontend utiliza MVC con JavaFX, FXML y CSS. `ServiceProxy` comunica las
+peticiones por sockets y recibe las alertas del servidor. El backend concentra
+los servicios, las reglas de negocio y el acceso a MySQL mediante JDBC.
+Los modelos y el protocolo pertenecen a `common`.
+
+```text
+Frontend (JavaFX + ServiceProxy) ── sockets ── Backend ── JDBC ── MySQL
+             │                                  │
+             └────────── common ────────────────┘
+```
+
+`common` es una biblioteca: se compila con el proyecto y no se ejecuta como
+aplicación. El frontend no se conecta a MySQL ni incluye el backend en su runtime;
+utiliza este último únicamente en las pruebas de integración.
+
+| Módulo | Responsabilidad y documentación |
+| --- | --- |
+| [`frontend`](frontend/README.md) | Presentación, navegación y reportes PDF con PDFBox y EasyTable |
+| [`backend`](backend/README.md) | Servidor, servicios, validaciones, IA y repositorios MySQL |
+| [`common`](common/README.md) | Modelos, protocolo y serialización compartidos |
+| [`database`](database/README.md) | MER, esquema MySQL y catálogo de demostración |
+
+### Estructura del repositorio
+
+```text
+pom.xml                         # POM padre: agrega los tres módulos
+mvnw / mvnw.cmd                 # Maven Wrapper
+iniciar.ps1                     # Arranque y cierre local de JavaFX, backend y MySQL
+compose.yaml                    # MySQL de desarrollo con volumen persistente
+compose.test.yaml               # MySQL exclusivo para integración
+.config/                        # Ejemplos de configuración local
+common/
+├── pom.xml
+└── src/main/java/              # Modelos y adaptadores compartidos
+backend/
+├── pom.xml
+└── src/
+    ├── main/                   # Servicios, lógica, IA y datos MySQL
+    └── test/                   # Pruebas de negocio y persistencia
+frontend/
+├── pom.xml
+└── src/
+    ├── main/                   # JavaFX, presentación y reportes PDF
+    └── test/                   # Pruebas de presentación, proxy y servidor
+database/                       # MER DBML, esquema MySQL y catálogo de ejemplo
+docs/                           # Arquitectura, ejecución manual y pruebas funcionales
+data/xml/                       # Archivos de datos del proyecto 01
+```
+
+---
+
+## Documentación
+
+| Guía | Contenido |
+| --- | --- |
+| [Ejecución manual con Docker](docs/ejecucion-manual.md) | MySQL en un contenedor y arranque de cada proceso por separado |
+| [Ejecución sin Docker](docs/ejecucion-sin-docker.md) | Instalación de MySQL, esquema, configuración, compilación y arranque |
+| [Pruebas funcionales](docs/pruebas-funcionales.md) | Recorrido de pantallas, reportes y alertas |
+| [Arquitectura](docs/organizacion-proyecto-02.md) | Dependencias y distribución de clases |
+| [Base de datos](database/README.md) | Modelo DBML y scripts de creación |
+| [Docker y persistencia](database/DOCKER.md) | MySQL, volúmenes y credenciales de Docker |
+| [Usuarios y credenciales](database/USUARIOS.md) | Cuentas de MySQL y usuarios de la aplicación |
+| [Protocolo de sockets](docs/protocolo-autenticacion.md) | Operaciones, sesiones y notificaciones |
