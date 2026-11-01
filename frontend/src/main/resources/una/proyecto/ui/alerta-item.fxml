@@ -18,5 +18,9 @@
     </HBox>
     <Label fx:id="encargado" wrapText="true" styleClass="text-secondary" />
     <Label fx:id="horario" wrapText="true" styleClass="alerta-horario" />
-    <Button text="Ver detalle" onAction="#verDetalle" styleClass="btn-link" />
+    <Button text="Ver detalle" onAction="#verDetalle" maxWidth="Infinity"
+            styleClass="btn-secondary, btn-small, alerta-detalle">
+        <graphic><FontIcon iconLiteral="fa-eye" /></graphic>
+        <tooltip><Tooltip text="Ver los datos y recursos de esta reserva" /></tooltip>
+    </Button>
 </VBox>
