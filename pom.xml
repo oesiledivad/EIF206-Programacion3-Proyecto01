@@ -14,6 +14,10 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.release>17</maven.compiler.release>
     <junit.version>5.12.1</junit.version>
+    <test.db.url>jdbc:mysql://127.0.0.1:3308/sistema_reservas</test.db.url>
+    <test.db.user>reservas_app</test.db.user>
+    <test.db.password>reservas_test_password</test.db.password>
+    <it.excludedGroups>ia-externa</it.excludedGroups>
   </properties>
   <dependencies>
     <dependency>
@@ -79,6 +83,12 @@
         <artifactId>maven-failsafe-plugin</artifactId>
         <version>3.2.5</version>
         <configuration>
+          <excludedGroups>${it.excludedGroups}</excludedGroups>
+          <environmentVariables>
+            <DB_URL>${test.db.url}</DB_URL>
+            <DB_USER>${test.db.user}</DB_USER>
+            <DB_PASSWORD>${test.db.password}</DB_PASSWORD>
+          </environmentVariables>
           <includes>
             <include>**/*IT.java</include>
           </includes>
@@ -98,4 +108,12 @@
 
     </plugins>
   </build>
+  <profiles>
+    <profile>
+      <id>ia</id>
+      <properties>
+        <it.excludedGroups></it.excludedGroups>
+      </properties>
+    </profile>
+  </profiles>
 </project>
