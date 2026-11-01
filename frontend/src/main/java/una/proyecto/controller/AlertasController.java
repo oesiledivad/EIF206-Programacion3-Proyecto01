@@ -2,6 +2,7 @@ package una.proyecto.controller;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.IntegerBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -30,13 +31,18 @@ public class AlertasController {
     @FXML private Label contadorAlertas;
 
     private final ObservableList<Reserva> alertas = FXCollections.observableArrayList();
+    private final IntegerBinding cantidadAlertas = Bindings.size(alertas);
     private final MainLogic mainLogic = new MainLogic();
+
+    public IntegerBinding cantidadAlertasProperty() {
+        return cantidadAlertas;
+    }
 
     @FXML
     public void initialize() {
         listaAlertas.setCellFactory(lista -> new AlertaCelda());
         listaAlertas.setItems(alertas);
-        contadorAlertas.textProperty().bind(Bindings.size(alertas).asString());
+        contadorAlertas.textProperty().bind(cantidadAlertas.asString());
 
         abrirCanalDeAlertas();
     }
