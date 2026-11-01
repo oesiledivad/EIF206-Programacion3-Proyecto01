@@ -190,6 +190,16 @@ public class Worker {
             case Protocol.FUNCIONARIO_ACTUALIZAR:
             case Protocol.FUNCIONARIO_ELIMINAR:
                 return ejecutarFuncionario(operacion);
+            case Protocol.ESTADISTICAS_RECURSOS:
+            case Protocol.ESTADISTICAS_ACTIVIDADES: {
+                LocalDate desde = (LocalDate) is.readObject();
+                LocalDate hasta = (LocalDate) is.readObject();
+                requireSession();
+                var estadisticas = servicios.getEstadisticasService();
+                return new ArrayList<>(operacion == Protocol.ESTADISTICAS_RECURSOS
+                        ? estadisticas.obtenerEstadisticasRecursos(desde, hasta)
+                        : estadisticas.obtenerEstadisticasActividades(desde, hasta));
+            }
         }
 
     }

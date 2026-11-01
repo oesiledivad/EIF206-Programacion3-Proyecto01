@@ -66,6 +66,9 @@ public final class Protocol {
     public static final int FUNCIONARIO_ACTUALIZAR = 504;
     public static final int FUNCIONARIO_ELIMINAR = 505;
 
+    public static final int ESTADISTICAS_RECURSOS = 600;
+    public static final int ESTADISTICAS_ACTIVIDADES = 601;
+
     private Protocol() {
     }
 }
