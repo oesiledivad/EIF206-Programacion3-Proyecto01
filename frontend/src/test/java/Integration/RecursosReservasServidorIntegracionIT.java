@@ -2,6 +2,7 @@ package Integration;
 
 import org.junit.jupiter.api.*;
 import una.proyecto.datos.Database;
+import una.proyecto.datos.ReservaDatos;
 import una.proyecto.datos.UsuarioDatos;
 import una.proyecto.model.*;
 import una.proyecto.proxy.ServiceProxy;
@@ -12,6 +13,7 @@ import java.sql.PreparedStatement;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.concurrent.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -121,4 +123,130 @@ class RecursosReservasServidorIntegracionIT {
         return cliente.reservaCrear("Reserva RR", LocalDate.now().plusDays(30),
                 LocalTime.of(9, 0), LocalTime.of(10, 0), List.of(categoria));
     }
+
+    @RepeatedTest(5)
+    void reservasSimultaneasDelMismoRecursoGuardanYNotificanSoloUna() throws Exception {
+        comprobarReservasSimultaneas(false);
+    }
+
+    @Test void reservasSimultaneasConDosRecursosAsignanUnoDistintoACadaFuncionario() throws Exception {
+        proxy.recursoCrear(new Recurso("IT-RR-SEGUNDO", categoria.getId(), "Segunda sala RR"));
+        comprobarReservasSimultaneas(true);
+    }
+
+    private void comprobarReservasSimultaneas(boolean hayDosRecursos) throws Exception {
+        BlockingQueue<Reserva> avisosAdmin = new LinkedBlockingQueue<>();
+        BlockingQueue<Reserva> avisosPrimero = new LinkedBlockingQueue<>();
+        BlockingQueue<Reserva> avisosSegundo = new LinkedBlockingQueue<>();
+        BlockingQueue<Exception> erroresCanal = new LinkedBlockingQueue<>();
+        proxy.iniciarAlertas(avisosAdmin::add, erroresCanal::add);
+        try (ServiceProxy primero = new ServiceProxy("127.0.0.1", server.getPuerto());
+             ServiceProxy segundo = new ServiceProxy("127.0.0.1", server.getPuerto())) {
+            assertNotNull(primero.authenticate(FUNCIONARIO, CLAVE));
+            assertNotNull(segundo.authenticate(OTRO, CLAVE));
+            primero.iniciarAlertas(avisosPrimero::add, erroresCanal::add);
+            segundo.iniciarAlertas(avisosSegundo::add, erroresCanal::add);
+
+            ExecutorService hilos = Executors.newFixedThreadPool(2);
+            CountDownLatch listos = new CountDownLatch(2);
+            CountDownLatch inicio = new CountDownLatch(1);
+            Resultado primeroResultado;
+            Resultado segundoResultado;
+            try {
+                Future<Resultado> uno = hilos.submit(() -> intentarReserva(primero, listos, inicio));
+                Future<Resultado> dos = hilos.submit(() -> intentarReserva(segundo, listos, inicio));
+                assertTrue(listos.await(5, TimeUnit.SECONDS), "Ambos clientes deben estar listos");
+                inicio.countDown();
+                primeroResultado = uno.get(10, TimeUnit.SECONDS);
+                segundoResultado = dos.get(10, TimeUnit.SECONDS);
+            } finally {
+                inicio.countDown();
+                hilos.shutdownNow();
+                assertTrue(hilos.awaitTermination(10, TimeUnit.SECONDS));
+            }
+
+            List<Resultado> resultados = List.of(primeroResultado, segundoResultado);
+            List<Reserva> guardadas = resultados.stream().map(Resultado::reserva).filter(java.util.Objects::nonNull).toList();
+            assertEquals(hayDosRecursos ? 2 : 1, guardadas.size());
+            if (hayDosRecursos) {
+                assertEquals(2, guardadas.stream().flatMap(r -> r.getRecursosAsignadosIds().stream()).distinct().count());
+            } else {
+                Resultado rechazado = resultados.stream().filter(r -> r.error() != null).findFirst().orElseThrow();
+                assertTrue(rechazado.error().getMessage().contains("No hay recursos disponibles"), rechazado.error().getMessage());
+            }
+
+            List<String> ids = guardadas.stream().map(Reserva::getId).sorted().toList();
+            assertEquals(ids, proxy.reservasObtener().stream()
+                    .filter(r -> List.of(FUNCIONARIO, OTRO).contains(r.getIdFuncionario()))
+                    .map(Reserva::getId).sorted().toList());
+            assertEquals(guardadas.size(), contarFilasDePrueba("reservas"));
+            assertEquals(guardadas.size(), contarFilasDePrueba("reserva_recurso"));
+            comprobarAvisos(avisosAdmin, guardadas);
+            comprobarAvisos(avisosPrimero, guardadas.stream().filter(r -> !FUNCIONARIO.equals(r.getIdFuncionario())).toList());
+            comprobarAvisos(avisosSegundo, guardadas.stream().filter(r -> !OTRO.equals(r.getIdFuncionario())).toList());
+            assertTrue(erroresCanal.isEmpty(), "Los canales deben permanecer conectados");
+        }
+    }
+
+    private Resultado intentarReserva(ServiceProxy cliente, CountDownLatch listos, CountDownLatch inicio) throws Exception {
+        listos.countDown();
+        assertTrue(inicio.await(5, TimeUnit.SECONDS));
+        try {
+            return new Resultado(reservar(cliente), null);
+        } catch (ServiceProxy.RemoteException error) {
+            return new Resultado(null, error);
+        }
+    }
+
+    private void comprobarAvisos(BlockingQueue<Reserva> avisos, List<Reserva> esperadas) throws Exception {
+        java.util.ArrayList<String> recibidas = new java.util.ArrayList<>();
+        for (Reserva ignorada : esperadas) {
+            Reserva aviso = avisos.poll(3, TimeUnit.SECONDS);
+            assertNotNull(aviso, "Debe llegar una alerta por cada reserva ajena guardada");
+            Reserva persistida = proxy.reservaBuscarPorId(aviso.getId());
+            assertNotNull(persistida, "La alerta debe referirse a una reserva ya persistida");
+            assertEquals(persistida.getRecursosAsignadosIds(), aviso.getRecursosAsignadosIds());
+            recibidas.add(aviso.getId());
+        }
+        assertEquals(esperadas.stream().map(Reserva::getId).sorted().toList(), recibidas.stream().sorted().toList());
+        assertNull(avisos.poll(300, TimeUnit.MILLISECONDS), "No debe haber alertas propias, duplicadas ni de reservas rechazadas");
+    }
+
+    @Test void falloAlGuardarAsignacionesRevierteReservaYRecursosInsertados() throws Exception {
+        Reserva reserva = new Reserva();
+        reserva.setIdFuncionario(FUNCIONARIO);
+        reserva.setActividad("Reserva que debe revertirse");
+        reserva.setFecha(LocalDate.now().plusDays(30));
+        reserva.setHoraInicio(LocalTime.of(9, 0));
+        reserva.setHoraFin(LocalTime.of(10, 0));
+        // La primera asignación es válida; la segunda fuerza el fallo de la transacción.
+        reserva.setRecursosAsignadosIds(List.of(RECURSO, "IT-RR-INEXISTENTE"));
+
+        RuntimeException error = assertThrows(RuntimeException.class, () -> new ReservaDatos().crear(reserva));
+
+        assertTrue(error.getMessage().contains("recurso"), error.getMessage());
+        assertNull(reserva.getId());
+        assertEquals(0, contarFilasDePrueba("reservas"));
+        assertEquals(0, contarFilasDePrueba("reserva_recurso"));
+        assertTrue(proxy.reservasObtener().stream().noneMatch(r -> FUNCIONARIO.equals(r.getIdFuncionario())));
+    }
+
+    private int contarFilasDePrueba(String tabla) throws Exception {
+        String sql = switch (tabla) {
+            case "reservas" -> "SELECT COUNT(*) FROM reservas WHERE id_funcionario IN (?, ?)";
+            case "reserva_recurso" -> "SELECT COUNT(*) FROM reserva_recurso rr JOIN reservas r ON r.id_reserva = rr.id_reserva WHERE r.id_funcionario IN (?, ?)";
+            default -> throw new IllegalArgumentException("Tabla no contemplada en la prueba");
+        };
+        try (Connection cnx = Database.instance().openConnection();
+             PreparedStatement consulta = cnx.prepareStatement(sql)) {
+            consulta.setString(1, FUNCIONARIO);
+            consulta.setString(2, OTRO);
+            try (var filas = consulta.executeQuery()) {
+                assertTrue(filas.next());
+                return filas.getInt(1);
+            }
+        }
+    }
+
+    private record Resultado(Reserva reserva, ServiceProxy.RemoteException error) { }
 }
