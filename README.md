@@ -537,16 +537,45 @@ $env:SERVER_PORT = "1234"
 
 ### 8. ✅ Verificar la conexión
 
-Las pruebas del recorrido de ingreso usan sockets reales y la base configurada.
-Ejecutarlas con una base exclusiva para pruebas:
+Los objetivos Maven habituales funcionan desde la raíz, con JDK 17 o superior
+(JDK 21 recomendado). Si tienes Maven instalado, puedes usar `mvn` en lugar de
+`.\mvnw.cmd`; ambos leen el mismo `pom.xml`.
 
 ```powershell
-.\mvnw.cmd verify "-Dit.test=LoginIntegracionIT" -Dfailsafe.failIfNoSpecifiedTests=false
+# Compilar y ejecutar todas las pruebas unitarias; no requiere MySQL ni Docker
+.\mvnw.cmd clean test
+
+# Iniciar una base MySQL exclusiva para integración
+docker compose -f compose.test.yaml up -d --wait
+
+# Ejecutar todas las pruebas unitarias e integraciones locales
+.\mvnw.cmd clean verify
+
+# Detener la base de pruebas conservando su volumen
+docker compose -f compose.test.yaml stop
 ```
 
-Se ejecutan las pruebas unitarias y la integración del login, el panel remoto,
-el cambio de contraseña y logout. Groq no es necesario para iniciar sesión;
-la configuración de IA se utiliza al invocar el asistente de reservas.
+| Comando Maven | Alcance |
+| --- | --- |
+| `mvn clean test` | Limpia, compila y ejecuta las pruebas unitarias con Surefire |
+| `mvn clean package` | Añade la generación de los JAR |
+| `mvn clean verify` | Añade las integraciones con Failsafe; requiere MySQL de pruebas |
+| `mvn clean install` | Ejecuta lo anterior e instala los artefactos en el repositorio Maven local |
+| `mvn clean verify -DskipITs` | Ejecuta unitarias y genera los JAR, omitiendo únicamente las integraciones |
+
+`compose.test.yaml` utiliza el proyecto Docker **eif206-tests**, el puerto **3308**
+y un volumen propio. Inicializa el esquema sin cargar `seed.sql`: cada suite crea
+y elimina sus datos. No utiliza los archivos `.config/docker.env` ni
+`.config/database.env` de desarrollo. No ejecutes las integraciones contra una
+base con datos personales.
+
+Failsafe establece `DB_URL`, `DB_USER` y `DB_PASSWORD` para sus procesos de prueba.
+Para utilizar otra base exclusiva, configura las propiedades Maven
+`-Dtest.db.url=...`, `-Dtest.db.user=...` y `-Dtest.db.password=...`.
+
+Las pruebas unitarias de IA utilizan HTTP simulado. Las llamadas reales a Groq
+están etiquetadas como `ia-externa` y se incluyen solamente con el perfil opcional
+`mvn clean verify -Pia`, con la configuración de Groq correspondiente.
 
 ### 🧪 Integración continua en GitHub Actions
 
@@ -554,20 +583,16 @@ El workflow **Tests** (`.github/workflows/tests.yml`) se ejecuta en los pushes y
 pull requests dirigidos a `main` y `develop`. También puede iniciarse desde
 **Actions → Tests → Run workflow**.
 
-Utiliza JDK 21, Maven Wrapper y una instancia MySQL 8.4 exclusiva de CI,
-inicializada con `database/schema.sql`. Compila los tres módulos y ejecuta todas
-las pruebas unitarias junto con estas integraciones:
+Utiliza JDK 21, Maven Wrapper y `compose.test.yaml`. Ejecuta `clean verify` sin
+filtros de clases: incluye todas las pruebas unitarias y las integraciones de
+usuarios, funcionarios, categorías, recursos, reservas, calendarios, estadísticas,
+login y alertas. Las suites del servidor y del proxy verifican además permisos y
+comunicación por sockets.
 
-* `UsuariosIntegracionIT`: persistencia de usuarios, hashes, estado activo y cambio de contraseña.
-* `FuncionariosIntegracionIT`: perfiles de funcionarios y su clave inicial.
-* `ServerIntegracionIT`: operaciones y permisos del servidor por sockets.
-* `LoginIntegracionIT`: ingreso, panel remoto, cambio de contraseña y cierre de sesión desde el cliente.
-* `EstadisticasServidorIntegracionIT`: consultas remotas por período, roles, validación de fechas y exclusión de reservas canceladas.
-
-Las demás suites de integración quedan fuera de este comando; el resultado del
-workflow corresponde a las pruebas enumeradas. No requiere secretos de Groq ni
-archivos de configuración de tu computadora. Los reportes se publican como
-artefacto **reportes-pruebas** y MySQL se elimina al terminar la ejecución.
+Las llamadas externas de IA requieren el perfil opcional y quedan fuera del CI
+normal. No se necesitan secretos de Groq ni archivos de configuración personales.
+Los reportes se publican como artefacto **reportes-pruebas** y MySQL de CI se
+elimina al terminar la ejecución.
 
 ### 9. ⏹️ Detener la ejecución
 

@@ -69,12 +69,16 @@ classpath; la aplicación conserva los descriptores JPMS de sus módulos.
 Para verificar sin llamar al servicio externo de IA:
 
 ```sh
-./mvnw verify "-Dit.test=*IT,!IAgeneratorIntegracionIT" -Dfailsafe.failIfNoSpecifiedTests=false
+docker compose -f compose.test.yaml up -d --wait
+./mvnw clean verify
 ```
 
-Las pruebas de integración de IA utilizan Groq y requieren `GROQ_API_KEY`.
+Las pruebas de integración de IA se incluyen con `-Pia`, utilizan Groq y requieren `GROQ_API_KEY`.
 Las pruebas unitarias de IA utilizan un cliente HTTP simulado.
-GitHub Actions ejecuta `mvn verify` desde la raíz para procesar todos los módulos.
+GitHub Actions ejecuta `clean verify` desde la raíz para procesar todos los módulos.
+Las unitarias se ejecutan con `clean test`, sin base de datos. Failsafe usa una
+base exclusiva indicada por `test.db.url`, `test.db.user` y `test.db.password`;
+sus valores predeterminados corresponden a `compose.test.yaml`.
 
 ## Configuración y datos
 

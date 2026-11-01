@@ -52,16 +52,16 @@ operación obsoleta sobrescriba las credenciales.
 
 ## Pruebas
 
-Las pruebas de integración requieren una base exclusiva para pruebas con
-`schema.sql`. Se puede usar otra instancia Compose con otro nombre de proyecto
-y otro puerto. No usar datos personales en esa base.
+Las pruebas de integración utilizan la base exclusiva de `compose.test.yaml`,
+con `schema.sql` y sin datos de demostración. No usar datos personales en esa base.
 
 ```sh
-./mvnw verify "-Dit.test=UsuariosIntegracionIT,FuncionariosIntegracionIT,ServerIntegracionIT,LoginIntegracionIT" -Dfailsafe.failIfNoSpecifiedTests=false
+docker compose -f compose.test.yaml up -d --wait
+./mvnw clean verify
 ```
 
-La conexión acepta `DB_URL`, `DB_USER` y `DB_PASSWORD` desde el entorno o desde
-`.config/database.env`. Las pruebas eliminan únicamente sus identificadores de
+Failsafe establece `DB_URL`, `DB_USER` y `DB_PASSWORD` desde las propiedades Maven
+`test.db.url`, `test.db.user` y `test.db.password`. Las pruebas eliminan únicamente sus identificadores de
 usuario reservados. La conversión de archivos XML existentes es una operación
 independiente de la creación del esquema.
 

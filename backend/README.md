@@ -53,7 +53,8 @@ Usar JDK 17 o superior —se recomienda JDK 21— y Maven. Ejecutar desde la ra�
 Para ejecutar las pruebas locales y excluir la integración con el servicio de IA:
 
 ```sh
-./mvnw -pl backend -am verify "-Dit.test=*IT,!IAgeneratorIntegracionIT" -Dfailsafe.failIfNoSpecifiedTests=false
+docker compose -f compose.test.yaml up -d --wait
+./mvnw -pl backend -am clean verify
 ```
 
 Para incluir también las pruebas de integración de IA:

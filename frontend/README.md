@@ -81,10 +81,12 @@ los errores del servidor se muestran junto a los filtros correspondientes.
 Para ejecutar las pruebas del módulo y sus dependencias sin llamadas externas a IA:
 
 ```sh
-./mvnw -pl frontend -am verify "-Dit.test=LoginIntegracionIT,EstadisticasServidorIntegracionIT" "-Dfailsafe.failIfNoSpecifiedTests=false"
+docker compose -f compose.test.yaml up -d --wait
+./mvnw -pl frontend -am clean verify
 ```
 
 Los reportes propios del módulo se generan en `target/surefire-reports/` y
 `target/failsafe-reports/`, dentro de `frontend/`.
+Para ejecutar únicamente las unitarias sin MySQL, usar `./mvnw -pl frontend -am clean test`.
 
 [Documentación general](../README.md) · [Arquitectura](../docs/organizacion-proyecto-02.md)
