@@ -99,6 +99,12 @@ de IA usan un cliente HTTP simulado.
 El diseño relacional y los scripts de MySQL se documentan en
 [`database`](../database/README.md). Los repositorios JDBC utilizan las tablas de ese esquema.
 
+Con `DB_LOG_SQL=true` en `.config/database.env` o en el entorno, las conexiones
+de `Database` registran consultas, lotes y transacciones en
+`target/local/backend-sql.log`, relativo a la raíz del repositorio. El registro
+está desactivado por defecto y oculta parámetros, literales y mensajes de error
+que puedan contener datos. Consulta la [guía de registro SQL](../docs/registro-sql.md).
+
 [Documentación general](../README.md) · [Arquitectura](../docs/organizacion-proyecto-02.md)
 
 ## Autenticación y entorno

@@ -405,15 +405,47 @@ con los datos de Docker cuando no existe. Para configurarlo manualmente, copia
 DB_URL=jdbc:mysql://127.0.0.1:3307/sistema_reservas
 DB_USER=reservas_app
 DB_PASSWORD=tu_clave_de_reservas_app
+DB_LOG_SQL=false
 ```
 
 * **`DB_URL`**: Dirección JDBC de la base. El puerto debe coincidir con `MYSQL_PORT` de `.config/docker.env`.
 * **`DB_USER`**: Usuario MySQL de conexión; Docker crea `reservas_app`.
 * **`DB_PASSWORD`**: Debe ser exactamente la misma contraseña que `MYSQL_PASSWORD`.
+* **`DB_LOG_SQL`**: Activa el registro SQL con `true`. Es opcional y está desactivado por defecto.
 
 Para MySQL instalado directamente en el sistema, utiliza como plantilla
 `.config/database.env.example` y ajusta el puerto, usuario y contraseña a esa
 instalación. El script de inicio automático utiliza la configuración de Docker.
+
+#### Registro de consultas SQL
+
+Para guardar las consultas del backend, agrega `DB_LOG_SQL=true` en
+`.config/database.env` y vuelve a iniciar el servidor. También puedes activarlo
+para los procesos de una terminal:
+
+```powershell
+$env:DB_LOG_SQL = 'true'
+.\iniciar.ps1 -SoloBackend
+```
+
+El archivo se guarda en **`target/local/backend-sql.log`**, tanto con MySQL en
+Docker como con una instalación propia. Tras realizar una operación en la
+aplicación, puedes seguirlo desde otra terminal:
+
+```powershell
+Get-Content .\target\local\backend-sql.log -Tail 50 -Wait
+```
+
+Cada entrada contiene fecha UTC, duración y resultado o código de error, junto
+con la estructura de la consulta. Los parámetros y literales se mantienen como
+`?`; no se guardan contraseñas, hashes ni resultados de las consultas. También
+se registran `COMMIT` y `ROLLBACK`.
+
+El log se agrega al archivo existente y está excluido de Git por estar dentro
+de `target/`. `clean` elimina ese directorio. Para desactivar el registro,
+configura `DB_LOG_SQL=false` y reinicia el backend; si utilizaste la variable
+de entorno, cámbiala también o elimínala con `Remove-Item Env:DB_LOG_SQL`.
+La [guía del registro SQL](docs/registro-sql.md) explica el formato y su alcance.
 
 ### `.config/admin.env`
 
@@ -648,6 +680,7 @@ data/xml/                       # Archivos de datos del proyecto 01
 | [Ejecución sin Docker](docs/ejecucion-sin-docker.md) | Instalación de MySQL, esquema, configuración, compilación y arranque |
 | [Pruebas funcionales](docs/pruebas-funcionales.md) | Recorrido de pantallas, reportes y alertas |
 | [Datos de demostración](docs/datos-demostracion.md) | Carga opcional de cinco ejemplos por entidad y credenciales de prueba |
+| [Registro SQL](docs/registro-sql.md) | Activación, lectura y alcance del log de consultas del backend |
 | [Arquitectura](docs/organizacion-proyecto-02.md) | Dependencias y distribución de clases |
 | [Base de datos](database/README.md) | Modelo DBML y scripts de creación |
 | [Docker y persistencia](database/DOCKER.md) | MySQL, volúmenes y credenciales de Docker |
