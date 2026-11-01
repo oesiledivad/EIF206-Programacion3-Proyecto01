@@ -404,6 +404,10 @@ El panel de alertas permanece visible a la derecha al cambiar de pantalla.
 Al recibir una reserva aparece un aviso temporal de seis segundos; **Ver alerta**
 enfoca la tarjeta más reciente del panel. Para abrir sus datos, utiliza **Ver detalle**.
 
+Si se pierde la conexión de alertas, el panel muestra el aviso y el botón
+**Reconectar alertas**, conservando las tarjetas recibidas. Si se reinició el
+backend, vuelve a iniciar sesión. El cierre de sesión no genera este aviso.
+
 Cierra primero los frontends adicionales y al final la aplicación iniciada sin
 `-SoloFrontend`: esta última detiene backend y MySQL cuando se cierra.
 

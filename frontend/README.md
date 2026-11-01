@@ -40,6 +40,8 @@ desde la raíz del repositorio:
 ```
 
 Iniciar primero MySQL y el backend siguiendo el [arranque completo](../README.md#compilación-y-ejecución).
+Al abrir el login, el frontend conecta en segundo plano antes de enviar credenciales.
+Si no consigue conectarse, muestra el error y permite reintentar al ingresar.
 En Windows PowerShell, usar `.\mvnw.cmd` en lugar de `./mvnw`.
 La instalación resuelve las dependencias entre módulos en el repositorio Maven
 local. El objetivo `javafx:run` se aplica únicamente a `frontend`.
@@ -63,6 +65,8 @@ Cerrar esta ventana adicional conserva los servicios en ejecución.
 Las alertas se muestran como una `ListView` con tarjetas FXML y estilos CSS.
 El panel derecho siempre está visible, independientemente de la pantalla actual.
 La notificación emergente permite enfocar la alerta más reciente sin cambiar de vista.
+Si se interrumpe el canal, el panel muestra el estado y permite **Reconectar alertas**
+sin borrar las tarjetas recibidas. Si el backend se reinició, vuelve a iniciar sesión.
 Para probar su recepción, ingresar con usuarios distintos en las dos ventanas
 y crear una reserva desde un funcionario. La
 [guía de múltiples clientes](../README.md#-abrir-otro-frontend-y-probar-las-alertas)
