@@ -9,7 +9,7 @@ JavaFX y organizada según el patrón Modelo–Vista–Controlador.
 | --- | --- |
 | `src/main/java/una/proyecto/app` | Punto de entrada `MainApp` |
 | `src/main/java/una/proyecto/controller` | Controladores de las pantallas |
-| `src/main/java/una/proyecto/proxy` | Cliente de autenticación y consulta del panel por sockets |
+| `src/main/java/una/proyecto/proxy` | Peticiones por sockets y recepción de alertas |
 | `src/main/java/una/proyecto/presentation/logic` | Lógica de presentación de ingreso y navegación |
 | `src/main/java/una/proyecto/utils` | Sesión local, navegación, ventanas y generación de PDF |
 | `src/main/resources/una/proyecto/ui` | Vistas FXML |
@@ -23,8 +23,10 @@ funcionarios, categorías y recursos, calendarios, estadísticas y reportes PDF.
 ## Dependencias
 
 El módulo utiliza los modelos y contratos de [`common`](../common/README.md).
-Ingreso, cambio de contraseña y panel inicial utilizan `ServiceProxy` contra
-[`backend`](../backend/README.md). Las demás vistas usan servicios locales. Las vistas usan JavaFX, FormsFX e
+Las consultas y operaciones de datos utilizan `ServiceProxy` contra
+[`backend`](../backend/README.md), incluidas las estadísticas por categoría y semana.
+El backend es una dependencia exclusiva de pruebas, para iniciar servidores de integración;
+no forma parte de la aplicación distribuida. Las vistas usan JavaFX, FormsFX e
 Ikonli; los reportes utilizan PDFBox y EasyTable.
 
 ## Ejecución
@@ -66,15 +68,18 @@ describe el recorrido completo.
 
 ## Configuración y pruebas
 
-Los servicios locales utilizan la conexión MySQL descrita en la
-[guía de usuarios y configuración](../database/USUARIOS.md). La configuración del
-asistente de IA se carga desde el archivo `.env` descrito en el
-[README general](../README.md).
+El frontend utiliza `SERVER_HOST` y `SERVER_PORT` para localizar el backend.
+No necesita credenciales MySQL ni claves de Groq: ambas configuraciones pertenecen
+al servidor, como se describe en el [README general](../README.md).
+
+Las consultas de estadísticas se ejecutan en segundo plano. Mientras se consulta
+un período se deshabilitan sus fechas y los botones de generar e imprimir;
+los errores del servidor se muestran junto a los filtros correspondientes.
 
 Para ejecutar las pruebas del módulo y sus dependencias sin llamadas externas a IA:
 
 ```sh
-./mvnw -pl frontend -am verify "-Dit.test=*IT,!IAgeneratorIntegracionIT" -Dfailsafe.failIfNoSpecifiedTests=false
+./mvnw -pl frontend -am verify "-Dit.test=LoginIntegracionIT,EstadisticasServidorIntegracionIT" "-Dfailsafe.failIfNoSpecifiedTests=false"
 ```
 
 Los reportes propios del módulo se generan en `target/surefire-reports/` y

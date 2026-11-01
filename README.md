@@ -518,10 +518,10 @@ Ingresar con **ID `admin`** y la contraseña del paso 5. Debe abrirse el panel
 principal con el nombre **Administrador** y los contadores leídos desde el backend.
 Si se cargó el catálogo, el panel mostrará **2 recursos**.
 
-El login, la consulta del panel inicial, el cambio de contraseña y el cierre de
-sesión utilizan el proxy de sockets. Las demás vistas conservan sus llamadas a
-los servicios locales. Las operaciones de red de login y carga del panel se
-realizan en segundo plano para mantener la interfaz disponible.
+Las operaciones de datos utilizan el proxy de sockets. El frontend no requiere
+configuración MySQL ni incluye el backend entre sus dependencias de ejecución.
+Las operaciones de red de login, carga del panel y estadísticas se realizan en
+segundo plano para mantener la interfaz disponible.
 
 Para conectar ese frontend a un backend en otra computadora, definir antes de
 arrancarlo:
@@ -558,6 +558,7 @@ las pruebas unitarias junto con estas integraciones:
 * `FuncionariosIntegracionIT`: perfiles de funcionarios y su clave inicial.
 * `ServerIntegracionIT`: operaciones y permisos del servidor por sockets.
 * `LoginIntegracionIT`: ingreso, panel remoto, cambio de contraseña y cierre de sesión desde el cliente.
+* `EstadisticasServidorIntegracionIT`: consultas remotas por período, roles, validación de fechas y exclusión de reservas canceladas.
 
 Las demás suites de integración quedan fuera de este comando; el resultado del
 workflow corresponde a las pruebas enumeradas. No requiere secretos de Groq ni

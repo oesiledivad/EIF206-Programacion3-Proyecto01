@@ -24,6 +24,13 @@ hilos.
 | 12 | `AUTH_CAMBIAR_CLAVE` | Contraseña actual y nueva con `writeObject(String)` | `null` |
 | 20 | `DASHBOARD_RESUMEN` | Ninguno; requiere sesión | `DashboardData` con reservas visibles y contadores |
 | 99 | `DISCONNECT` | Ninguno | Cierre del socket, sin respuesta |
+| 600 | `ESTADISTICAS_RECURSOS` | Desde y hasta con `writeObject(LocalDate)` | `List<EstadisticaItem>` por categoría |
+| 601 | `ESTADISTICAS_ACTIVIDADES` | Desde y hasta con `writeObject(LocalDate)` | `List<EstadisticaItem>` por semana |
+
+Las consultas de estadísticas requieren una sesión activa, tanto de administrador
+como de funcionario. El backend valida que ambas fechas estén presentes y que
+`desde` no sea posterior a `hasta`. Los límites del período son inclusivos y
+las reservas canceladas no se incluyen. Cada elemento contiene `nombre` y `cantidad`.
 
 Después de enviar cada petición, ejecutar `flush()`. Se recomienda `reset()` del
 stream al terminar cada envío para evitar reutilizar versiones anteriores de

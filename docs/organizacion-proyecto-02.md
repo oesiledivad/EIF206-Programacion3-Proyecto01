@@ -14,12 +14,14 @@ El MER y los scripts MySQL se encuentran en [`database`](../database/README.md).
 ## Dependencias
 
 ```text
-frontend --> backend --> common
-    |______________________^
+frontend --> common <-- backend
+frontend -- sockets --> backend -- JDBC --> MySQL
 ```
 
-Ingreso, cambio de contraseña y panel inicial usan sockets mediante `ServiceProxy`.
-Las demás vistas de escritorio utilizan servicios locales del backend. El backend depende de los modelos de common y es independiente de JavaFX.
+Las operaciones de datos, incluidas las estadísticas, usan sockets mediante `ServiceProxy`.
+El frontend no incluye clases del backend en su runtime ni se conecta a MySQL. Su dependencia
+Maven del backend tiene alcance `test` para las pruebas de integración.
+El backend depende de los modelos de common y es independiente de JavaFX.
 Common no depende de los otros módulos.
 
 Cada módulo tiene su propio `pom.xml` y descriptor `module-info.java`.
