@@ -53,7 +53,7 @@ jobs:
       - name: Compilar módulos y ejecutar pruebas unitarias e integración de autenticación
         run: >-
           xvfb-run -a ./mvnw --batch-mode --no-transfer-progress verify
-          -Dit.test=UsuariosIntegracionIT,FuncionariosIntegracionIT,ServerIntegracionIT,LoginIntegracionIT
+          -Dit.test=UsuariosIntegracionIT,FuncionariosIntegracionIT,ServerIntegracionIT,LoginIntegracionIT,EstadisticasServidorIntegracionIT
           -Dfailsafe.failIfNoSpecifiedTests=false
 
       - name: Guardar reportes de pruebas
