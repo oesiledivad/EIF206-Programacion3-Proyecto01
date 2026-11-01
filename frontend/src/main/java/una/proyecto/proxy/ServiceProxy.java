@@ -32,6 +32,7 @@ public class ServiceProxy implements LoginService, AutoCloseable {
 
      //NOTIFICACIONES
     private volatile String sid;
+    private boolean autenticado;
     private ReceptorNotificaciones receptor;
     private final Object lockAlertas = new Object();
 
@@ -44,8 +45,14 @@ public class ServiceProxy implements LoginService, AutoCloseable {
     public static ServiceProxy instance() { return INSTANCE; }
 
     @Override
-    public Usuario authenticate(String id, String password) {
-        try { return (Usuario) request(Protocol.AUTH_LOGIN, id, password); }
+    public synchronized Usuario authenticate(String id, String password) {
+        detenerAlertas();
+        autenticado = false;
+        try {
+            Usuario usuario = (Usuario) request(Protocol.AUTH_LOGIN, id, password);
+            autenticado = usuario != null;
+            return usuario;
+        }
         catch (RemoteException e) {
             if ("Credenciales incorrectas.".equals(e.getMessage())) return null;
             throw e;
@@ -231,20 +238,29 @@ public class ServiceProxy implements LoginService, AutoCloseable {
     // Abre el canal asincrono. Debe llamarse DESPUES del login: el servidor
     // rechaza el canal si la conexion no tiene sesion.
     public void iniciarAlertas(Consumer<Reserva> alAlertar) {
-        String sidActual = sid;
-        if (sidActual == null) {
-            throw new IllegalStateException("Debe iniciar sesión antes de abrir el canal de alertas.");
+        iniciarAlertas(alAlertar, error -> { });
+    }
+
+    public void iniciarAlertas(Consumer<Reserva> alAlertar, Consumer<Exception> alDesconectar) {
+        ReceptorNotificaciones nuevo;
+        synchronized (this) {
+            if (!autenticado || sid == null) {
+                throw new IllegalStateException("Debe iniciar sesión antes de abrir el canal de alertas.");
+            }
+            nuevo = new ReceptorNotificaciones(host, port, sid, alAlertar, alDesconectar);
+            synchronized (lockAlertas) {
+                if (receptor != null) receptor.close();
+                receptor = nuevo;
+            }
         }
-        ReceptorNotificaciones nuevo = new ReceptorNotificaciones(host, port, sidActual, alAlertar);
         try {
             nuevo.iniciar();
         } catch (IOException e) {
             nuevo.close();
+            synchronized (lockAlertas) {
+                if (receptor == nuevo) receptor = null;
+            }
             throw new IllegalStateException("No se pudo abrir el canal de alertas: " + e.getMessage(), e);
-        }
-        synchronized (lockAlertas) {
-            if (receptor != null) receptor.close();
-            receptor = nuevo;
         }
     }
 
@@ -271,6 +287,7 @@ public class ServiceProxy implements LoginService, AutoCloseable {
 
 
     public synchronized void logout() {
+        detenerAlertas();
         if (socket == null) return;
         try { request(Protocol.AUTH_LOGOUT); }
         catch (IllegalStateException ignored) {
@@ -310,9 +327,25 @@ public class ServiceProxy implements LoginService, AutoCloseable {
             if (status != Protocol.STATUS_NO_ERROR) throw new IOException("Respuesta desconocida");
             return result;
         } catch (IOException | ClassNotFoundException e) {
-            close();
+            try {
+                synchronized (lockAlertas) {
+                    if (receptor != null) receptor.interrumpir(e);
+                }
+            } finally {
+                close();
+            }
             throw new IllegalStateException("No se pudo comunicar con el servidor en " + host + ":" + port
                     + ". Compruebe que el backend esté iniciado.", e);
+        }
+    }
+
+    public synchronized void conectar() {
+        try {
+            connect();
+        } catch (IOException | ClassNotFoundException e) {
+            close();
+            throw new IllegalStateException("No se pudo conectar al backend en " + host + ":" + port
+                    + ". Compruebe que el servidor esté iniciado.", e);
         }
     }
 
@@ -320,13 +353,15 @@ public class ServiceProxy implements LoginService, AutoCloseable {
         if (socket != null) return;
         socket = new Socket();
         socket.connect(new InetSocketAddress(host, port), 3000);
-        socket.setSoTimeout(30_000);
+        socket.setSoTimeout(5000);
         output = new ObjectOutputStream(socket.getOutputStream());
         output.flush();
         input = new ObjectInputStream(socket.getInputStream());
         output.writeInt(Protocol.SYNC);
         output.flush();
-        if (!(input.readObject() instanceof String saludo)) throw new IOException("Saludo inválido");sid = saludo;
+        if (!(input.readObject() instanceof String saludo)) throw new IOException("Saludo inválido");
+        sid = saludo;
+        socket.setSoTimeout(30_000);
     }
 
     @Override
@@ -336,6 +371,8 @@ public class ServiceProxy implements LoginService, AutoCloseable {
             try { socket.close(); } catch (IOException ignored) { }
         }
         socket = null;
+        sid = null;
+        autenticado = false;
         input = null;
         output = null;
     }
