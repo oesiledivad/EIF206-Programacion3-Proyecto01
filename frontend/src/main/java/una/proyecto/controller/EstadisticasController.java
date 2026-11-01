@@ -1,6 +1,7 @@
 package una.proyecto.controller;
 
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -12,8 +13,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 import una.proyecto.model.EstadisticaItem;
-import una.proyecto.service.EstadisticasService;
-import una.proyecto.bootstrap.AppFactory;
+import una.proyecto.proxy.ServiceProxy;
 import una.proyecto.utils.GeneradorPDFS;
 import una.proyecto.utils.ReportePDF;
 import una.proyecto.utils.TablePDF;
@@ -62,7 +62,7 @@ public class EstadisticasController {
     @FXML
     private VBox vboxEstadisticasActividades;
 
-    private final EstadisticasService estadisticasService = AppFactory.createEstadisticasService();
+    private final ServiceProxy proxy = ServiceProxy.instance();
 
     private final ObservableList<EstadisticaItem> resourceData = FXCollections.observableArrayList();
     private final ObservableList<EstadisticaItem> activityData = FXCollections.observableArrayList();
@@ -220,63 +220,64 @@ public class EstadisticasController {
     // ACCIONES Y LÓGICA DE CARGA
 
     private void loadResourceData() {
-        try {
-            LocalDate fromDate = dpRecursosDesde.getValue();
-            LocalDate toDate = dpRecursosHasta.getValue();
-
-            if (!validateDates(fromDate, toDate, true)) {
-                return;
-            }
-
-            hideErrorMessages();
-
-            resourceData.clear();
-
-            List<EstadisticaItem> items = estadisticasService.obtenerEstadisticasRecursos(fromDate, toDate);
-
-            if (items != null && !items.isEmpty()) {
-                resourceData.setAll(items);
-                updateChartSeries(resourceSeries, items);
-            } else {
-                showResourceError("No se encontraron datos para el período seleccionado.");
-                resourceSeries.getData().clear();
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            showResourceError("Error al cargar recursos: " + e.getMessage());
-            resourceSeries.getData().clear();
-        }
+        cargarEstadisticas(true);
     }
 
     private void loadActivityData() {
-        try {
-            LocalDate fromDate = dpActividadesDesde.getValue();
-            LocalDate toDate = dpActividadesHasta.getValue();
+        cargarEstadisticas(false);
+    }
 
-            if (!validateDates(fromDate, toDate, false)) {
-                return;
+    private void cargarEstadisticas(boolean recursos) {
+        DatePicker desde = recursos ? dpRecursosDesde : dpActividadesDesde;
+        DatePicker hasta = recursos ? dpRecursosHasta : dpActividadesHasta;
+        Button generar = recursos ? btnGenerarRecursos : btnGenerarActividades;
+        Button imprimir = recursos ? btnImprimirRecursos : btnImprimirActividades;
+        Label error = recursos ? lblErrorRecursos : lblErrorActividades;
+        ObservableList<EstadisticaItem> datos = recursos ? resourceData : activityData;
+        XYChart.Series<String, Number> serie = recursos ? resourceSeries : activitySeries;
+        if (generar.isDisabled()) return;
+        LocalDate inicio = desde.getValue();
+        LocalDate fin = hasta.getValue();
+        if (!validateDates(inicio, fin, recursos)) return;
+        error.setVisible(false);
+        error.setText("");
+        datos.clear();
+        serie.getData().clear();
+        generar.setDisable(true);
+        imprimir.setDisable(true);
+        desde.setDisable(true);
+        hasta.setDisable(true);
+
+        Task<List<EstadisticaItem>> tarea = new Task<>() {
+            @Override protected List<EstadisticaItem> call() {
+                return recursos ? proxy.estadisticasRecursos(inicio, fin)
+                        : proxy.estadisticasActividades(inicio, fin);
             }
-
-            hideErrorMessages();
-
-            activityData.clear();
-
-            List<EstadisticaItem> items = estadisticasService.obtenerEstadisticasActividades(fromDate, toDate);
-
-            if (items != null && !items.isEmpty()) {
-                activityData.setAll(items);
-                updateChartSeries(activitySeries, items);
-            } else {
-                showActivityError("No se encontraron datos para el período seleccionado.");
-                activitySeries.getData().clear();
+        };
+        Runnable terminar = () -> {
+            generar.setDisable(false);
+            imprimir.setDisable(false);
+            desde.setDisable(false);
+            hasta.setDisable(false);
+        };
+        tarea.setOnSucceeded(event -> {
+            terminar.run();
+            List<EstadisticaItem> items = tarea.getValue();
+            datos.setAll(items);
+            updateChartSeries(serie, items);
+            if (items.isEmpty()) {
+                error.setText("No se encontraron datos para el período seleccionado.");
+                error.setVisible(true);
             }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            showActivityError("Error al cargar actividades: " + e.getMessage());
-            activitySeries.getData().clear();
-        }
+        });
+        tarea.setOnFailed(event -> {
+            terminar.run();
+            error.setText("No se pudieron cargar las estadísticas: " + tarea.getException().getMessage());
+            error.setVisible(true);
+        });
+        Thread hilo = new Thread(tarea, recursos ? "Estadisticas-Recursos" : "Estadisticas-Actividades");
+        hilo.setDaemon(true);
+        hilo.start();
     }
 
     private boolean validateDates(LocalDate fromDate, LocalDate toDate, boolean isResource) {

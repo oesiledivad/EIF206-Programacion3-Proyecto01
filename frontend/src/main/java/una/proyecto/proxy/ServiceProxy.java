@@ -1,6 +1,7 @@
 package una.proyecto.proxy;
 
 import una.proyecto.model.DashboardData;
+import una.proyecto.model.EstadisticaItem;
 import una.proyecto.model.LoginService;
 import una.proyecto.model.Usuario;
 import una.proyecto.model.Recurso;
@@ -52,6 +53,16 @@ public class ServiceProxy implements LoginService, AutoCloseable {
     }
 
     public DashboardData dashboard() { return (DashboardData) request(Protocol.DASHBOARD_RESUMEN); }
+
+    @SuppressWarnings("unchecked")
+    public List<EstadisticaItem> estadisticasRecursos(LocalDate desde, LocalDate hasta) {
+        return (List<EstadisticaItem>) request(Protocol.ESTADISTICAS_RECURSOS, desde, hasta);
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<EstadisticaItem> estadisticasActividades(LocalDate desde, LocalDate hasta) {
+        return (List<EstadisticaItem>) request(Protocol.ESTADISTICAS_ACTIVIDADES, desde, hasta);
+    }
     public void changePassword(String actual, String nueva) { request(Protocol.AUTH_CAMBIAR_CLAVE, actual, nueva); }
 
     // ================= Categorias =================
