@@ -45,6 +45,25 @@ local. El objetivo `javafx:run` se aplica únicamente a `frontend`.
 En IntelliJ, importar el `pom.xml` raíz y usar la raíz del repositorio como
 directorio de trabajo al ejecutar `una.proyecto.app.MainApp`.
 
+## Abrir otro cliente en Windows
+
+Con una primera aplicación iniciada mediante `iniciar.ps1`, abrir otra terminal
+PowerShell en la raíz y ejecutar:
+
+```powershell
+.\iniciar.ps1 -SoloFrontend
+```
+
+El nuevo cliente utiliza el mismo backend y no administra MySQL ni el servidor.
+Para otro destino, agregar `-ServidorBackend` y `-PuertoBackend`.
+Cerrar esta ventana adicional conserva los servicios en ejecución.
+
+Las alertas se muestran como una `ListView` con tarjetas FXML y estilos CSS.
+Para probar su recepción, ingresar con usuarios distintos en las dos ventanas
+y crear una reserva desde un funcionario. La
+[guía de múltiples clientes](../README.md#-abrir-otro-frontend-y-probar-las-alertas)
+describe el recorrido completo.
+
 ## Configuración y pruebas
 
 Los servicios locales utilizan la conexión MySQL descrita en la

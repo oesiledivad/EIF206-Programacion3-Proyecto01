@@ -6,14 +6,19 @@
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
 <BorderPane fx:id="mainLayout" prefHeight="635.0" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="una.proyecto.controller.MainViewController">
+   <top>
+      <fx:include source="title-bar.fxml" />
+   </top>
    <left>
       <VBox fx:id="sidebar" alignment="TOP_CENTER" prefHeight="600.0" styleClass="sidebar" BorderPane.alignment="TOP_CENTER">
          <children>
@@ -66,6 +71,20 @@
                            <graphic>
                               <FontIcon iconLiteral="fa-bar-chart" styleClass="icon-primary" />
                            </graphic></ToggleButton>
+                        <Separator />
+                        <ToggleButton fx:id="btnAlertas" alignment="CENTER_LEFT" maxWidth="Infinity"
+                                      selected="false" styleClass="menu-item, alertas-menu"
+                                      accessibleText="Mostrar u ocultar el panel de alertas">
+                           <graphic>
+                              <HBox alignment="CENTER_LEFT" spacing="12.0" prefWidth="160.0" mouseTransparent="true">
+                                 <FontIcon fx:id="campanaAlertas" iconLiteral="fa-bell-o" styleClass="icon-primary" />
+                                 <Label text="Alertas" />
+                                 <Region HBox.hgrow="ALWAYS" />
+                                 <Label fx:id="contadorAlertasBoton" text="0" styleClass="alertas-contador" />
+                              </HBox>
+                           </graphic>
+                           <tooltip><Tooltip text="Mostrar u ocultar el panel de alertas" /></tooltip>
+                        </ToggleButton>
                      </children>
                   </VBox>
                </children>
@@ -94,13 +113,22 @@
       </VBox>
    </left>
    <center>
-      <StackPane fx:id="viewContainer" styleClass="view-container" BorderPane.alignment="CENTER">
-         <padding>
-            <Insets top="24.0" />
-         </padding>
+      <StackPane BorderPane.alignment="CENTER">
+         <StackPane fx:id="viewContainer" styleClass="view-container">
+            <padding><Insets top="24.0" /></padding>
+         </StackPane>
+         <HBox fx:id="avisoNuevaAlerta" alignment="CENTER_LEFT" spacing="8.0" minWidth="0.0"
+               maxWidth="320.0" maxHeight="-Infinity" visible="false" managed="false"
+               styleClass="alertas-aviso" StackPane.alignment="BOTTOM_RIGHT">
+            <StackPane.margin><Insets bottom="20.0" right="20.0" left="20.0" /></StackPane.margin>
+            <Label text="Nueva reserva recibida" wrapText="true" minWidth="0.0" maxWidth="Infinity" HBox.hgrow="ALWAYS" />
+            <Button text="Ver alerta" minWidth="-Infinity" onAction="#mostrarAlertas" styleClass="btn-link" />
+         </HBox>
       </StackPane>
    </center>
-   <top>
-      <fx:include source="title-bar.fxml" />
-   </top>
+   <right>
+      <VBox visible="${btnAlertas.selected}" managed="${btnAlertas.selected}">
+         <fx:include fx:id="panelAlertas" source="alertas-panel.fxml" VBox.vgrow="ALWAYS" />
+      </VBox>
+   </right>
 </BorderPane>

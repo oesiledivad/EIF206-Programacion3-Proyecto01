@@ -2,6 +2,8 @@
 param(
     [switch]$Comprobar,
     [switch]$SinCompilar,
+    [switch]$SoloFrontend,
+    [ValidateNotNullOrEmpty()][string]$ServidorBackend = '127.0.0.1',
     [ValidateRange(1, 65535)][int]$PuertoBackend = 1234
 )
 
@@ -45,9 +47,6 @@ function Invoke-Compose([string[]]$Arguments) {
 
 try {
     Push-Location $root
-    New-Item -ItemType Directory -Force target/local | Out-Null
-    $lock = [IO.File]::Open("$root/target/local/iniciar.lock", 'OpenOrCreate', 'ReadWrite', 'None')
-
     $candidates = @($env:JAVA_HOME)
     if (Get-Command java -ErrorAction SilentlyContinue) {
         $candidates += Split-Path (Split-Path (Get-Command java).Source)
@@ -69,6 +68,29 @@ try {
     $env:JAVA_HOME = $jdk
     $env:PATH = "$jdk/bin;$env:PATH"
     Write-Host "Usando JDK: $jdk"
+
+    if ($SoloFrontend) {
+        $env:SERVER_HOST = $ServidorBackend
+        $env:SERVER_PORT = "$PuertoBackend"
+        $cliente = New-Object Net.Sockets.TcpClient
+        try {
+            $conexion = $cliente.ConnectAsync($ServidorBackend, $PuertoBackend)
+            if (-not $conexion.Wait(3000)) { throw 'Tiempo de espera agotado.' }
+        } catch {
+            throw "No se pudo conectar a ${ServidorBackend}:$PuertoBackend. Inicie primero el backend con .\iniciar.ps1 o revise la direccion y el puerto."
+        } finally {
+            $cliente.Dispose()
+        }
+        Write-Host "Backend disponible en ${ServidorBackend}:$PuertoBackend."
+        if (-not $Comprobar) {
+            Write-Host 'Abriendo otro frontend. Al cerrarlo, el backend y MySQL seguiran funcionando.'
+            Invoke-Maven @('-pl', 'frontend', 'javafx:run')
+        }
+        return
+    }
+
+    New-Item -ItemType Directory -Force target/local | Out-Null
+    $lock = [IO.File]::Open("$root/target/local/iniciar.lock", 'OpenOrCreate', 'ReadWrite', 'None')
 
     if (-not (Get-Command docker -ErrorAction SilentlyContinue)) { throw 'Instale Docker Desktop y vuelva a abrir PowerShell.' }
     & docker info *> $null
@@ -167,7 +189,13 @@ try {
         }
     } finally {
         if ($lock) { $lock.Dispose() }
-        foreach ($name in $variables) { [Environment]::SetEnvironmentVariable($name, $original[$name], 'Process') }
+        foreach ($name in $variables) {
+            if ($null -eq $original[$name]) {
+                Remove-Item -LiteralPath "Env:$name" -ErrorAction SilentlyContinue
+            } else {
+                [Environment]::SetEnvironmentVariable($name, $original[$name], 'Process')
+            }
+        }
         Pop-Location
     }
 }

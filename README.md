@@ -359,6 +359,50 @@ Si PowerShell bloquea los scripts, puedes habilitar únicamente esta ejecución:
 powershell -NoProfile -ExecutionPolicy Bypass -File .\iniciar.ps1
 ```
 
+### 🪟 Abrir otro frontend y probar las alertas
+
+Mantén la primera aplicación abierta con `iniciar.ps1`. Desde **otra terminal
+PowerShell**, en la raíz del mismo repositorio, abre otra ventana:
+
+```powershell
+.\iniciar.ps1 -SoloFrontend
+```
+
+Esta opción reutiliza la compilación del primer arranque y conecta el nuevo
+frontend al backend en `127.0.0.1:1234`. No inicia ni detiene backend o MySQL,
+y puedes repetir el comando en más terminales para abrir otros clientes.
+
+Si el backend usa otro puerto o está en otra computadora:
+
+```powershell
+.\iniciar.ps1 -SoloFrontend -PuertoBackend 1235
+.\iniciar.ps1 -SoloFrontend -ServidorBackend 192.168.1.20 -PuertoBackend 1234
+```
+
+Para comprobar únicamente que el puerto del backend acepta conexiones:
+
+```powershell
+.\iniciar.ps1 -SoloFrontend -Comprobar
+```
+
+Para probar las alertas con dos ventanas:
+
+1. En la primera, ingresa como administrador y crea un funcionario activo,
+   una categoría y un recurso disponible de esa categoría.
+2. En la segunda, ingresa con ese funcionario; su contraseña inicial es su ID.
+3. Crea una reserva con una categoría que tenga recursos disponibles en el horario elegido.
+4. Comprueba que en la primera ventana aparezca una tarjeta con la actividad,
+   funcionario y horario, y que aumente el contador de alertas.
+5. Usa **Ver detalle** para consultar la reserva y la **×** para descartarla.
+   Descartar el aviso solo lo retira de la lista local; la reserva se conserva.
+
+Las ventanas deben utilizar **usuarios distintos**: el servidor no notifica al
+mismo usuario que creó la reserva. Las alertas son temporales y se reciben
+mientras el cliente está conectado.
+
+Cierra primero los frontends adicionales y al final la aplicación iniciada sin
+`-SoloFrontend`: esta última detiene backend y MySQL cuando se cierra.
+
 También puedes ejecutar cada paso manualmente como se describe a continuación.
 
 ### 1. 📥 Obtener el proyecto y comprobar Java
