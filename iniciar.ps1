@@ -1,15 +1,74 @@
-[CmdletBinding()]
+[CmdletBinding(DefaultParameterSetName = 'Completo')]
 param(
     [switch]$Comprobar,
     [switch]$SinCompilar,
-    [switch]$SoloFrontend,
+    [Parameter(ParameterSetName = 'Completo')]
+    [Parameter(ParameterSetName = 'Backend')][switch]$DatosDemo,
+    [Parameter(ParameterSetName = 'Frontend')][switch]$SoloFrontend,
+    [Parameter(ParameterSetName = 'Backend')][switch]$SoloBackend,
+    [Parameter(ParameterSetName = 'Frontend')]
     [ValidateNotNullOrEmpty()][string]$ServidorBackend = '127.0.0.1',
+    [Alias('h', 'help')][switch]$Ayuda,
     [ValidateRange(1, 65535)][int]$PuertoBackend = 1234
 )
+
+if ($Ayuda) {
+    Write-Output @'
+Sistema de Reserva de Recursos - Inicio local
+
+Uso: .\iniciar.ps1 [opciones]
+
+Sin opciones: inicia MySQL en Docker, compila los modulos, crea el administrador
+si no existe, inicia el backend y abre JavaFX. Al cerrar JavaFX detiene los
+servicios que administra este script y conserva los datos de MySQL.
+
+Opciones:
+  -SoloBackend       Inicia MySQL y backend sin abrir JavaFX. Mantiene la terminal
+                     abierta; Ctrl+C detiene ambos servicios y conserva los datos.
+  -SoloFrontend      Conecta otro frontend a un backend existente. No administra
+                     MySQL ni el servidor. Requiere los modulos ya compilados.
+  -ServidorBackend   Host o IP del servidor, con -SoloFrontend. Por defecto: 127.0.0.1.
+  -PuertoBackend     Puerto TCP del backend. Por defecto: 1234. Rango: 1 a 65535.
+  -SinCompilar       Reutiliza la compilacion y el classpath del arranque anterior.
+                     Se aplica al inicio completo o con -SoloBackend.
+  -DatosDemo         Agrega 5 funcionarios, categorias, recursos y reservas futuras.
+                     Al cerrar elimina solo los ejemplos creados por esta ejecucion.
+                     Conserva datos manuales y las dependencias que estos necesiten.
+  -Comprobar         Comprueba el arranque y termina sin abrir JavaFX; detiene
+                     MySQL y backend al finalizar. Con -SoloFrontend, solo
+                     comprueba que el puerto acepte conexiones.
+  -Ayuda, -h, -help   Muestra esta ayuda sin iniciar servicios ni requerir Java.
+
+-SoloBackend y -SoloFrontend son modos excluyentes.
+
+Ejemplos:
+  .\iniciar.ps1
+  .\iniciar.ps1 -SoloBackend
+  .\iniciar.ps1 -SoloBackend -SinCompilar -PuertoBackend 1235
+  .\iniciar.ps1 -SoloBackend -Comprobar
+  .\iniciar.ps1 -DatosDemo
+  .\iniciar.ps1 -SoloBackend -DatosDemo
+  .\iniciar.ps1 -SoloFrontend
+  .\iniciar.ps1 -SoloFrontend -ServidorBackend 192.168.1.20 -PuertoBackend 1234
+  .\iniciar.ps1 -SoloFrontend -Comprobar
+  .\iniciar.ps1 -h
+
+Requisitos: JDK 17+ (21 recomendado) y Docker Desktop para iniciar MySQL.
+Configuracion: .config/docker.env, .config/database.env y .config/admin.env.
+IA opcional: .env. Instrucciones completas en README.md y docs/.
+Registros del backend: target/local/backend.log y backend-error.log.
+'@
+    return
+}
+
+if ($PSCmdlet.ParameterSetName -eq 'Frontend' -and -not $SoloFrontend) {
+    throw 'Use -ServidorBackend junto con -SoloFrontend. Consulte .\iniciar.ps1 -h.'
+}
 
 $ErrorActionPreference = 'Stop'
 $root = $PSScriptRoot
 $backend = $null
+$demoRegistro = $null
 $mysqlManaged = $false
 $lock = $null
 $variables = @('JAVA_HOME', 'PATH', 'DB_URL', 'DB_USER', 'DB_PASSWORD',
@@ -160,6 +219,14 @@ try {
     }
 
     $classpath = "$root/backend/target/classes;" + (Get-Content $classpathFile -Raw).Trim()
+    if ($DatosDemo) {
+        $demoRegistro = Join-Path $root "target/local/demo-$([guid]::NewGuid().ToString('N')).properties"
+        & "$jdk/bin/java.exe" -cp $classpath una.proyecto.bootstrap.CargarDemostracion cargar $demoRegistro
+        if ($LASTEXITCODE -ne 0) { throw 'No se pudieron cargar los ejemplos de demostracion.' }
+        if (-not (Test-Path -LiteralPath $demoRegistro)) { throw 'No se genero el registro de demostracion. Ejecute sin -SinCompilar.' }
+        Write-Host 'Los ejemplos nuevos de esta ejecucion se eliminaran al cerrar; sus datos manuales se conservaran.'
+    }
+
     $stdout = "$root/target/local/backend.log"
     $stderr = "$root/target/local/backend-error.log"
     $backend = Start-Process -FilePath "$jdk/bin/java.exe" -ArgumentList @('-cp', "`"$classpath`"", 'una.proyecto.server.BackendApp') `
@@ -175,17 +242,34 @@ try {
     }
     if (-not $ready) { throw "El backend no arranco a tiempo. Revise $stdout y $stderr." }
     Write-Host "Backend conectado a MySQL y escuchando en $PuertoBackend."
-    if (-not $Comprobar) {
+    if ($SoloBackend -and -not $Comprobar) {
+        Write-Host 'Solo backend activo. Use -SoloFrontend en otro equipo o terminal para conectarse.'
+        Write-Host 'Presione Ctrl+C para detener este backend y MySQL, conservando sus datos.'
+        while (-not $backend.HasExited) { Start-Sleep -Seconds 1 }
+        if ($backend.ExitCode -ne 0) { throw "El backend termino con error. Revise $stdout y $stderr." }
+    } elseif (-not $Comprobar) {
         Write-Host 'Abriendo JavaFX. Al cerrar la ventana se detendran este backend y MySQL.'
         Invoke-Maven @('-pl', 'frontend', 'javafx:run')
     }
 } finally {
     try {
-        if ($backend -and -not $backend.HasExited) { Stop-Process -Id $backend.Id -ErrorAction SilentlyContinue }
-        if ($mysqlManaged) {
-            Write-Host 'Deteniendo MySQL y conservando sus datos...'
-            & docker compose --env-file "$root/.config/docker.env" stop mysql
-            if ($LASTEXITCODE -ne 0) { Write-Warning 'No se pudo detener MySQL. Use docker compose --env-file .config/docker.env stop mysql.' }
+        try {
+            if ($backend -and -not $backend.HasExited) { Stop-Process -Id $backend.Id -ErrorAction SilentlyContinue }
+            if ($demoRegistro -and (Test-Path -LiteralPath $demoRegistro)) {
+                Write-Host 'Eliminando los ejemplos creados por esta ejecucion...'
+                try {
+                    & "$jdk/bin/java.exe" -cp $classpath una.proyecto.bootstrap.CargarDemostracion limpiar $demoRegistro
+                    if ($LASTEXITCODE -ne 0) { Write-Warning "No se completo la limpieza. Se conserva el registro: $demoRegistro" }
+                } catch {
+                    Write-Warning "No se completo la limpieza. Se conserva el registro: $demoRegistro. $($_.Exception.Message)"
+                }
+            }
+        } finally {
+            if ($mysqlManaged) {
+                Write-Host 'Deteniendo MySQL y conservando sus datos...'
+                & docker compose --env-file "$root/.config/docker.env" stop mysql
+                if ($LASTEXITCODE -ne 0) { Write-Warning 'No se pudo detener MySQL. Use docker compose --env-file .config/docker.env stop mysql.' }
+            }
         }
     } finally {
         if ($lock) { $lock.Dispose() }
