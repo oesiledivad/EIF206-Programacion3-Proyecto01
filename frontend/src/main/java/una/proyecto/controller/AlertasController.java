@@ -49,7 +49,7 @@ public class AlertasController {
             @Override
             protected Void call() {
                 // El listener corre en el hilo de red: se pasa al hilo de JavaFX
-                // antes de tocar la lista que esta ligada a la tabla.
+                // antes de actualizar la lista de alertas.
                 mainLogic.iniciarAlertas(reserva -> Platform.runLater(() -> alertas.add(0, reserva)));
                 return null;
             }
