@@ -2,27 +2,38 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<VBox prefWidth="300.0" minWidth="260.0" spacing="8.0" styleClass="card"
-      xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1"
+<VBox prefWidth="300.0" minWidth="280.0" maxWidth="320.0" spacing="16.0" styleClass="alertas-panel"
+      stylesheets="@../css/style.css"
+      xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="una.proyecto.controller.AlertasController">
     <padding>
-        <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
+        <Insets bottom="20.0" left="16.0" right="16.0" top="20.0" />
     </padding>
     <children>
-        <Label text="Alertas" />
-        <TableView fx:id="tablaAlertas" VBox.vgrow="ALWAYS">
-            <columns>
-                <TableColumn fx:id="colActividad" prefWidth="170.0" sortable="false" text="Actividad" />
-                <TableColumn fx:id="colVer" prefWidth="50.0" resizable="false" sortable="false" text="Ver" />
-                <TableColumn fx:id="colDescartar" prefWidth="55.0" resizable="false" sortable="false" text="Desc." />
-            </columns>
+        <VBox spacing="6.0">
+            <HBox alignment="CENTER_LEFT" spacing="8.0">
+                <FontIcon iconLiteral="fa-bell-o" styleClass="alertas-icono" />
+                <Label text="Alertas" styleClass="section-title" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Label fx:id="contadorAlertas" text="0" styleClass="alertas-contador" accessibleText="Cantidad de alertas" />
+            </HBox>
+            <Label text="Nuevas reservas de otros usuarios" wrapText="true" styleClass="text-secondary" />
+        </VBox>
+        <ListView fx:id="listaAlertas" styleClass="alertas-lista" VBox.vgrow="ALWAYS">
             <placeholder>
-                <Label text="Sin alertas" />
+                <VBox alignment="CENTER" spacing="10.0" styleClass="alertas-vacio">
+                    <FontIcon iconLiteral="fa-bell-o" styleClass="alertas-vacio-icono" />
+                    <Label text="Sin alertas por ahora" styleClass="section-title" wrapText="true" />
+                    <Label text="Las nuevas reservas aparecerán aquí mientras estés conectado."
+                           wrapText="true" textAlignment="CENTER" styleClass="text-secondary" />
+                </VBox>
             </placeholder>
-        </TableView>
+        </ListView>
     </children>
 </VBox>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<VBox spacing="8.0" styleClass="alerta-tarjeta" minWidth="0.0"
+      xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
+    <HBox alignment="TOP_LEFT" spacing="8.0">
+        <Label fx:id="actividad" wrapText="true" minWidth="0.0" prefWidth="0.0"
+               maxWidth="Infinity" HBox.hgrow="ALWAYS" styleClass="alerta-actividad" />
+        <Button onAction="#descartar" styleClass="alerta-descartar" accessibleText="Descartar alerta">
+            <graphic><FontIcon iconLiteral="fa-times" /></graphic>
+            <tooltip><Tooltip text="Descartar alerta" /></tooltip>
+        </Button>
+    </HBox>
+    <Label fx:id="encargado" wrapText="true" styleClass="text-secondary" />
+    <Label fx:id="horario" wrapText="true" styleClass="alerta-horario" />
+    <Button text="Ver detalle" onAction="#verDetalle" styleClass="btn-link" />
+</VBox>

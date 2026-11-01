@@ -1,45 +1,42 @@
 package una.proyecto.controller;
 
 import javafx.application.Platform;
-import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
-import javafx.geometry.Pos;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.ListCell;
 import javafx.scene.layout.GridPane;
-import org.kordamp.ikonli.javafx.FontIcon;
+import javafx.scene.layout.Region;
 import una.proyecto.model.Funcionario;
 import una.proyecto.model.Reserva;
 import una.proyecto.presentation.logic.MainLogic;
 
 import java.util.List;
-import java.util.function.Consumer;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.time.format.DateTimeFormatter;
 
 public class AlertasController {
 
-    @FXML private TableView<Reserva> tablaAlertas;
-    @FXML private TableColumn<Reserva, String> colActividad;
-    @FXML private TableColumn<Reserva, Void> colVer;
-    @FXML private TableColumn<Reserva, Void> colDescartar;
+    @FXML private ListView<Reserva> listaAlertas;
+    @FXML private Label contadorAlertas;
 
     private final ObservableList<Reserva> alertas = FXCollections.observableArrayList();
     private final MainLogic mainLogic = new MainLogic();
 
     @FXML
     public void initialize() {
-        colActividad.setCellValueFactory(celda -> new ReadOnlyStringWrapper(textoDeAlerta(celda.getValue())));
-        colVer.setCellFactory(columna -> new BotonCelda("fa-folder-open", this::verAlerta));
-        colDescartar.setCellFactory(columna -> new BotonCelda("fa-times-circle", this::descartarAlerta));
-        tablaAlertas.setItems(alertas);
+        listaAlertas.setCellFactory(lista -> new AlertaCelda());
+        listaAlertas.setItems(alertas);
+        contadorAlertas.textProperty().bind(Bindings.size(alertas).asString());
 
         abrirCanalDeAlertas();
     }
@@ -100,7 +97,7 @@ public class AlertasController {
         contenido.addRow(4, new Label("Recursos:"), listaRecursos);
 
         Alert detalle = new Alert(Alert.AlertType.INFORMATION);
-        detalle.initOwner(tablaAlertas.getScene().getWindow());
+        configurarDialogo(detalle);
         detalle.setTitle(reserva.getActividad());
         detalle.setHeaderText(null);
         detalle.getDialogPane().setContent(contenido);
@@ -112,6 +109,7 @@ public class AlertasController {
     // Solo quita la alerta de la lista local. No se llama al Backend.
     private void descartarAlerta(Reserva reserva) {
         Alert confirmar = new Alert(Alert.AlertType.CONFIRMATION, null, ButtonType.YES, ButtonType.NO);
+        configurarDialogo(confirmar);
         confirmar.setTitle("Descartar alerta");
         confirmar.setHeaderText("¿Desea descartar esta alerta?");
         confirmar.setContentText(textoDeAlerta(reserva));
@@ -130,21 +128,58 @@ public class AlertasController {
         return nombreEncargado(reserva) + " - " + reserva.getActividad();
     }
 
-    // Celda con un boton de icono. Sirve para las columnas Ver y Descartar.
-    private static class BotonCelda extends TableCell<Reserva, Void> {
-        private final Button boton = new Button();
+    private void configurarDialogo(Alert dialogo) {
+        dialogo.initOwner(listaAlertas.getScene().getWindow());
+        dialogo.getDialogPane().getStylesheets().add(
+                getClass().getResource("/una/proyecto/css/style.css").toExternalForm());
+        if (listaAlertas.getScene().getRoot().getStyleClass().contains("dark-mode")) {
+            dialogo.getDialogPane().getStyleClass().add("dark-mode");
+        }
+    }
 
-        BotonCelda(String icono, Consumer<Reserva> accion) {
-            boton.setGraphic(new FontIcon(icono));
-            boton.setStyle("-fx-background-color: transparent;");
-            boton.setOnAction(evento -> accion.accept(getTableView().getItems().get(getIndex())));
-            setAlignment(Pos.CENTER);
+    private class AlertaCelda extends ListCell<Reserva> {
+        @FXML private Label actividad;
+        @FXML private Label encargado;
+        @FXML private Label horario;
+        private final Parent contenido;
+
+        AlertaCelda() {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/una/proyecto/ui/alerta-item.fxml"));
+            loader.setController(this);
+            try {
+                contenido = loader.load();
+            } catch (IOException e) {
+                throw new UncheckedIOException("No se pudo cargar la tarjeta de alerta.", e);
+            }
+            setText(null);
+            prefWidthProperty().bind(listaAlertas.widthProperty().subtract(20));
+            ((Region) contenido).prefWidthProperty().bind(widthProperty());
+        }
+
+        @FXML private void verDetalle() {
+            if (getItem() != null) verAlerta(getItem());
+        }
+
+        @FXML private void descartar() {
+            if (getItem() != null) descartarAlerta(getItem());
         }
 
         @Override
-        protected void updateItem(Void item, boolean vacia) {
-            super.updateItem(item, vacia);
-            setGraphic(vacia ? null : boton);
+        protected void updateItem(Reserva reserva, boolean vacia) {
+            super.updateItem(reserva, vacia);
+            if (vacia || reserva == null) {
+                setGraphic(null);
+                return;
+            }
+            actividad.setText(reserva.getActividad());
+            encargado.setText(nombreEncargado(reserva));
+            String fecha = reserva.getFecha() == null ? "Sin fecha" :
+                    reserva.getFecha().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            DateTimeFormatter hora = DateTimeFormatter.ofPattern("HH:mm");
+            String inicio = reserva.getHoraInicio() == null ? "--:--" : reserva.getHoraInicio().format(hora);
+            String fin = reserva.getHoraFin() == null ? "--:--" : reserva.getHoraFin().format(hora);
+            horario.setText(fecha + " · " + inicio + "–" + fin);
+            setGraphic(contenido);
         }
     }
 }
