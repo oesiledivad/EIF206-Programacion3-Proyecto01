@@ -411,6 +411,63 @@ backend, vuelve a iniciar sesión. El cierre de sesión no genera este aviso.
 Cierra primero los frontends adicionales y al final la aplicación iniciada sin
 `-SoloFrontend`: esta última detiene backend y MySQL cuando se cierra.
 
+### 🌐 Conectar dos computadoras en la misma red
+
+Ambas computadoras deben tener la misma versión del proyecto. Ejecuta los
+comandos desde la raíz del repositorio en PowerShell.
+
+**En la computadora que ejecutará MySQL y el backend**, inicia Docker Desktop
+y la aplicación:
+
+```powershell
+.\iniciar.ps1
+```
+
+Mantén esa aplicación abierta. En otra terminal del mismo equipo, ejecuta:
+
+```powershell
+ipconfig
+```
+
+Busca la **dirección IPv4** del adaptador Wi-Fi o Ethernet conectado a la red.
+Por ejemplo, `192.168.1.20`. Esa será la dirección del backend para el otro equipo.
+
+**En la segunda computadora**, necesitas el repositorio y un JDK 17 o superior
+(JDK 21 recomendado). No necesitas instalar MySQL ni ejecutar Docker.
+En el primer uso, o después de actualizar el código, compila e instala los módulos:
+
+```powershell
+.\mvnw.cmd install -DskipTests
+```
+
+Abre el frontend indicando la IP del primer equipo:
+
+```powershell
+.\iniciar.ps1 -SoloFrontend -ServidorBackend 192.168.1.20 -PuertoBackend 1234
+```
+
+Sustituye `192.168.1.20` por la IPv4 real. Si configuraste otro puerto para el
+backend, utiliza ese mismo puerto en el cliente. `localhost` y `127.0.0.1`
+apuntan a la propia computadora, por lo que no sirven para localizar el otro equipo.
+
+Si Windows solicita acceso para Java en el equipo del backend, permite la
+conexión en **redes privadas**. Si el cliente no logra conectarse, ejecuta desde
+la segunda computadora:
+
+```powershell
+Test-NetConnection 192.168.1.20 -Port 1234
+```
+
+`TcpTestSucceeded : True` confirma que el puerto es accesible. Si devuelve
+`False`, revisa la IP, el puerto, que el backend siga abierto y las reglas del
+firewall del servidor para Java o para ese puerto TCP. Comprueba también que
+la red permita conexiones entre ambos equipos.
+
+Para validar el funcionamiento, ingresa con **usuarios distintos** en las dos
+computadoras y crea una reserva desde el funcionario. Debe aparecer en sus
+reservas y llegar como alerta al otro usuario. Puedes seguir los pasos de
+**Ver detalle** y descarte descritos en la sección anterior.
+
 También puedes ejecutar cada paso manualmente como se describe a continuación.
 
 ### 1. 📥 Obtener el proyecto y comprobar Java
