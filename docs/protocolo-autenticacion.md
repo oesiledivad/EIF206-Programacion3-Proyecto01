@@ -101,6 +101,13 @@ y consultar todas. Crear y cancelar requieren rol `FUNCIONARIO`.
 Los errores de autorización también consumen los parámetros de la petición, de
 modo que el siguiente intercambio conserva el orden del protocolo.
 
+Los clientes de un mismo servidor comparten `ReservaService`. Al crear una
+reserva, el servidor mantiene un bloqueo sobre ese servicio durante la selección
+de recursos y el guardado: la siguiente petición consulta las reservas ya
+confirmadas. MySQL guarda la reserva y todas sus asignaciones en una transacción;
+si falla una asignación, revierte el conjunto. La notificación se envía después
+del guardado exitoso. Este bloqueo corresponde a una instancia del backend.
+
 [Backend](../backend/README.md) · [Usuarios y credenciales](../database/USUARIOS.md)
 
 ## Panel inicial

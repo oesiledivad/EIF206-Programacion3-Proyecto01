@@ -581,6 +581,11 @@ Las pruebas unitarias de IA utilizan HTTP simulado. Las llamadas reales a Groq
 están etiquetadas como `ia-externa` y se incluyen solamente con el perfil opcional
 `mvn clean verify -Pia`, con la configuración de Groq correspondiente.
 
+Las integraciones de reservas prueban dos funcionarios enviando peticiones
+simultáneas: con un solo recurso se guarda una reserva; con dos recursos se
+asigna uno distinto a cada funcionario. También verifican las alertas de reservas
+confirmadas y el rollback cuando falla el guardado de una asignación.
+
 ### 🧪 Integración continua en GitHub Actions
 
 El workflow **Tests** (`.github/workflows/tests.yml`) se ejecuta en los pushes y
