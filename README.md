@@ -186,12 +186,31 @@ Los registros del backend quedan en `target/local/backend.log` y
 # Comprobar MySQL y backend sin abrir JavaFX
 .\iniciar.ps1 -Comprobar
 
+# Mantener MySQL y backend activos sin abrir JavaFX
+.\iniciar.ps1 -SoloBackend
+
+# Iniciar con cinco ejemplos de cada entidad
+.\iniciar.ps1 -DatosDemo
+
 # Reutilizar la compilación anterior cuando no cambió el código
 .\iniciar.ps1 -SinCompilar
 
 # Usar otro puerto para el backend y su cliente
 .\iniciar.ps1 -PuertoBackend 1235
+
+# Mostrar los modos, opciones y ejemplos disponibles
+.\iniciar.ps1 -h
 ```
+
+Con `-SoloBackend`, mantén la terminal abierta y conecta los clientes mediante
+`-SoloFrontend`. Al pulsar `Ctrl+C`, el script detiene el backend y MySQL,
+conservando sus datos. Este modo admite `-SinCompilar`, `-PuertoBackend` y
+`-Comprobar`; esta última opción comprueba el arranque y termina.
+`-SoloBackend` y `-SoloFrontend` no se pueden combinar.
+
+La ayuda también está disponible con `-Ayuda` o `-help`, sin iniciar servicios
+ni comprobar Java o Docker. `-SinCompilar` reutiliza el arranque anterior;
+omítelo después de cambiar el código.
 
 Si PowerShell bloquea los scripts, puedes habilitar únicamente esta ejecución:
 
@@ -208,11 +227,39 @@ Los funcionarios reciben su ID como clave inicial y pueden cambiarla desde la
 aplicación. Consulta la [configuración del administrador](#configadminenv) para
 personalizar su clave inicial.
 
+### Datos de demostración opcionales
+
+Para probar el sistema sin ingresar todo a mano, ejecuta:
+
+```powershell
+.\iniciar.ps1 -DatosDemo
+```
+
+Agrega **cinco funcionarios, cinco categorías, cinco recursos y cinco reservas
+futuras**. También puedes usar `.\iniciar.ps1 -SoloBackend -DatosDemo`.
+Sin esta opción no se cargan ejemplos. **Al cerrar la aplicación o detener
+`-SoloBackend` con `Ctrl+C`, se eliminan solo los ejemplos creados por esa ejecución.**
+Los datos que ya existían y los creados manualmente se conservan.
+Si un dato manual utiliza un funcionario, recurso o categoría de demostración,
+esa dependencia también se conserva y el script lo informa.
+
+Los ejemplos que ya existían antes del arranque no se duplican ni se eliminan
+al cerrar esa ejecución. Tampoco se restablecen sus claves o cancelaciones.
+
+Ingresa con un funcionario entre **`900000001` y `900000005`**, usando su mismo
+ID como clave inicial. Cada uno tiene una reserva; las nuevas se programan desde
+mañana, una por día, de **09:00 a 10:00**. Estas reservas alimentan calendarios,
+actividades y estadísticas. Para probar alertas, crea otra reserva con un usuario distinto.
+
+La [guía de datos de demostración](docs/datos-demostracion.md) incluye los ejemplos,
+las fechas para consultar y la carga mediante Maven, también sin Docker.
+
 ### Elegir otra forma de ejecución
 
 | Modalidad | Instrucciones |
 | --- | --- |
 | Script automático con MySQL en Docker | Inicio automático de esta sección |
+| Solo servidor y MySQL en Docker, sin interfaz | `.\iniciar.ps1 -SoloBackend` |
 | MySQL en Docker y procesos iniciados por separado | [Ejecución manual con Docker](docs/ejecucion-manual.md) |
 | MySQL instalado en el sistema, sin Docker | [Compilación y ejecución sin Docker](docs/ejecucion-sin-docker.md) |
 
@@ -251,13 +298,13 @@ Ambas computadoras deben tener la misma versión del proyecto. Ejecuta los
 comandos desde la raíz del repositorio en PowerShell.
 
 **En la computadora que ejecutará MySQL y el backend**, inicia Docker Desktop
-y la aplicación:
+y el servidor:
 
 ```powershell
-.\iniciar.ps1
+.\iniciar.ps1 -SoloBackend
 ```
 
-Mantén esa aplicación abierta. En otra terminal del mismo equipo, ejecuta:
+Mantén esa terminal abierta. En otra terminal del mismo equipo, ejecuta:
 
 ```powershell
 ipconfig
@@ -288,8 +335,9 @@ Si Windows solicita acceso para Java en el equipo del backend, permite la
 conexión en **redes privadas**. Para comprobar la comunicación, consulta
 [Problemas de conexión](#-problemas-de-conexión).
 
-Ingresa con usuarios distintos en ambos equipos y sigue la prueba de alertas
-de la sección siguiente.
+Para utilizar también una interfaz en el equipo servidor, abre otra terminal y
+ejecuta `.\iniciar.ps1 -SoloFrontend`. Ingresa con usuarios distintos en ambos
+clientes y sigue la prueba de alertas de la sección siguiente.
 
 ### 🪟 Abrir otro frontend y probar las alertas
 
@@ -318,6 +366,7 @@ backend, vuelve a iniciar sesión. El cierre de sesión no genera este aviso.
 
 Cierra primero los frontends adicionales y al final la aplicación iniciada sin
 `-SoloFrontend`: esta última detiene backend y MySQL cuando se cierra.
+Si iniciaste con `-SoloBackend`, detén ese script con `Ctrl+C` al terminar.
 
 ---
 
@@ -598,6 +647,7 @@ data/xml/                       # Archivos de datos del proyecto 01
 | [Ejecución manual con Docker](docs/ejecucion-manual.md) | MySQL en un contenedor y arranque de cada proceso por separado |
 | [Ejecución sin Docker](docs/ejecucion-sin-docker.md) | Instalación de MySQL, esquema, configuración, compilación y arranque |
 | [Pruebas funcionales](docs/pruebas-funcionales.md) | Recorrido de pantallas, reportes y alertas |
+| [Datos de demostración](docs/datos-demostracion.md) | Carga opcional de cinco ejemplos por entidad y credenciales de prueba |
 | [Arquitectura](docs/organizacion-proyecto-02.md) | Dependencias y distribución de clases |
 | [Base de datos](database/README.md) | Modelo DBML y scripts de creación |
 | [Docker y persistencia](database/DOCKER.md) | MySQL, volúmenes y credenciales de Docker |
