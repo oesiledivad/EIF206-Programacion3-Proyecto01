@@ -327,7 +327,7 @@ public class CalendarizacionActividadesController {
             LocalDate fechaSeleccionada = dtpicker.getValue();
 
             ReportePDF reporte = new ReportePDF("Reporte de actividades Calendario", nuevo);
-            GeneradorPDFS.generar(reporte, "Calendarizacion.pdf");
+            GeneradorPDFS.generar(reporte, "Actividades.pdf");
 
             mostrarAlerta(
                     "Éxito",
