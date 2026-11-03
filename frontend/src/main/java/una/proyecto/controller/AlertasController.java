@@ -10,6 +10,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -29,6 +30,10 @@ public class AlertasController {
 
     @FXML private ListView<Reserva> listaAlertas;
     @FXML private Label contadorAlertas;
+    @FXML private Label estadoConexion;
+    @FXML private Button btnReconectar;
+    private int intentoConexion;
+    private volatile boolean vistaCerrada;
 
     private final ObservableList<Reserva> alertas = FXCollections.observableArrayList();
     private final IntegerBinding cantidadAlertas = Bindings.size(alertas);
@@ -38,11 +43,22 @@ public class AlertasController {
         return cantidadAlertas;
     }
 
+    public void enfocarAlertas() {
+        if (!alertas.isEmpty()) {
+            listaAlertas.getSelectionModel().select(0);
+            listaAlertas.scrollTo(0);
+        }
+        listaAlertas.requestFocus();
+    }
+
     @FXML
     public void initialize() {
         listaAlertas.setCellFactory(lista -> new AlertaCelda());
         listaAlertas.setItems(alertas);
         contadorAlertas.textProperty().bind(cantidadAlertas.asString());
+        listaAlertas.sceneProperty().addListener((observable, anterior, actual) -> {
+            if (anterior != null && actual == null) vistaCerrada = true;
+        });
 
         abrirCanalDeAlertas();
     }
@@ -50,26 +66,39 @@ public class AlertasController {
     // ================= Mostrar =================
 
     // La conexion puede tardar, asi que se abre fuera del hilo de la interfaz.
+    @FXML
     private void abrirCanalDeAlertas() {
+        int intento = ++intentoConexion;
+        estadoConexion.setText("Conectando alertas...");
+        estadoConexion.getStyleClass().setAll("text-secondary");
+        btnReconectar.setVisible(false);
         Task<Void> tarea = new Task<>() {
             @Override
             protected Void call() {
+                if (vistaCerrada) return null;
                 // El listener corre en el hilo de red: se pasa al hilo de JavaFX
                 // antes de actualizar la lista de alertas.
-                mainLogic.iniciarAlertas(reserva -> Platform.runLater(() -> alertas.add(0, reserva)));
+                mainLogic.iniciarAlertas(reserva -> Platform.runLater(() -> {
+                    if (!vistaCerrada) alertas.add(0, reserva);
+                }), error -> Platform.runLater(() -> mostrarDesconexion(intento)));
                 return null;
             }
         };
-        tarea.setOnFailed(evento -> {
-            Alert aviso = new Alert(Alert.AlertType.WARNING);
-            aviso.setTitle("Alertas");
-            aviso.setHeaderText(null);
-            aviso.setContentText("No se pudo abrir el canal de alertas: " + tarea.getException().getMessage());
-            aviso.show();
+        tarea.setOnSucceeded(evento -> {
+            if (vistaCerrada || intento != intentoConexion || btnReconectar.isVisible()) return;
+            estadoConexion.setText("Alertas conectadas");
         });
+        tarea.setOnFailed(evento -> mostrarDesconexion(intento));
         Thread hilo = new Thread(tarea, "Abrir-Alertas");
         hilo.setDaemon(true);
         hilo.start();
+    }
+
+    private void mostrarDesconexion(int intento) {
+        if (vistaCerrada || intento != intentoConexion) return;
+        estadoConexion.setText("Sin conexión: no se recibirán nuevas alertas. Si el servidor se reinició, vuelva a ingresar.");
+        estadoConexion.getStyleClass().setAll("text-danger");
+        btnReconectar.setVisible(true);
     }
 
     // ================= Ver =================

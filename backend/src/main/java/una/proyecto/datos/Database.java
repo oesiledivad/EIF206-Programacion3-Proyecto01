@@ -8,6 +8,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.nio.file.Path;
 
 public class Database {
 
@@ -20,6 +21,7 @@ public class Database {
     private final String url;
     private final String user;
     private final String password;
+    private final RegistroSQL registroSQL;
     private Connection cnx;
 
     public static synchronized Database instance() {
@@ -45,6 +47,8 @@ public class Database {
         url = leerVariable(config, "DB_URL");
         user = leerVariable(config, "DB_USER");
         password = leerVariable(config, "DB_PASSWORD");
+        registroSQL = Boolean.parseBoolean(config.get("DB_LOG_SQL", "false").trim())
+                ? new RegistroSQL(Path.of("target", "local", "backend-sql.log")) : null;
     }
 
     private static String leerVariable(Dotenv config, String nombre) {
@@ -66,13 +70,14 @@ public class Database {
                     // La conexion ya estaba muerta; se reemplaza abajo.
                 }
             }
-            cnx = DriverManager.getConnection(url, user, password);
+            cnx = openConnection();
         }
         return cnx;
     }
 
     public Connection openConnection() throws SQLException {
-        return DriverManager.getConnection(url, user, password);
+        Connection connection = DriverManager.getConnection(url, user, password);
+        return registroSQL == null ? connection : registroSQL.envolver(connection);
     }
 
     public PreparedStatement prepareStatement(String sql) throws SQLException {

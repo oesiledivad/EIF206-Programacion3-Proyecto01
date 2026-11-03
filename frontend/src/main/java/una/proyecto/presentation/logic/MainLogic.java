@@ -66,6 +66,10 @@ public class MainLogic {
         ServiceProxy.instance().iniciarAlertas(alAlertar);
     }
 
+    public void iniciarAlertas(Consumer<Reserva> alAlertar, Consumer<Exception> alDesconectar) {
+        ServiceProxy.instance().iniciarAlertas(alAlertar, alDesconectar);
+    }
+
     /**
      * Convierte los ids de recursos de una reserva en sus descripciones.
      * Si un id no se encuentra, se muestra el id tal cual.

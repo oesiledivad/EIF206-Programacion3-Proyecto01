@@ -1,7 +1,5 @@
 module una.proyecto.frontend {
     requires una.proyecto.common;
-    // Temporal: llamadas locales mientras se implementa el transporte por sockets.
-    requires una.proyecto.backend;
     requires javafx.controls;
     requires javafx.fxml;
     requires org.kordamp.ikonli.javafx;

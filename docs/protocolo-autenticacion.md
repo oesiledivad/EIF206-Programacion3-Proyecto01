@@ -5,6 +5,9 @@ El contrato está definido en `common/una.proyecto.protocolo.Protocol` y lo atie
 
 ## Conexión
 
+El frontend inicia la conexión en segundo plano al abrir el login, antes de
+enviar credenciales. Si falla, muestra el error y permite reintentar al ingresar.
+
 1. Abrir un socket hacia `Protocol.SERVER:Protocol.PORT`.
 2. Crear `ObjectOutputStream`, ejecutar `flush()` y crear `ObjectInputStream`.
 3. Enviar `writeInt(Protocol.SYNC)` y ejecutar `flush()`.
@@ -15,6 +18,10 @@ Todas las peticiones de una conexión deben enviarse y leerse en orden. El proxy
 debe sincronizar cada intercambio completo para evitar mezclar respuestas entre
 hilos.
 
+El intento de conexión TCP tiene un límite de tres segundos y el saludo inicial
+de cinco segundos, aplicado antes de crear `ObjectInputStream`. Después del
+saludo, las respuestas síncronas tienen un límite de treinta segundos.
+
 ## Operaciones
 
 | Código | Constante | Parámetros, en orden | Resultado exitoso |
@@ -24,6 +31,17 @@ hilos.
 | 12 | `AUTH_CAMBIAR_CLAVE` | Contraseña actual y nueva con `writeObject(String)` | `null` |
 | 20 | `DASHBOARD_RESUMEN` | Ninguno; requiere sesión | `DashboardData` con reservas visibles y contadores |
 | 99 | `DISCONNECT` | Ninguno | Cierre del socket, sin respuesta |
+| 600 | `ESTADISTICAS_RECURSOS` | Desde y hasta con `writeObject(LocalDate)` | `List<EstadisticaItem>` por categoría |
+| 601 | `ESTADISTICAS_ACTIVIDADES` | Desde y hasta con `writeObject(LocalDate)` | `List<EstadisticaItem>` por semana |
+
+Las consultas de estadísticas requieren una sesión activa, tanto de administrador
+como de funcionario. El backend valida que ambas fechas estén presentes y que
+`desde` no sea posterior a `hasta`. Los límites del período son inclusivos y
+las reservas canceladas no se incluyen. Cada elemento contiene `nombre` y `cantidad`.
+Las semanas comienzan el lunes, se devuelven en orden cronológico e incluyen
+las semanas sin actividades con cantidad cero. La etiqueta es la fecha del lunes
+de cada semana, aunque ese lunes sea anterior al inicio del período. Solo se
+cuentan las actividades cuya fecha está dentro de los límites solicitados.
 
 Después de enviar cada petición, ejecutar `flush()`. Se recomienda `reset()` del
 stream al terminar cada envío para evitar reutilizar versiones anteriores de
@@ -63,6 +81,12 @@ Cada notificación posterior contiene `readInt()` con el tipo de evento y
 `Reserva`. El servidor envía el evento a conexiones autenticadas de otros usuarios.
 Al volver a iniciar sesión después de logout, abrir de nuevo el canal de alertas.
 
+El canal asíncrono aplica un límite de cinco segundos al saludo y su confirmación;
+después espera eventos sin límite de inactividad. Un corte inesperado avisa al
+panel, que conserva las tarjetas recibidas y ofrece **Reconectar alertas**.
+Si el servidor se reinició, es necesario volver a iniciar sesión para obtener
+otro `sid`. Logout y el cierre voluntario del canal no generan avisos de desconexión.
+
 ## Reservas y permisos
 
 Las operaciones `RESERVA_CREAR`, `RESERVA_LISTAR`, `RESERVA_BUSCAR` y
@@ -76,6 +100,13 @@ y consultar todas. Crear y cancelar requieren rol `FUNCIONARIO`.
 
 Los errores de autorización también consumen los parámetros de la petición, de
 modo que el siguiente intercambio conserva el orden del protocolo.
+
+Los clientes de un mismo servidor comparten `ReservaService`. Al crear una
+reserva, el servidor mantiene un bloqueo sobre ese servicio durante la selección
+de recursos y el guardado: la siguiente petición consulta las reservas ya
+confirmadas. MySQL guarda la reserva y todas sus asignaciones en una transacción;
+si falla una asignación, revierte el conjunto. La notificación se envía después
+del guardado exitoso. Este bloqueo corresponde a una instancia del backend.
 
 [Backend](../backend/README.md) · [Usuarios y credenciales](../database/USUARIOS.md)
 

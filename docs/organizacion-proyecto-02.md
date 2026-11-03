@@ -14,12 +14,14 @@ El MER y los scripts MySQL se encuentran en [`database`](../database/README.md).
 ## Dependencias
 
 ```text
-frontend --> backend --> common
-    |______________________^
+frontend --> common <-- backend
+frontend -- sockets --> backend -- JDBC --> MySQL
 ```
 
-Ingreso, cambio de contraseña y panel inicial usan sockets mediante `ServiceProxy`.
-Las demás vistas de escritorio utilizan servicios locales del backend. El backend depende de los modelos de common y es independiente de JavaFX.
+Las operaciones de datos, incluidas las estadísticas, usan sockets mediante `ServiceProxy`.
+El frontend no incluye clases del backend en su runtime ni se conecta a MySQL. Su dependencia
+Maven del backend tiene alcance `test` para las pruebas de integración.
+El backend depende de los modelos de common y es independiente de JavaFX.
 Common no depende de los otros módulos.
 
 Cada módulo tiene su propio `pom.xml` y descriptor `module-info.java`.
@@ -67,12 +69,16 @@ classpath; la aplicación conserva los descriptores JPMS de sus módulos.
 Para verificar sin llamar al servicio externo de IA:
 
 ```sh
-./mvnw verify "-Dit.test=*IT,!IAgeneratorIntegracionIT" -Dfailsafe.failIfNoSpecifiedTests=false
+docker compose -f compose.test.yaml up -d --wait
+./mvnw clean verify
 ```
 
-Las pruebas de integración de IA utilizan Groq y requieren `GROQ_API_KEY`.
+Las pruebas de integración de IA se incluyen con `-Pia`, utilizan Groq y requieren `GROQ_API_KEY`.
 Las pruebas unitarias de IA utilizan un cliente HTTP simulado.
-GitHub Actions ejecuta `mvn verify` desde la raíz para procesar todos los módulos.
+GitHub Actions ejecuta `clean verify` desde la raíz para procesar todos los módulos.
+Las unitarias se ejecutan con `clean test`, sin base de datos. Failsafe usa una
+base exclusiva indicada por `test.db.url`, `test.db.user` y `test.db.password`;
+sus valores predeterminados corresponden a `compose.test.yaml`.
 
 ## Configuración y datos
 

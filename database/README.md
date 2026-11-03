@@ -3,6 +3,11 @@
 Esquema relacional del Sistema de Reserva de Recursos para MySQL 8.4.
 Incluye el modelo DBML, la creación de tablas y un catálogo de demostración.
 
+Para una demostración con **cinco funcionarios, categorías, recursos y reservas**,
+utiliza `.\iniciar.ps1 -DatosDemo`. La [guía de ejemplos](../docs/datos-demostracion.md)
+incluye también la carga sin Docker. Esta opción es independiente del catálogo
+pequeño de `seed.sql` y no se ejecuta en el arranque normal.
+
 ## Archivos
 
 - `modelo.dbml`: fuente editable del MER; copiar en dbdiagram.io y exportar el diagrama.

@@ -13,11 +13,11 @@
       <artifactId>common</artifactId>
       <version>${project.version}</version>
     </dependency>
-    <!-- Dependencia local temporal hasta implementar los proxies por sockets. -->
     <dependency>
       <groupId>una.proyecto</groupId>
       <artifactId>backend</artifactId>
       <version>${project.version}</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.openjfx</groupId>

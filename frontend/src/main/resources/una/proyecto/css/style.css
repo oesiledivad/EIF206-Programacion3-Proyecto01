@@ -1466,18 +1466,6 @@ Text.heading-3 {
     -fx-border-width: 1px;
 }
 
-.menu-item.alertas-menu:nuevas {
-    -fx-background-color: -fx-warning-light;
-}
-
-.menu-item.alertas-menu:nuevas .ikonli-font-icon {
-    -fx-icon-color: -fx-text-primary;
-}
-
-.menu-item.alertas-menu:selected .alertas-contador {
-    -fx-background-color: -fx-bg-secondary;
-}
-
 .alertas-aviso {
     -fx-background-color: -fx-warning-light;
     -fx-background-radius: 8px;

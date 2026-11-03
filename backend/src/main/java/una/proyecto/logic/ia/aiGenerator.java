@@ -6,8 +6,6 @@ import org.json.JSONObject;
 
 import una.proyecto.model.Categoria;
 import una.proyecto.model.Reserva;
-import una.proyecto.service.CategoriaService;
-import una.proyecto.bootstrap.AppFactory;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -108,7 +106,6 @@ public class aiGenerator {
             reservaGeneradaPorelAI.setHoraFin(LocalTime.parse(normalizarHora(horaFinTxt)));
         }
 
-        CategoriaService categoriaService = AppFactory.createCategoriaService();
         List<Categoria> categorias = new ArrayList<>();
         JSONArray arr = datos.optJSONArray("categorias");
 

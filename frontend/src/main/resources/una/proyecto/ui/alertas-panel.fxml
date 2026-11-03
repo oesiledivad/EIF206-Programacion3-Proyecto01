@@ -2,6 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
@@ -24,6 +25,9 @@
                 <Label fx:id="contadorAlertas" text="0" styleClass="alertas-contador" accessibleText="Cantidad de alertas" />
             </HBox>
             <Label text="Nuevas reservas de otros usuarios" wrapText="true" styleClass="text-secondary" />
+            <Label fx:id="estadoConexion" text="Conectando alertas..." wrapText="true" minHeight="-Infinity" styleClass="text-secondary" />
+            <Button fx:id="btnReconectar" text="Reconectar alertas" onAction="#abrirCanalDeAlertas"
+                    visible="false" managed="${btnReconectar.visible}" styleClass="btn-secondary, btn-small" />
         </VBox>
         <ListView fx:id="listaAlertas" styleClass="alertas-lista" VBox.vgrow="ALWAYS">
             <placeholder>

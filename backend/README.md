@@ -24,7 +24,7 @@ y utiliza MySQL mediante JDBC.
 
 El punto de entrada del servidor es `una.proyecto.server.BackendApp`. El servidor
 escucha en `Protocol.PORT` y atiende el contrato de autenticación, panel inicial y reservas por
-sockets. El [`frontend`](../frontend/README.md) también utiliza servicios locales.
+sockets. El [`frontend`](../frontend/README.md) accede a los servicios mediante `ServiceProxy`.
 
 Sus dependencias de aplicación son `common`, MySQL Connector/J, JAXB, el cliente
 HTTP de Java, JSON y Dotenv. El módulo es independiente de JavaFX.
@@ -53,16 +53,17 @@ Usar JDK 17 o superior —se recomienda JDK 21— y Maven. Ejecutar desde la ra�
 Para ejecutar las pruebas locales y excluir la integración con el servicio de IA:
 
 ```sh
-./mvnw -pl backend -am verify "-Dit.test=*IT,!IAgeneratorIntegracionIT" -Dfailsafe.failIfNoSpecifiedTests=false
+docker compose -f compose.test.yaml up -d --wait
+./mvnw -pl backend -am clean verify
 ```
 
 Para incluir también las pruebas de integración de IA:
 
 ```sh
-./mvnw -pl backend -am verify
+./mvnw -pl backend -am verify -Pia
 ```
 
-Para verificar pruebas del servidor sin un frontend, si no un cliente simulado:
+Para verificar el servidor mediante un cliente simulado:
 
 ```sh
 ./mvnw -pl backend -am clean verify "-Dit.test=ServerIntegracionIT" "-Dfailsafe.failIfNoSpecifiedTests=false"
@@ -92,11 +93,17 @@ de trabajo e inicializar la base con los scripts de `database/`.
 
 El asistente de IA utiliza `GROQ_API_KEY`, `GROQ_URL` y `GROQ_MODEL`, definidos
 en el entorno o en el `.env` de la raíz. Las pruebas de integración de IA llaman
-al servicio externo y se omiten si no hay clave configurada. Las pruebas unitarias
+al servicio externo y se incluyen con `-Pia`; requieren la clave configurada. Las pruebas unitarias
 de IA usan un cliente HTTP simulado.
 
 El diseño relacional y los scripts de MySQL se documentan en
 [`database`](../database/README.md). Los repositorios JDBC utilizan las tablas de ese esquema.
+
+Con `DB_LOG_SQL=true` en `.config/database.env` o en el entorno, las conexiones
+de `Database` registran consultas, lotes y transacciones en
+`target/local/backend-sql.log`, relativo a la raíz del repositorio. El registro
+está desactivado por defecto y oculta parámetros, literales y mensajes de error
+que puedan contener datos. Consulta la [guía de registro SQL](../docs/registro-sql.md).
 
 [Documentación general](../README.md) · [Arquitectura](../docs/organizacion-proyecto-02.md)
 

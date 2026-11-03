@@ -35,9 +35,7 @@ class EstadisticasLogicTest {
         MockitoAnnotations.openMocks(this);
         estadisticasLogic = new EstadisticasLogic(reservaDatos, categoriaDatos);
 
-        // Fijar locale para que el inicio de semana sea determinista entre máquinas
         localeOriginal = Locale.getDefault();
-        Locale.setDefault(new Locale("es", "CR"));
     }
 
     @AfterEach
@@ -189,7 +187,8 @@ class EstadisticasLogicTest {
         List<EstadisticaItem> result = estadisticasLogic.obtenerEstadisticasActividades(
                 LocalDate.of(2026, 1, 1), LocalDate.of(2026, 1, 31));
 
-        assertTrue(result.isEmpty());
+        assertEquals(5, result.size());
+        assertTrue(result.stream().allMatch(item -> item.getCantidad() == 0));
     }
 
     @Test
@@ -200,13 +199,12 @@ class EstadisticasLogicTest {
         List<EstadisticaItem> result = estadisticasLogic.obtenerEstadisticasActividades(
                 LocalDate.of(2026, 1, 1), LocalDate.of(2026, 1, 31));
 
-        assertTrue(result.isEmpty());
+        assertEquals(5, result.size());
+        assertTrue(result.stream().allMatch(item -> item.getCantidad() == 0));
     }
 
     @Test
     void actividades_mismaSemana_seAgrupanJuntas() {
-        // Con locale es-CR, la semana inicia lunes.
-        // Lunes 2026-01-12 a domingo 2026-01-18
         Reserva lunes = mockReserva(LocalDate.of(2026, 1, 12));
         Reserva miercoles = mockReserva(LocalDate.of(2026, 1, 14));
         Reserva domingo = mockReserva(LocalDate.of(2026, 1, 18));
@@ -216,9 +214,10 @@ class EstadisticasLogicTest {
         List<EstadisticaItem> result = estadisticasLogic.obtenerEstadisticasActividades(
                 LocalDate.of(2026, 1, 1), LocalDate.of(2026, 1, 31));
 
-        assertEquals(1, result.size());
-        assertEquals(3, result.get(0).getCantidad());
-        assertEquals("2026-01-12", result.get(0).getNombre());
+        assertEquals(5, result.size());
+        assertEquals(3, result.get(2).getCantidad());
+        assertEquals("2026-01-12", result.get(2).getNombre());
+        assertEquals(3, result.stream().mapToInt(item -> item.getCantidad()).sum());
     }
 
     @Test
@@ -231,16 +230,83 @@ class EstadisticasLogicTest {
         List<EstadisticaItem> result = estadisticasLogic.obtenerEstadisticasActividades(
                 LocalDate.of(2026, 1, 1), LocalDate.of(2026, 1, 31));
 
-        assertEquals(2, result.size());
+        assertEquals(5, result.size());
+        assertEquals(1, result.get(2).getCantidad());
+        assertEquals(1, result.get(3).getCantidad());
     }
 
     @Test
-    void actividades_listaVacia_retornaListaVacia() {
+    void actividades_listaVacia_incluyeTodasLasSemanasConCero() {
         when(reservaDatos.obtenerTodos()).thenReturn(List.of());
 
         List<EstadisticaItem> result = estadisticasLogic.obtenerEstadisticasActividades(
                 LocalDate.of(2026, 1, 1), LocalDate.of(2026, 1, 31));
 
-        assertTrue(result.isEmpty());
+        assertEquals(List.of("2025-12-29", "2026-01-05", "2026-01-12", "2026-01-19", "2026-01-26"),
+                result.stream().map(item -> item.getNombre()).toList());
+        assertTrue(result.stream().allMatch(item -> item.getCantidad() == 0));
+    }
+
+    @Test
+    void actividades_ordenCronologicoAunqueReservasVenganDesordenadas() {
+        doReturn(List.of(mockReserva(LocalDate.of(2026, 1, 26)), mockReserva(LocalDate.of(2026, 1, 5))))
+                .when(reservaDatos).obtenerTodos();
+        var result = estadisticasLogic.obtenerEstadisticasActividades(
+                LocalDate.of(2026, 1, 5), LocalDate.of(2026, 1, 26));
+        assertEquals(List.of("2026-01-05", "2026-01-12", "2026-01-19", "2026-01-26"),
+                result.stream().map(item -> item.getNombre()).toList());
+        assertEquals(List.of(1, 0, 0, 1), result.stream().map(item -> item.getCantidad()).toList());
+    }
+
+    @Test
+    void actividades_cuentaLimitesInclusivosSinAmpliarPeriodoALaSemanaCompleta() {
+        doReturn(List.of(
+                mockReserva(LocalDate.of(2026, 1, 6)), mockReserva(LocalDate.of(2026, 1, 7)),
+                mockReserva(LocalDate.of(2026, 1, 9)), mockReserva(LocalDate.of(2026, 1, 10))))
+                .when(reservaDatos).obtenerTodos();
+        var result = estadisticasLogic.obtenerEstadisticasActividades(
+                LocalDate.of(2026, 1, 7), LocalDate.of(2026, 1, 9));
+        assertEquals(1, result.size());
+        assertEquals("2026-01-05", result.get(0).getNombre());
+        assertEquals(2, result.get(0).getCantidad());
+    }
+
+    @Test
+    void actividades_domingoYLunesPertenecenASemanasDiferentes() {
+        doReturn(List.of(mockReserva(LocalDate.of(2026, 1, 18)), mockReserva(LocalDate.of(2026, 1, 19))))
+                .when(reservaDatos).obtenerTodos();
+        var result = estadisticasLogic.obtenerEstadisticasActividades(
+                LocalDate.of(2026, 1, 18), LocalDate.of(2026, 1, 19));
+        assertEquals(List.of("2026-01-12", "2026-01-19"), result.stream().map(item -> item.getNombre()).toList());
+        assertEquals(List.of(1, 1), result.stream().map(item -> item.getCantidad()).toList());
+    }
+
+    @Test
+    void actividades_periodoDeUnDiaDevuelveSuSemana() {
+        doReturn(List.of(mockReserva(LocalDate.of(2026, 1, 14)))).when(reservaDatos).obtenerTodos();
+        var result = estadisticasLogic.obtenerEstadisticasActividades(
+                LocalDate.of(2026, 1, 14), LocalDate.of(2026, 1, 14));
+        assertEquals(1, result.size());
+        assertEquals("2026-01-12", result.get(0).getNombre());
+        assertEquals(1, result.get(0).getCantidad());
+    }
+
+    @Test
+    void actividades_cruceDeAnioIncluyeSemanasSinDatos() {
+        when(reservaDatos.obtenerTodos()).thenReturn(List.of());
+        var result = estadisticasLogic.obtenerEstadisticasActividades(
+                LocalDate.of(2025, 12, 31), LocalDate.of(2026, 1, 6));
+        assertEquals(List.of("2025-12-29", "2026-01-05"), result.stream().map(item -> item.getNombre()).toList());
+        assertTrue(result.stream().allMatch(item -> item.getCantidad() == 0));
+    }
+
+    @Test
+    void actividades_inicioLunesNoDependeDelLocale() {
+        Locale.setDefault(Locale.US);
+        doReturn(List.of(mockReserva(LocalDate.of(2026, 1, 18)))).when(reservaDatos).obtenerTodos();
+        var result = estadisticasLogic.obtenerEstadisticasActividades(
+                LocalDate.of(2026, 1, 18), LocalDate.of(2026, 1, 18));
+        assertEquals("2026-01-12", result.get(0).getNombre());
+        assertEquals(1, result.get(0).getCantidad());
     }
 }

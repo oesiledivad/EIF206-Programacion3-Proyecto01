@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import una.proyecto.logic.ia.aiGenerator;
 import una.proyecto.model.Categoria;
 import una.proyecto.model.Reserva;
@@ -16,6 +17,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("ia-externa")
 public class IAgeneratorIntegracionIT {
 
     private List<Categoria> categorias;
