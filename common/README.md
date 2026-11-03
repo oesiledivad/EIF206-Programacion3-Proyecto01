@@ -12,16 +12,14 @@ biblioteca utilizada por [`frontend`](../frontend/README.md) y
 | `una.proyecto.model` | Estado de reserva y estructuras de datos para calendarios y estadísticas |
 | `una.proyecto.model` | Contrato `LoginService` y respuesta `DashboardData` del panel inicial |
 | `una.proyecto.protocolo` | Operaciones y estados de comunicación |
-| `una.proyecto.serialization` | Adaptadores JAXB para `LocalDate` y `LocalTime` |
 
 El descriptor `src/main/java/module-info.java` declara el módulo
-`una.proyecto.common` y exporta los paquetes de modelos y serialización.
+`una.proyecto.common` y exporta los paquetes de modelos y protocolo.
 
 ## Dependencias
 
-La dependencia de aplicación es Jakarta XML Binding API. Los modelos contienen
-anotaciones JAXB y utilizan los adaptadores de fecha y hora para la serialización
-XML.
+El módulo no tiene dependencias externas. Los modelos implementan `Serializable`
+para viajar por sockets entre `frontend` y `backend`.
 
 `common` no depende de `frontend` ni de `backend`. Las clases compartidas permiten
 que ambos módulos utilicen las mismas representaciones de los datos.

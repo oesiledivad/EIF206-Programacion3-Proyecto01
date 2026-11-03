@@ -41,7 +41,7 @@ build/
 ### Mac OS ###
 .DS_Store
 
-### Proyecto - Datos XML ###
+### Proyecto - Reportes PDF ###
 pdfs/
 
 ###Credenciales BD

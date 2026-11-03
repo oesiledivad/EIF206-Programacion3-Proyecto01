@@ -36,8 +36,6 @@ al utilizar JPMS.
 | `LoginLogic`, `MainLogic` | `frontend`: `una.proyecto.presentation.logic` |
 | `SessionManager` | `frontend`: `una.proyecto.utils` |
 | `AppFactory` | `backend`: `una.proyecto.bootstrap` |
-| `XmlUtil` | `backend`: `una.proyecto.datos.xml` |
-| `LocalDateAdapter`, `LocalTimeAdapter` | `common`: `una.proyecto.serialization` |
 
 La lógica de presentación coordina el ingreso y la navegación. La autenticación
 de credenciales se realiza mediante `AuthService` en el backend.

@@ -39,7 +39,7 @@ public class EstadisticasLogic {
                         conteo.put(nombre, conteo.getOrDefault(nombre, 0) + 1);
                     }
                 }
-                // 2. Si vienen los IDs deserializados del XML (<categoriasDeRecursosIds>)
+                // 2. Si solo vienen los IDs (ReservaDatos los carga desde reserva_recurso)
                 else if (reserva.getCategoriasDeRecursosIds() != null) {
                     for (String idCat : reserva.getCategoriasDeRecursosIds()) {
                         Categoria categoria = categoriaDatos.leerPorId(idCat);
