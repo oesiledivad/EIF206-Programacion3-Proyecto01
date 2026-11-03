@@ -654,7 +654,7 @@ compose.test.yaml               # MySQL exclusivo para integración
 .config/                        # Ejemplos de configuración local
 common/
 ├── pom.xml
-└── src/main/java/              # Modelos y adaptadores compartidos
+└── src/main/java/              # Modelos y protocolo compartidos
 backend/
 ├── pom.xml
 └── src/

@@ -7,7 +7,7 @@ Java y la configuración de compilación y pruebas.
 | --- | --- | --- |
 | `frontend` | Aplicación JavaFX, MVC y reportes PDF | [README](../frontend/README.md) |
 | `backend` | Servidor, servicios, lógica, integración con IA y datos MySQL | [README](../backend/README.md) |
-| `common` | Modelos y adaptadores de serialización | [README](../common/README.md) |
+| `common` | Modelos serializables y protocolo de sockets | [README](../common/README.md) |
 
 El MER y los scripts MySQL se encuentran en [`database`](../database/README.md).
 
