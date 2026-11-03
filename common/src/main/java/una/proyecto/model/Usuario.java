@@ -1,16 +1,7 @@
 package una.proyecto.model;
 
-import jakarta.xml.bind.annotation.XmlAccessType;
-import jakarta.xml.bind.annotation.XmlAccessorType;
-import jakarta.xml.bind.annotation.XmlSeeAlso;
-
 import java.io.Serializable;
 
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlSeeAlso({
-        Funcionario.class,
-        Administrador.class
-})
 public abstract class Usuario implements Serializable {
     private static final long serialVersionUID = 1L;
     private String id;
@@ -20,7 +11,7 @@ public abstract class Usuario implements Serializable {
     private boolean active = true;
 
     /**
-     * Empty constructor required by JAXB.
+     * Constructor vacio (requerido por la serializacion y los mapeos).
      */
     public Usuario() {
     }

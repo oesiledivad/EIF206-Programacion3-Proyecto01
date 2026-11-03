@@ -1,37 +1,22 @@
 package una.proyecto.model;
 
-import jakarta.xml.bind.annotation.XmlAccessType;
-import jakarta.xml.bind.annotation.XmlAccessorType;
-import jakarta.xml.bind.annotation.XmlRootElement;
-import jakarta.xml.bind.annotation.XmlTransient;
-import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import una.proyecto.serialization.LocalDateAdapter;
-import una.proyecto.serialization.LocalTimeAdapter;
-
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
-@XmlRootElement(name="reserva")
-@XmlAccessorType(XmlAccessType.FIELD)
 public class Reserva implements Serializable {
     private static final long serialVersionUID = 1L;
     private String id;
     private String actividad;
-    @XmlJavaTypeAdapter(LocalDateAdapter.class)
     private LocalDate fecha;
-    @XmlJavaTypeAdapter(LocalTimeAdapter.class)
     private LocalTime horaInicio;
-    @XmlJavaTypeAdapter(LocalTimeAdapter.class)
     private LocalTime horaFin;
     private String idFuncionario;
 
-    @XmlTransient
     private Funcionario funcionarioReserva;
     private List<String> categoriasDeRecursosIds;
-    @XmlTransient
     private List<Categoria> categoriasDeRecursos;
     private List<String> recursosAsignadosIds;
     private EstadoReserva estado;

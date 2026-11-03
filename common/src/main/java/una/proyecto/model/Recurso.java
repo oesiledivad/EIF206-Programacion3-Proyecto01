@@ -1,13 +1,7 @@
 package una.proyecto.model;
 
-import jakarta.xml.bind.annotation.XmlAccessType;
-import jakarta.xml.bind.annotation.XmlAccessorType;
-import jakarta.xml.bind.annotation.XmlRootElement;
-
 import java.io.Serializable;
 
-@XmlRootElement(name="recurso")
-@XmlAccessorType(XmlAccessType.FIELD)
 public class Recurso implements Serializable {
     private static final long serialVersionUID = 1L;
     private String id;
@@ -15,7 +9,6 @@ public class Recurso implements Serializable {
     private String idCategoria;
     private String descripcion;
     public Recurso(){}
-
 
     public Recurso(String id, String idCategoria, String descripcion) {
         this.id = id;

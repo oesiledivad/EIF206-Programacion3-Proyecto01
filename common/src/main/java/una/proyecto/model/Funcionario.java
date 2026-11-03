@@ -1,13 +1,7 @@
 package una.proyecto.model;
 
-import jakarta.xml.bind.annotation.XmlAccessType;
-import jakarta.xml.bind.annotation.XmlAccessorType;
-import jakarta.xml.bind.annotation.XmlElement;
-
-@XmlAccessorType(XmlAccessType.FIELD)
 public class Funcionario extends Usuario {
 
-    @XmlElement
     private String phone;
 
     public Funcionario() {
@@ -41,5 +35,4 @@ public class Funcionario extends Usuario {
         this.phone = phone;
     }
 }
-
 
