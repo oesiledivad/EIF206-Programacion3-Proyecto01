@@ -62,8 +62,7 @@ docker compose -f compose.test.yaml up -d --wait
 
 Failsafe establece `DB_URL`, `DB_USER` y `DB_PASSWORD` desde las propiedades Maven
 `test.db.url`, `test.db.user` y `test.db.password`. Las pruebas eliminan únicamente sus identificadores de
-usuario reservados. La conversión de archivos XML existentes es una operación
-independiente de la creación del esquema.
+usuario reservados.
 
 [MySQL con Docker](DOCKER.md) · [Esquema y catálogo](README.md)
 

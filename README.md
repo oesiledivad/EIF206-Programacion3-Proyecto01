@@ -654,7 +654,7 @@ compose.test.yaml               # MySQL exclusivo para integración
 .config/                        # Ejemplos de configuración local
 common/
 ├── pom.xml
-└── src/main/java/              # Modelos y adaptadores compartidos
+└── src/main/java/              # Modelos y protocolo compartidos
 backend/
 ├── pom.xml
 └── src/
@@ -667,7 +667,6 @@ frontend/
     └── test/                   # Pruebas de presentación, proxy y servidor
 database/                       # MER DBML, esquema MySQL y catálogo de ejemplo
 docs/                           # Arquitectura, ejecución manual y pruebas funcionales
-data/xml/                       # Archivos de datos del proyecto 01
 ```
 
 ---

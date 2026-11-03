@@ -7,7 +7,7 @@ Java y la configuración de compilación y pruebas.
 | --- | --- | --- |
 | `frontend` | Aplicación JavaFX, MVC y reportes PDF | [README](../frontend/README.md) |
 | `backend` | Servidor, servicios, lógica, integración con IA y datos MySQL | [README](../backend/README.md) |
-| `common` | Modelos y adaptadores de serialización | [README](../common/README.md) |
+| `common` | Modelos serializables y protocolo de sockets | [README](../common/README.md) |
 
 El MER y los scripts MySQL se encuentran en [`database`](../database/README.md).
 
@@ -36,8 +36,6 @@ al utilizar JPMS.
 | `LoginLogic`, `MainLogic` | `frontend`: `una.proyecto.presentation.logic` |
 | `SessionManager` | `frontend`: `una.proyecto.utils` |
 | `AppFactory` | `backend`: `una.proyecto.bootstrap` |
-| `XmlUtil` | `backend`: `una.proyecto.datos.xml` |
-| `LocalDateAdapter`, `LocalTimeAdapter` | `common`: `una.proyecto.serialization` |
 
 La lógica de presentación coordina el ingreso y la navegación. La autenticación
 de credenciales se realiza mediante `AuthService` en el backend.

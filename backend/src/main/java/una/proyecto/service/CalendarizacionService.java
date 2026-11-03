@@ -16,6 +16,11 @@ public class CalendarizacionService {
         this.reservaService = AppFactory.createReservaService();
     }
 
+    // Permite inyectar el servicio de reservas (pruebas unitarias sin MySQL).
+    public CalendarizacionService(ReservaService reservaService) {
+        this.reservaService = reservaService;
+    }
+
     public List<Reserva> obtenerReservasDeLaSemana(LocalDate fecha) {
         LocalDate inicioSemana = fecha.with(DayOfWeek.MONDAY);
         LocalDate finSemana = fecha.with(DayOfWeek.SUNDAY);

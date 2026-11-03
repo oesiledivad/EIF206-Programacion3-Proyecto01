@@ -66,6 +66,9 @@ public class UsuarioDatos {
         }
     }
 
+    // Crea el usuario. Si el id pertenece a un usuario dado de baja, lo reactiva
+    // como si fuera nuevo (nombre, rol, telefono y clave inicial). Devuelve false
+    // solo si ya existe un usuario ACTIVO con ese id.
     public boolean addUser(Usuario user) {
         if (user == null || user.getId() == null || user.getId().isBlank()) return false;
         validateProfile(user);
@@ -73,21 +76,32 @@ public class UsuarioDatos {
         try (Connection connection = db.openConnection()) {
             connection.setAutoCommit(false);
             try {
-                try (PreparedStatement statement = connection.prepareStatement(
-                        "INSERT INTO usuarios (id_usuario, nombre, clave_hash, rol, activo) VALUES (?, ?, ?, ?, TRUE)")) {
-                    statement.setString(1, user.getId());
-                    statement.setString(2, user.getName());
-                    statement.setString(3, hash);
-                    statement.setString(4, user.getRole());
-                    statement.executeUpdate();
+                Boolean activo = estadoActual(connection, user.getId());
+                if (Boolean.TRUE.equals(activo)) {
+                    connection.rollback();
+                    return false;
                 }
-                if (user instanceof Funcionario funcionario) {
+                if (activo == null) {
                     try (PreparedStatement statement = connection.prepareStatement(
-                            "INSERT INTO funcionarios (id_usuario, telefono) VALUES (?, ?)")) {
+                            "INSERT INTO usuarios (id_usuario, nombre, clave_hash, rol, activo) VALUES (?, ?, ?, ?, TRUE)")) {
                         statement.setString(1, user.getId());
-                        statement.setString(2, funcionario.getPhone());
+                        statement.setString(2, user.getName());
+                        statement.setString(3, hash);
+                        statement.setString(4, user.getRole());
                         statement.executeUpdate();
                     }
+                } else {
+                    try (PreparedStatement statement = connection.prepareStatement(
+                            "UPDATE usuarios SET nombre = ?, clave_hash = ?, rol = ?, activo = TRUE WHERE id_usuario = ?")) {
+                        statement.setString(1, user.getName());
+                        statement.setString(2, hash);
+                        statement.setString(3, user.getRole());
+                        statement.setString(4, user.getId());
+                        statement.executeUpdate();
+                    }
+                }
+                if (user instanceof Funcionario funcionario) {
+                    guardarTelefono(connection, user.getId(), funcionario.getPhone());
                 }
                 connection.commit();
                 return true;
@@ -98,6 +112,34 @@ public class UsuarioDatos {
             }
         } catch (SQLException e) {
             throw failure("crear el usuario", e);
+        }
+    }
+
+    // null si el usuario no existe; si existe, bloquea su fila hasta el commit.
+    private Boolean estadoActual(Connection connection, String id) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(
+                "SELECT activo FROM usuarios WHERE id_usuario = ? FOR UPDATE")) {
+            statement.setString(1, id);
+            try (ResultSet rows = statement.executeQuery()) {
+                return rows.next() ? rows.getBoolean(1) : null;
+            }
+        }
+    }
+
+    // Actualiza el telefono del perfil de funcionario o lo crea si no existia
+    // (por ejemplo, al reactivar como funcionario un id que fue administrador).
+    private void guardarTelefono(Connection connection, String id, String telefono) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(
+                "UPDATE funcionarios SET telefono = ? WHERE id_usuario = ?")) {
+            statement.setString(1, telefono);
+            statement.setString(2, id);
+            if (statement.executeUpdate() == 1) return;
+        }
+        try (PreparedStatement statement = connection.prepareStatement(
+                "INSERT INTO funcionarios (id_usuario, telefono) VALUES (?, ?)")) {
+            statement.setString(1, id);
+            statement.setString(2, telefono);
+            statement.executeUpdate();
         }
     }
 

@@ -12,12 +12,9 @@ y utiliza MySQL mediante JDBC.
 | `src/main/java/una/proyecto/logic` | Validaciones y reglas de negocio |
 | `src/main/java/una/proyecto/logic/ia` | Interpretación de solicitudes de reserva con Groq |
 | `src/main/java/una/proyecto/datos` | Repositorios JDBC y configuración MySQL |
-| `src/main/java/una/proyecto/datos/wrapper` | Contenedores JAXB |
-| `src/main/java/una/proyecto/datos/xml` | Utilidades XML |
 | `src/main/java/una/proyecto/bootstrap` | Construcción de servicios y creación del administrador |
 | `src/main/java/una/proyecto/server` | Servidor, workers y punto de entrada `BackendApp` |
 | `src/main/java/una/proyecto/security` | Hash y verificación de contraseñas |
-| `src/main/resources/una/proyecto/datos` | Recurso XML de usuarios |
 | `src/test/java` | Pruebas unitarias y de integración |
 
 ## Uso y dependencias
@@ -26,7 +23,7 @@ El punto de entrada del servidor es `una.proyecto.server.BackendApp`. El servido
 escucha en `Protocol.PORT` y atiende el contrato de autenticación, panel inicial y reservas por
 sockets. El [`frontend`](../frontend/README.md) accede a los servicios mediante `ServiceProxy`.
 
-Sus dependencias de aplicación son `common`, MySQL Connector/J, JAXB, el cliente
+Sus dependencias de aplicación son `common`, MySQL Connector/J, el cliente
 HTTP de Java, JSON y Dotenv. El módulo es independiente de JavaFX.
 
 ## Ejecución

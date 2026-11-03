@@ -227,6 +227,32 @@ public class CategoriasTest {
         verify(datos).eliminar("CAT-000001");
     }
 
+    // Regla: no se elimina una categoria que todavia tiene recursos activos
+    @Test
+    void eliminarCategoriaConRecursosActivosLanzaExcepcionYNoLaBorra() {
+        when(datos.leerPorId("CAT-000001")).thenReturn(new Categoria("CAT-000001", "Sala"));
+        when(recursoService.obtenerTodosRecursos()).thenReturn(List.of(
+                new Recurso("SALA-1", "CAT-000001", "Sala 1"),
+                new Recurso("LAP-1", "CAT-000002", "Laptop")));
+
+        IllegalArgumentException error = assertThrows(IllegalArgumentException.class,
+                () -> logica.eliminar("CAT-000001"));
+
+        assertTrue(error.getMessage().contains("1 recurso"), "Mensaje: " + error.getMessage());
+        verify(datos, never()).eliminar(any());
+    }
+
+    // Si los recursos activos son de otras categorias, si se puede eliminar
+    @Test
+    void eliminarCategoriaSinRecursosPropiosSeElimina() {
+        when(datos.leerPorId("CAT-000001")).thenReturn(new Categoria("CAT-000001", "Sala"));
+        when(recursoService.obtenerTodosRecursos()).thenReturn(List.of(new Recurso("LAP-1", "CAT-000002", "Laptop")));
+
+        logica.eliminar("CAT-000001");
+
+        verify(datos).eliminar("CAT-000001");
+    }
+
     // ── categoriasSinRecursos / categoriaConRecursos ──────────────────────────
 
     // Probar categoriasSinRecursos() con lista vacia — debe retornar lista vacia
