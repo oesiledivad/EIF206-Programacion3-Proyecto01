@@ -106,6 +106,6 @@ public class Reserva implements Serializable {
     }
 
     public String getNombreFuncionario() {
-        return funcionarioReserva.getName();
+        return funcionarioReserva != null ? funcionarioReserva.getName() : idFuncionario;
     }
 }
