@@ -98,6 +98,29 @@ class UsuariosIntegracionIT {
         assertEquals("Juan Perez", datos.findUserById(ID).getName());
     }
 
+    @Test void crearDeNuevoUnaCedulaDadaDeBajaLaReactivaComoNueva() {
+        crearFuncionario();
+        logic.cambiarContrasena(ID, ID, "claveVieja");
+        assertTrue(datos.deleteUser(ID));
+
+        new FuncionarioLogic(datos).crear(new Funcionario(ID, "FUNCIONARIO", "Maria Mata", "77777777"));
+
+        Funcionario reactivado = (Funcionario) datos.findUserById(ID);
+        assertNotNull(reactivado, "Debe volver a estar activo");
+        assertEquals("Maria Mata", reactivado.getName());
+        assertEquals("77777777", reactivado.getPhone());
+        assertNotNull(auth.authenticate(ID, ID), "La clave inicial vuelve a ser la cedula");
+        assertNull(auth.authenticate(ID, "claveVieja"), "La clave anterior ya no sirve");
+    }
+
+    @Test void noReactivaNiDuplicaUnaCedulaActiva() {
+        crearFuncionario();
+        Funcionario otro = new Funcionario(ID, "FUNCIONARIO", "Otro Nombre", "77777777");
+        otro.setPassword(ID);
+        assertFalse(datos.addUser(otro));
+        assertEquals("Juan Perez", datos.findUserById(ID).getName());
+    }
+
     @Test void bajaLogicaBloqueaLoginCambioYReactivacionPorEdicion() {
         crearFuncionario();
         assertTrue(datos.deleteUser(ID));
