@@ -3,16 +3,13 @@ package una.proyecto.datos;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import una.proyecto.model.Recurso;
-import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
 import java.util.List;
-//=======================================
-//Aca iran los imports de la base de datos.
-//=======================================
+
 import java.sql.ResultSet;
 
 public class RecursoDatos {
