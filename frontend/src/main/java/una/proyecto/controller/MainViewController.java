@@ -16,7 +16,6 @@ import una.proyecto.presentation.logic.MainLogic.UserSessionInfo;
 import una.proyecto.presentation.logic.MainLogic.MenuPermissions;
 import una.proyecto.utils.Navigation;
 import una.proyecto.utils.SessionManager;
-import una.proyecto.utils.WindowHelper;
 
 import java.io.IOException;
 

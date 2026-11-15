@@ -5,7 +5,6 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import una.proyecto.model.Categoria;
-import una.proyecto.model.FilaCalendarizacion;
 import una.proyecto.model.Recurso;
 import una.proyecto.model.Reserva;
 import una.proyecto.utils.*;

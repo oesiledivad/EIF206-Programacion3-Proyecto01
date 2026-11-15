@@ -9,7 +9,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 
 import una.proyecto.model.Categoria;
 import una.proyecto.model.EstadoReserva;
-import una.proyecto.model.Funcionario;
 import una.proyecto.model.Reserva;
 import una.proyecto.proxy.ServiceProxy;
 import una.proyecto.utils.SessionManager;

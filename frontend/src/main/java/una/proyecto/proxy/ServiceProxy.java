@@ -19,8 +19,6 @@ import una.proyecto.model.Categoria;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-import static una.proyecto.protocolo.Protocol.RECURSO_ACTUALIZAR;
-import static una.proyecto.protocolo.Protocol.RECURSO_LISTAR;
 
 public class ServiceProxy implements LoginService, AutoCloseable {
     private static final ServiceProxy INSTANCE = new ServiceProxy();
@@ -44,6 +42,8 @@ public class ServiceProxy implements LoginService, AutoCloseable {
     public ServiceProxy(String host, int port) { this.host = host; this.port = port; }
     public static ServiceProxy instance() { return INSTANCE; }
 
+    // ================= Sesión =================
+
     @Override
     public synchronized Usuario authenticate(String id, String password) {
         detenerAlertas();
@@ -59,6 +59,10 @@ public class ServiceProxy implements LoginService, AutoCloseable {
         }
     }
 
+    public void changePassword(String actual, String nueva) { request(Protocol.AUTH_CAMBIAR_CLAVE, actual, nueva); }
+
+    // ================= Dashboard y Estadísticas =================
+
     public DashboardData dashboard() { return (DashboardData) request(Protocol.DASHBOARD_RESUMEN); }
 
     @SuppressWarnings("unchecked")
@@ -70,7 +74,6 @@ public class ServiceProxy implements LoginService, AutoCloseable {
     public List<EstadisticaItem> estadisticasActividades(LocalDate desde, LocalDate hasta) {
         return (List<EstadisticaItem>) request(Protocol.ESTADISTICAS_ACTIVIDADES, desde, hasta);
     }
-    public void changePassword(String actual, String nueva) { request(Protocol.AUTH_CAMBIAR_CLAVE, actual, nueva); }
 
     // ================= Categorias =================
 
@@ -273,19 +276,6 @@ public class ServiceProxy implements LoginService, AutoCloseable {
         }
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
     public synchronized void logout() {
         detenerAlertas();
         if (socket == null) return;
@@ -294,25 +284,6 @@ public class ServiceProxy implements LoginService, AutoCloseable {
             // Cerrar el socket también revoca la sesión del servidor.
         } finally { close(); }
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     private synchronized Object request(int operation, Object... parameters) {
         try {

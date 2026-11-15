@@ -4,7 +4,6 @@ import una.proyecto.datos.CategoriaDatos;
 import una.proyecto.datos.RecursoDatos;
 import una.proyecto.datos.ReservaDatos;
 import una.proyecto.logic.*;
-import una.proyecto.model.Funcionario;
 import una.proyecto.service.*;
 import una.proyecto.datos.UsuarioDatos;
 

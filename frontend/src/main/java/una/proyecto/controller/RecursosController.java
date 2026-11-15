@@ -13,7 +13,6 @@ import una.proyecto.utils.ReportePDF;
 import una.proyecto.utils.TablePDF;
 import una.proyecto.proxy.ServiceProxy;
 
-import java.util.List;
 
 public class RecursosController {
     @FXML
