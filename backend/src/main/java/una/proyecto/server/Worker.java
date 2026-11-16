@@ -1,0 +1,587 @@
+package una.proyecto.server;
+
+import una.proyecto.model.Reserva;
+import una.proyecto.model.Usuario;
+import una.proyecto.model.DashboardData;
+import una.proyecto.model.Funcionario;
+import una.proyecto.model.Recurso;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import una.proyecto.protocolo.Protocol;
+
+import una.proyecto.service.ReservaService;
+import una.proyecto.service.RecursoService;
+import una.proyecto.service.Servicios;
+import una.proyecto.service.FuncionarioService;
+
+import una.proyecto.model.EstadoReserva;
+import una.proyecto.logic.ia.aiGenerator;
+import java.util.Collections;
+
+import una.proyecto.model.Categoria;
+import una.proyecto.service.CategoriaService;
+import java.util.List;
+
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
+import java.util.ArrayList;
+
+// Atiende a un cliente en su propio hilo.
+// Recibe sus peticiones por el canal sincrono y le envia alertas por el asincrono.
+public class Worker {
+
+    private final Server server;
+    private final Servicios servicios;
+    private final String sid;
+    private volatile Usuario usuario;
+
+    // Canal sincrono: peticiones y respuestas
+    private final Socket socket;
+    private final ObjectOutputStream os;
+    private final ObjectInputStream is;
+
+    // Canal asincrono: alertas. Es null hasta que el cliente lo abre.
+    private Socket socketAsync;
+    private ObjectOutputStream osAsync;
+
+    public Worker(Server server, Servicios servicios, Socket socket,
+                  ObjectOutputStream os, ObjectInputStream is, String sid) {
+        this.server = server;
+        this.servicios = servicios;
+        this.socket = socket;
+        this.os = os;
+        this.is = is;
+        this.sid = sid;
+    }
+
+    // ================= Ciclo de vida =================
+
+    public void start() {
+        Thread hilo = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                escuchar();
+            }
+        }, "Worker-" + sid);
+        hilo.start();
+    }
+    // Lo ejecuta el hilo creado en start().
+    private void escuchar() {
+        boolean continuar = true;
+        while (continuar) {
+            try {
+                int operacion = is.readInt();
+                continuar = atender(operacion);
+            } catch (IOException e) {
+                continuar = false; // El cliente se desconecto sin avisar.
+            }
+        }
+        cerrar();
+    }
+
+    // Ejecuta la operacion y responde siempre con: estado + objeto.
+    // Devuelve false cuando el cliente pide desconectarse.
+    private boolean atender(int operacion) throws IOException {
+        if (operacion == Protocol.DISCONNECT) {
+            return false;
+        }
+        Object resultado;
+        int estado;
+        try {
+            resultado = ejecutar(operacion);
+            estado = Protocol.STATUS_NO_ERROR;
+        } catch (IOException e) {
+            throw e; // La conexion se rompio: no se puede responder.
+        } catch (Exception e) {
+            resultado = mensajeDe(e);
+            estado = Protocol.STATUS_ERROR;
+            System.err.println("[" + sid + "] Error en la operacion " + operacion + ": " + resultado);
+        }
+        os.writeInt(estado);
+        os.writeObject(resultado);
+        os.flush();
+        os.reset();
+        return true;
+    }
+
+    // Reparte cada operacion al metodo de su entidad.
+    private Object ejecutar(int operacion) throws IOException, ClassNotFoundException {
+        switch (operacion) {
+            case Protocol.AUTH_LOGIN: {
+                Object id = is.readObject();
+                Object clave = is.readObject();
+                logout();
+                if (!(id instanceof String) || !(clave instanceof String)) {
+                    throw new IllegalArgumentException("Credenciales inválidas.");
+                }
+                usuario = servicios.getAuthService().authenticate((String) id, (String) clave);
+                if (usuario == null) throw new IllegalArgumentException("Credenciales incorrectas.");
+                return usuario;
+            }
+            case Protocol.AUTH_LOGOUT:
+                logout();
+                return null;
+            case Protocol.AUTH_CAMBIAR_CLAVE: {
+                Object actual = is.readObject();
+                Object nueva = is.readObject();
+                Usuario sesion = requireSession();
+                if (!(actual instanceof String) || !(nueva instanceof String)) {
+                    throw new IllegalArgumentException("Contraseñas inválidas.");
+                }
+                servicios.getUsuarioLogic().cambiarContrasena(sesion.getId(), (String) actual, (String) nueva);
+                return null;
+            }
+            case Protocol.DASHBOARD_RESUMEN: {
+                Usuario sesion = requireSession();
+                boolean admin = "ADMIN".equals(sesion.getRole());
+                var reservas = admin ? servicios.getReservaService().obtenerTodasReservas()
+                        : servicios.getReservaService().obtenerReservasPorFuncionario(sesion.getId());
+                var funcionarios = admin ? servicios.getFuncionarioService().getAllEmployees()
+                        : java.util.List.<Funcionario>of();
+                for (Reserva reserva : reservas) {
+                    funcionarios.stream().filter(f -> f.getId().equals(reserva.getIdFuncionario()))
+                            .findFirst().ifPresent(reserva::setFuncionarioReserva);
+                }
+                return new DashboardData(reservas, servicios.getRecursoService().obtenerTodosRecursos().size(),
+                        funcionarios.size());
+            }
+            case Protocol.RESERVA_CREAR:
+            case Protocol.RESERVA_LISTAR:
+            case Protocol.RESERVA_BUSCAR:
+            case Protocol.RESERVA_CANCELAR:
+            case Protocol.RESERVA_EXTRAER_IA:
+                return ejecutarReserva(operacion);
+
+            // Recursos:
+            case Protocol.RECURSO_LISTAR:
+            case Protocol.RECURSO_BUSCAR:
+            case Protocol.RECURSO_FILTRAR:
+            case Protocol.RECURSO_CREAR:
+            case Protocol.RECURSO_ACTUALIZAR:
+            case Protocol.RECURSO_ELIMINAR:
+            case Protocol.RECURSO_POR_CATEGORIA:
+            case Protocol.RECURSO_TEXTO_POR_CATEGORIAS:
+                return ejecutarRecurso(operacion);
+
+
+            // Categorias:
+            case Protocol.CATEGORIA_LISTAR:
+            case Protocol.CATEGORIA_BUSCAR_DESCRIPCION:
+            case Protocol.CATEGORIA_CREAR:
+            case Protocol.CATEGORIA_ACTUALIZAR:
+            case Protocol.CATEGORIA_ELIMINAR:
+            case Protocol.CATEGORIA_SIN_RECURSOS:
+            case Protocol.CATEGORIA_CON_RECURSOS:
+                return ejecutarCategoria(operacion);
+            default:
+                throw new IllegalArgumentException("Operacion desconocida: " + operacion);
+
+            case Protocol.CALENDARIZACION_RECURSOS_CATEGORIA:
+            case Protocol.CALENDARIZACION_RESERVAS_DIA:
+            case Protocol.CALENDARIZACION_RESERVAS_SEMANA:
+                return ejecutarCalendarizacion(operacion);
+
+            case Protocol.FUNCIONARIO_LISTAR:
+            case Protocol.FUNCIONARIO_BUSCAR_ID:
+            case Protocol.FUNCIONARIO_BUSCAR_NOMBRE:
+            case Protocol.FUNCIONARIO_CREAR:
+            case Protocol.FUNCIONARIO_ACTUALIZAR:
+            case Protocol.FUNCIONARIO_ELIMINAR:
+                return ejecutarFuncionario(operacion);
+            case Protocol.ESTADISTICAS_RECURSOS:
+            case Protocol.ESTADISTICAS_ACTIVIDADES: {
+                LocalDate desde = (LocalDate) is.readObject();
+                LocalDate hasta = (LocalDate) is.readObject();
+                requireSession();
+                var estadisticas = servicios.getEstadisticasService();
+                return new ArrayList<>(operacion == Protocol.ESTADISTICAS_RECURSOS
+                        ? estadisticas.obtenerEstadisticasRecursos(desde, hasta)
+                        : estadisticas.obtenerEstadisticasActividades(desde, hasta));
+            }
+        }
+
+    }
+    // ================= Calendarizacion =================
+
+    private Object ejecutarCalendarizacion(int operacion) throws IOException, ClassNotFoundException {
+        switch (operacion) {
+            case Protocol.CALENDARIZACION_RECURSOS_CATEGORIA: {
+                String idCategoria = (String) is.readObject();
+                requireSession();
+                if (idCategoria == null) throw new IllegalArgumentException("Debe indicar la categoría.");
+                return new ArrayList<Recurso>(servicios.getRecursoService().recursosPorCategoria(idCategoria));
+            }
+            case Protocol.CALENDARIZACION_RESERVAS_DIA: {
+                LocalDate fecha = (LocalDate) is.readObject();
+                String idCategoria = (String) is.readObject();
+                requireSession();
+                if (fecha == null || idCategoria == null) {
+                    throw new IllegalArgumentException("Debe indicar la fecha y la categoría.");
+                }
+                return conEncargado(servicios.getReservaService().filtrarReservasService(fecha, idCategoria));
+            }
+            case Protocol.CALENDARIZACION_RESERVAS_SEMANA: {
+                LocalDate fecha = (LocalDate) is.readObject();
+                requireSession();
+                if (fecha == null) throw new IllegalArgumentException("Debe indicar una fecha.");
+                return conEncargado(servicios.getCalendarizacionService().obtenerReservasDeLaSemana(fecha));
+            }
+            default:
+                throw new IllegalArgumentException("Operacion de calendarizacion desconocida: " + operacion);
+        }
+    }
+
+    // ================= Funcionarios =================
+
+    private Object ejecutarFuncionario(int operacion) throws IOException, ClassNotFoundException {
+        FuncionarioService funcionarioService = servicios.getFuncionarioService();
+        switch (operacion) {
+            case Protocol.FUNCIONARIO_LISTAR: {
+                requireAdmin(requireSession());
+                return new ArrayList<Funcionario>(funcionarioService.getAllEmployees());
+            }
+            case Protocol.FUNCIONARIO_BUSCAR_ID: {
+                String id = (String) is.readObject();
+                requireAdmin(requireSession());
+                return new ArrayList<Funcionario>(funcionarioService.findById(id));
+            }
+            case Protocol.FUNCIONARIO_BUSCAR_NOMBRE: {
+                String nombre = (String) is.readObject();
+                requireAdmin(requireSession());
+                return new ArrayList<Funcionario>(funcionarioService.findByName(nombre));
+            }
+            case Protocol.FUNCIONARIO_CREAR: {
+                Funcionario funcionario = (Funcionario) is.readObject();
+                requireAdmin(requireSession());
+                if (funcionario == null) throw new IllegalArgumentException("El funcionario es requerido.");
+                funcionarioService.addEmployee(funcionario); // la lógica pone rol y clave inicial = cédula
+                return null;
+            }
+            case Protocol.FUNCIONARIO_ACTUALIZAR: {
+                Funcionario funcionario = (Funcionario) is.readObject();
+                requireAdmin(requireSession());
+                if (funcionario == null) throw new IllegalArgumentException("El funcionario es requerido.");
+                funcionarioService.updateEmployee(funcionario); // la lógica conserva la clave actual
+                return null;
+            }
+            case Protocol.FUNCIONARIO_ELIMINAR: {
+                String id = (String) is.readObject();
+                Usuario sesion = requireSession();
+                requireAdmin(sesion);
+                funcionarioService.deleteEmployee(id);
+                return null;
+            }
+            default:
+                throw new IllegalArgumentException("Operacion de funcionario desconocida: " + operacion);
+        }
+    }
+
+    // La BD solo guarda el id del funcionario, aquí se pone el objeto completo (sin clave)
+    // para que la pantalla muestre el nombre del encargado sin hacer más peticiones.
+    private ArrayList<Reserva> conEncargado(List<Reserva> reservas) {
+        List<Funcionario> funcionarios = servicios.getFuncionarioService().getAllEmployees();
+        for (Reserva reserva : reservas) {
+            funcionarios.stream()
+                    .filter(f -> f.getId().equals(reserva.getIdFuncionario()))
+                    .findFirst()
+                    .ifPresent(reserva::setFuncionarioReserva);
+        }
+        return new ArrayList<>(reservas);
+    }
+
+    // ================= Reservas =================
+
+    private Object ejecutarReserva(int operacion) throws IOException, ClassNotFoundException {
+        ReservaService reservaService = servicios.getReservaService();
+        switch (operacion) {
+            case Protocol.RESERVA_CREAR: {
+                Reserva datos = (Reserva) is.readObject();
+                Usuario sesion = requireSession();
+                requireFuncionario(sesion);
+                if (datos == null) throw new IllegalArgumentException("La reserva es requerida.");
+                List<Categoria> categorias = datos.getCategoriasDeRecursos();
+                if (categorias == null || categorias.isEmpty()) {
+                    throw new IllegalArgumentException("Debe seleccionar al menos una categoría.");
+                }
+                reservaService.verificarHorasService(datos.getFecha(), datos.getHoraInicio(), datos.getHoraFin());
+
+                Reserva reserva;
+                // Asignar recursos y guardar deben ocurrir juntos: si dos funcionarios
+                // reservan al mismo tiempo, el segundo debe ver lo que guardo el primero.
+                synchronized (reservaService) {
+                    reserva = reservaService.crearReserva(datos.getActividad(), datos.getFecha(),
+                            datos.getHoraInicio(), datos.getHoraFin(), sesion.getId(), categorias,
+                            EstadoReserva.ACTIVA, null);
+                    reservaService.save(reserva);
+                }
+                conEncargado(Collections.singletonList(reserva));
+                server.notificarReservaCreada(this, reserva);
+                return reserva;
+            }
+
+            case Protocol.RESERVA_LISTAR: {
+                Usuario sesion = requireSession();
+                List<Reserva> reservas = "ADMIN".equals(sesion.getRole())
+                        ? reservaService.obtenerTodasReservas()
+                        : reservaService.obtenerReservasPorFuncionario(sesion.getId());
+                reservaService.repoblarCategoriasService(reservas, servicios.getCategoriaService().obtenerTodas());
+                return new ArrayList<Reserva>(reservas);
+            }
+            case Protocol.RESERVA_BUSCAR: {
+                String id = (String) is.readObject();
+                Usuario sesion = requireSession();
+                Reserva reserva = reservaService.buscarPorId(id);
+                if (reserva != null && !"ADMIN".equals(sesion.getRole())) requirePropietario(sesion, reserva);
+                return reserva;
+            }
+            case Protocol.RESERVA_CANCELAR: {
+                String id = (String) is.readObject();
+                Usuario sesion = requireSession();
+                requireFuncionario(sesion);
+                Reserva reserva = reservaService.buscarPorId(id);
+                if (reserva == null) throw new IllegalArgumentException("La reserva no existe.");
+                requirePropietario(sesion, reserva);
+                boolean futura = reserva.getFecha().isAfter(LocalDate.now())
+                        || (reserva.getFecha().equals(LocalDate.now()) && reserva.getHoraInicio().isAfter(LocalTime.now()));
+                if (!futura) throw new IllegalArgumentException("Solo puede cancelar reservas futuras.");
+                reservaService.delete(id);
+                return null;
+            }
+            case Protocol.RESERVA_EXTRAER_IA: {
+                String frase = (String) is.readObject();
+                Usuario sesion = requireSession();
+                requireFuncionario(sesion);
+                if (frase == null || frase.isBlank()) {
+                    throw new IllegalArgumentException("Ingrese una frase para extraer información.");
+                }
+                try {
+                    return aiGenerator.extraeInformacion(frase, servicios.getCategoriaService().obtenerTodas());
+                } catch (Exception e) {
+                    throw new IllegalStateException("No se pudo extraer la información: " + e.getMessage(), e);
+                }
+            }
+            default:
+                throw new IllegalArgumentException("Operacion de reserva desconocida: " + operacion);
+        }
+    }
+
+    // ================= Categorias =================
+
+    @SuppressWarnings("unchecked")
+    private Object ejecutarCategoria(int operacion) throws IOException, ClassNotFoundException {
+        CategoriaService categoriaService = servicios.getCategoriaService();
+        switch (operacion) {
+            case Protocol.CATEGORIA_LISTAR: {
+                requireSession();
+                return new ArrayList<Categoria>(categoriaService.obtenerTodas());
+            }
+            case Protocol.CATEGORIA_BUSCAR_DESCRIPCION: {
+                String descripcion = (String) is.readObject();
+                requireSession();
+                return new ArrayList<Categoria>(categoriaService.buscarPorDescripcion(descripcion));
+            }
+            case Protocol.CATEGORIA_CREAR: {
+                Categoria categoria = (Categoria) is.readObject();
+                requireAdmin(requireSession());
+                if (categoria == null) throw new IllegalArgumentException("La categoría es requerida.");
+                categoriaService.save(categoria);
+                return categoria; // ya trae el id que asignó MySQL
+            }
+            case Protocol.CATEGORIA_ACTUALIZAR: {
+                Categoria categoria = (Categoria) is.readObject();
+                requireAdmin(requireSession());
+                if (categoria == null) throw new IllegalArgumentException("La categoría es requerida.");
+                categoriaService.update(categoria);
+                return null;
+            }
+            case Protocol.CATEGORIA_ELIMINAR: {
+                String id = (String) is.readObject();
+                requireAdmin(requireSession());
+                categoriaService.delete(id);
+                return null;
+            }
+            case Protocol.CATEGORIA_SIN_RECURSOS: {
+                List<Categoria> escogidas = (List<Categoria>) is.readObject();
+                requireSession();
+                return new ArrayList<Categoria>(categoriaService.categoriaNoPoseeRecursos(escogidas));
+            }
+            case Protocol.CATEGORIA_CON_RECURSOS: {
+                List<Categoria> escogidas = (List<Categoria>) is.readObject();
+                requireSession();
+                return new ArrayList<Categoria>(categoriaService.categoriaConRecursos(escogidas));
+            }
+            default:
+                throw new IllegalArgumentException("Operacion de categoria desconocida: " + operacion);
+        }
+    }
+    // ================= Recursos =================
+    @SuppressWarnings("unchecked")
+    private Object ejecutarRecurso(int operacion) throws IOException, ClassNotFoundException {
+        RecursoService recursoService = servicios.getRecursoService();
+        switch (operacion) {
+            case Protocol.RECURSO_LISTAR: {
+                requireSession();
+                return new ArrayList<Recurso>(recursoService.obtenerTodosRecursos());
+            }
+            case Protocol.RECURSO_BUSCAR: {
+                String id = (String) is.readObject();
+                requireSession();
+                return recursoService.recurPorId(id);
+            }
+            case Protocol.RECURSO_FILTRAR: {
+                Categoria categoria = (Categoria) is.readObject();
+                String descripcion = (String) is.readObject();
+                requireSession();
+                return new ArrayList<Recurso>(recursoService.buscarPorFiltros(categoria, descripcion));
+            }
+            case Protocol.RECURSO_CREAR: {
+                Recurso recurso = (Recurso) is.readObject();
+                requireAdmin(requireSession());
+                if (recurso == null) throw new IllegalArgumentException("El recurso es requerido.");
+                recursoService.save(recurso);
+                return recurso;
+            }
+            case Protocol.RECURSO_ACTUALIZAR: {
+                Recurso recurso = (Recurso) is.readObject();
+                requireAdmin(requireSession());
+                if (recurso == null) throw new IllegalArgumentException("El recurso es requerido.");
+                recursoService.update(recurso);
+                return null;
+            }
+            case Protocol.RECURSO_ELIMINAR: {
+                String id = (String) is.readObject();
+                requireAdmin(requireSession());
+                recursoService.delete(id);
+                return null;
+            }
+            case Protocol.RECURSO_POR_CATEGORIA: {
+                String idCategoria = (String) is.readObject();
+                requireSession();
+                if (idCategoria == null) throw new IllegalArgumentException("Debe indicar la categoría.");
+                return new ArrayList<Recurso>(recursoService.recursosPorCategoria(idCategoria));
+            }
+            case Protocol.RECURSO_TEXTO_POR_CATEGORIAS: {
+                List<Categoria> categorias = (List<Categoria>) is.readObject();
+                requireSession();
+                if (categorias == null) throw new IllegalArgumentException("Debe indicar las categorías.");
+                return recursoService.obtenerRecursosParaTabe(categorias);
+            }
+            default:
+                throw new IllegalArgumentException("Operacion de recurso desconocida: " + operacion);
+        }
+    }
+
+    private synchronized Usuario requireSession() {
+        Usuario sesion = usuario;
+        Usuario vigente = sesion == null ? null : servicios.getAuthService().activeUser(sesion.getId());
+        if (vigente == null) {
+            logout();
+            throw new IllegalStateException("Debe iniciar sesión con un usuario activo.");
+        }
+        usuario = vigente;
+        return vigente;
+    }
+
+    private void requireFuncionario(Usuario sesion) {
+        if (!"FUNCIONARIO".equals(sesion.getRole())) {
+            throw new IllegalArgumentException("Esta operación requiere un funcionario.");
+        }
+    }
+
+    private void requireAdmin(Usuario sesion) {
+        if (!"ADMIN".equals(sesion.getRole())) {
+            throw new IllegalArgumentException("Esta operación requiere un administrador.");
+        }
+    }
+
+    private void requirePropietario(Usuario sesion, Reserva reserva) {
+        if (!sesion.getId().equalsIgnoreCase(reserva.getIdFuncionario())) {
+            throw new IllegalArgumentException("La reserva pertenece a otro funcionario.");
+        }
+    }
+
+    private synchronized void logout() {
+        usuario = null;
+        cerrarCanalAsync();
+    }
+
+    String getUsuarioId() {
+        Usuario sesion = usuario;
+        return sesion == null ? null : sesion.getId();
+    }
+
+    // ================= Alertas =================
+
+    // Lo llama el Server cuando el cliente abre su canal de alertas.
+    public synchronized void setCanalAsync(Socket socketAsync, ObjectOutputStream osAsync,
+                                           ObjectInputStream isAsync) throws IOException {
+        try {
+            requireSession();
+        } catch (IllegalStateException e) {
+            throw new IOException("El canal de alertas requiere una sesión activa.", e);
+        }
+        cerrarCanalAsync();
+        osAsync.writeInt(Protocol.STATUS_NO_ERROR);
+        osAsync.flush();
+        this.socketAsync = socketAsync;
+        this.osAsync = osAsync;
+    }
+
+    // Lo llaman los hilos de OTROS Workers (via Server); por eso es synchronized.
+    public synchronized void enviarNotificacion(int tipo, Object dato) {
+        if (osAsync == null || usuario == null) {
+            return; // Este cliente todavia no abrio su canal de alertas.
+        }
+        try {
+            requireSession();
+            osAsync.writeInt(tipo);
+            osAsync.writeObject(dato);
+            osAsync.flush();
+            osAsync.reset();
+        } catch (IOException | IllegalStateException e) {
+            System.err.println("[" + sid + "] No se pudo enviar la alerta: " + e.getMessage());
+            cerrarCanalAsync();
+        }
+    }
+
+    // ================= Cierre =================
+
+    synchronized void cerrar() {
+        usuario = null;
+        server.remover(this);
+        cerrarCanalAsync();
+        try {
+            socket.close();
+        } catch (IOException e) {
+            // Ya estaba cerrado.
+        }
+    }
+
+    private synchronized void cerrarCanalAsync() {
+        if (socketAsync != null) {
+            try {
+                socketAsync.close();
+            } catch (IOException e) {
+                // Ya estaba cerrado.
+            }
+        }
+        socketAsync = null;
+        osAsync = null;
+    }
+
+    // ================= Auxiliares =================
+
+    private String mensajeDe(Exception e) {
+        String mensaje = e.getMessage();
+        if (mensaje == null || mensaje.isBlank()) {
+            return "Error inesperado en el servidor (" + e.getClass().getSimpleName() + ")";
+        }
+        return mensaje;
+    }
+
+    public String getSid() {
+        return sid;
+    }
+}

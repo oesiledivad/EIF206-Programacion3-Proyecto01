@@ -1,0 +1,413 @@
+package una.proyecto.controller;
+
+import javafx.application.Platform;
+import javafx.concurrent.Task;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.VBox;
+import una.proyecto.model.EstadisticaItem;
+import una.proyecto.proxy.ServiceProxy;
+import una.proyecto.utils.GeneradorPDFS;
+import una.proyecto.utils.ReportePDF;
+import una.proyecto.utils.TablePDF;
+
+import java.time.LocalDate;
+import java.util.List;
+
+public class EstadisticasController {
+
+    @FXML
+    private BarChart<String, Number> barChartActividades;
+    @FXML
+    private BarChart<String, Number> barChartRecursos;
+    @FXML
+    private Button btnGenerarActividades;
+    @FXML
+    private Button btnGenerarRecursos;
+    @FXML
+    private Button btnImprimirActividades;
+    @FXML
+    private Button btnImprimirRecursos;
+
+    @FXML
+    private Button btnTabRecursos;
+    @FXML
+    private Button btnTabActividades;
+
+    @FXML
+    private DatePicker dpActividadesDesde;
+    @FXML
+    private DatePicker dpActividadesHasta;
+    @FXML
+    private DatePicker dpRecursosDesde;
+    @FXML
+    private DatePicker dpRecursosHasta;
+    @FXML
+    private Label lblErrorActividades;
+    @FXML
+    private Label lblErrorRecursos;
+    @FXML
+    private TableView<EstadisticaItem> tableViewActividades;
+    @FXML
+    private TableView<EstadisticaItem> tableViewRecursos;
+    @FXML
+    private VBox vboxEstadisticasRecursos;
+    @FXML
+    private VBox vboxEstadisticasActividades;
+
+    private final ServiceProxy proxy = ServiceProxy.instance();
+
+    private final ObservableList<EstadisticaItem> resourceData = FXCollections.observableArrayList();
+    private final ObservableList<EstadisticaItem> activityData = FXCollections.observableArrayList();
+
+    private final XYChart.Series<String, Number> resourceSeries = new XYChart.Series<>();
+    private final XYChart.Series<String, Number> activitySeries = new XYChart.Series<>();
+
+    @FXML
+    public void initialize() {
+        try {
+            setupDatePickers();
+            setupTables();
+            setupCharts();
+            setupButtons();
+            hideErrorMessages();
+
+            actualizarEstadoPestanas(true);
+
+            Platform.runLater(() -> {
+                loadResourceData();
+                loadActivityData();
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+            mostrarError("Error de inicialización", e.getMessage());
+        }
+    }
+
+
+    @FXML
+    private void handleTabRecursos() {
+        vboxEstadisticasRecursos.setVisible(true);
+        vboxEstadisticasRecursos.setManaged(true);
+
+        vboxEstadisticasActividades.setVisible(false);
+        vboxEstadisticasActividades.setManaged(false);
+
+        actualizarEstadoPestanas(true);
+    }
+
+    @FXML
+    private void handleTabActividades() {
+        vboxEstadisticasRecursos.setVisible(false);
+        vboxEstadisticasRecursos.setManaged(false);
+
+        vboxEstadisticasActividades.setVisible(true);
+        vboxEstadisticasActividades.setManaged(true);
+
+        actualizarEstadoPestanas(false);
+    }
+
+    private void actualizarEstadoPestanas(boolean recursosActivo) {
+        if (btnTabRecursos != null && btnTabActividades != null) {
+            if (recursosActivo) {
+                btnTabRecursos.getStyleClass().remove("tab-inactive");
+                if (!btnTabRecursos.getStyleClass().contains("tab-active")) {
+                    btnTabRecursos.getStyleClass().add("tab-active");
+                }
+
+                btnTabActividades.getStyleClass().remove("tab-active");
+                if (!btnTabActividades.getStyleClass().contains("tab-inactive")) {
+                    btnTabActividades.getStyleClass().add("tab-inactive");
+                }
+            } else {
+                btnTabActividades.getStyleClass().remove("tab-inactive");
+                if (!btnTabActividades.getStyleClass().contains("tab-active")) {
+                    btnTabActividades.getStyleClass().add("tab-active");
+                }
+
+                btnTabRecursos.getStyleClass().remove("tab-active");
+                if (!btnTabRecursos.getStyleClass().contains("tab-inactive")) {
+                    btnTabRecursos.getStyleClass().add("tab-inactive");
+                }
+            }
+        }
+    }
+
+    private void setupDatePickers() {
+        LocalDate today = LocalDate.now();
+        dpRecursosDesde.setValue(today.minusDays(30));
+        dpRecursosHasta.setValue(today);
+        dpActividadesDesde.setValue(today.minusDays(30));
+        dpActividadesHasta.setValue(today);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void setupTables() {
+        try {
+            // Configuración Tabla Recursos
+            TableColumn<EstadisticaItem, String> colResNombre = new TableColumn<>("Categoría");
+            colResNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
+
+            TableColumn<EstadisticaItem, Integer> colResCantidad = new TableColumn<>("Cantidad");
+            colResCantidad.setCellValueFactory(new PropertyValueFactory<>("cantidad"));
+
+            tableViewRecursos.getColumns().setAll(colResNombre, colResCantidad);
+            tableViewRecursos.setItems(resourceData);
+
+            // Configuración Tabla Actividades
+            TableColumn<EstadisticaItem, String> colActNombre = new TableColumn<>("Semana");
+            colActNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
+
+            TableColumn<EstadisticaItem, Integer> colActCantidad = new TableColumn<>("Cantidad");
+            colActCantidad.setCellValueFactory(new PropertyValueFactory<>("cantidad"));
+
+            tableViewActividades.getColumns().setAll(colActNombre, colActCantidad);
+            tableViewActividades.setItems(activityData);
+        } catch (Exception e) {
+            e.printStackTrace();
+            mostrarError("Error al configurar tablas", e.getMessage());
+        }
+    }
+
+    private void setupCharts() {
+        try {
+            // Gráfico Recursos
+            CategoryAxis xAxisRes = (CategoryAxis) barChartRecursos.getXAxis();
+            barChartRecursos.setAnimated(false);
+            xAxisRes.setAnimated(false);
+            xAxisRes.setLabel("Categoría");
+            NumberAxis yAxisRes = (NumberAxis) barChartRecursos.getYAxis();
+            yAxisRes.setAnimated(false);
+            yAxisRes.setLabel("Cantidad de reservas");
+
+            resourceSeries.setName("Recursos Reservados");
+            barChartRecursos.getData().add(resourceSeries);
+            barChartRecursos.setLegendVisible(false);
+
+            // Gráfico Actividades
+            CategoryAxis xAxisAct = (CategoryAxis) barChartActividades.getXAxis();
+            barChartActividades.setAnimated(false);
+            xAxisAct.setAnimated(false);
+            xAxisAct.setLabel("Semana");
+            NumberAxis yAxisAct = (NumberAxis) barChartActividades.getYAxis();
+            yAxisAct.setAnimated(false);
+            yAxisAct.setLabel("Cantidad de actividades");
+
+            activitySeries.setName("Actividades Programadas");
+            barChartActividades.getData().add(activitySeries);
+            barChartActividades.setLegendVisible(false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            mostrarError("Error al configurar gráficos", e.getMessage());
+        }
+    }
+
+    private void setupButtons() {
+        btnGenerarRecursos.setOnAction(event -> loadResourceData());
+        btnGenerarActividades.setOnAction(event -> loadActivityData());
+        btnImprimirRecursos.setOnAction(event -> printResourceReport());
+        btnImprimirActividades.setOnAction(event -> printActivityReport());
+    }
+
+    private void hideErrorMessages() {
+        lblErrorRecursos.setVisible(false);
+        lblErrorRecursos.setText("");
+        lblErrorActividades.setVisible(false);
+        lblErrorActividades.setText("");
+    }
+
+    // ACCIONES Y LÓGICA DE CARGA
+
+    private void loadResourceData() {
+        cargarEstadisticas(true);
+    }
+
+    private void loadActivityData() {
+        cargarEstadisticas(false);
+    }
+
+    private void cargarEstadisticas(boolean recursos) {
+        DatePicker desde = recursos ? dpRecursosDesde : dpActividadesDesde;
+        DatePicker hasta = recursos ? dpRecursosHasta : dpActividadesHasta;
+        Button generar = recursos ? btnGenerarRecursos : btnGenerarActividades;
+        Button imprimir = recursos ? btnImprimirRecursos : btnImprimirActividades;
+        Label error = recursos ? lblErrorRecursos : lblErrorActividades;
+        ObservableList<EstadisticaItem> datos = recursos ? resourceData : activityData;
+        XYChart.Series<String, Number> serie = recursos ? resourceSeries : activitySeries;
+        if (generar.isDisabled()) return;
+        LocalDate inicio = desde.getValue();
+        LocalDate fin = hasta.getValue();
+        if (!validateDates(inicio, fin, recursos)) return;
+        error.setVisible(false);
+        error.setText("");
+        datos.clear();
+        serie.getData().clear();
+        generar.setDisable(true);
+        imprimir.setDisable(true);
+        desde.setDisable(true);
+        hasta.setDisable(true);
+
+        Task<List<EstadisticaItem>> tarea = new Task<>() {
+            @Override protected List<EstadisticaItem> call() {
+                return recursos ? proxy.estadisticasRecursos(inicio, fin)
+                        : proxy.estadisticasActividades(inicio, fin);
+            }
+        };
+        Runnable terminar = () -> {
+            generar.setDisable(false);
+            imprimir.setDisable(false);
+            desde.setDisable(false);
+            hasta.setDisable(false);
+        };
+        tarea.setOnSucceeded(event -> {
+            terminar.run();
+            List<EstadisticaItem> items = tarea.getValue();
+            datos.setAll(items);
+            updateChartSeries(serie, items);
+            if (items.isEmpty()) {
+                error.setText("No se encontraron datos para el período seleccionado.");
+                error.setVisible(true);
+            }
+        });
+        tarea.setOnFailed(event -> {
+            terminar.run();
+            error.setText("No se pudieron cargar las estadísticas: " + tarea.getException().getMessage());
+            error.setVisible(true);
+        });
+        Thread hilo = new Thread(tarea, recursos ? "Estadisticas-Recursos" : "Estadisticas-Actividades");
+        hilo.setDaemon(true);
+        hilo.start();
+    }
+
+    private boolean validateDates(LocalDate fromDate, LocalDate toDate, boolean isResource) {
+        if (fromDate == null || toDate == null) {
+            String msg = "Seleccione ambas fechas.";
+            if (isResource) showResourceError(msg); else showActivityError(msg);
+            return false;
+        }
+
+        if (fromDate.isAfter(toDate)) {
+            String msg = "La fecha 'Desde' debe ser anterior o igual a 'Hasta'.";
+            if (isResource) showResourceError(msg); else showActivityError(msg);
+            return false;
+        }
+
+        return true;
+    }
+
+    private void updateChartSeries(XYChart.Series<String, Number> series, List<EstadisticaItem> items) {
+        series.getData().clear();
+        if (items != null) {
+            for (EstadisticaItem item : items) {
+                if (item != null && item.getNombre() != null) {
+                    series.getData().add(new XYChart.Data<>(item.getNombre(), item.getCantidad()));
+                }
+            }
+        }
+    }
+
+    // MANEJO DE ERRORES
+
+    private void showResourceError(String message) {
+        Platform.runLater(() -> {
+            lblErrorRecursos.setText(message);
+            lblErrorRecursos.setVisible(true);
+        });
+    }
+
+    private void showActivityError(String message) {
+        Platform.runLater(() -> {
+            lblErrorActividades.setText(message);
+            lblErrorActividades.setVisible(true);
+        });
+    }
+
+    private void mostrarError(String titulo, String mensaje) {
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle(titulo);
+            alert.setHeaderText(null);
+            alert.setContentText(mensaje);
+            alert.showAndWait();
+
+            if (tableViewRecursos != null && tableViewRecursos.getScene() != null) {
+                if (tableViewRecursos.getScene().getRoot() != null) {
+                    tableViewRecursos.getScene().getRoot().requestLayout();
+                }
+            }
+        });
+    }
+
+    // IMPRESIÓN / REPORTES PDF
+
+    private void printResourceReport() {
+        try {
+            if (resourceData.isEmpty()) {
+                showResourceError("No hay datos para imprimir. Genere primero las estadísticas.");
+                return;
+            }
+
+            TablePDF tabla = GeneradorPDFS.desdeTableView(tableViewRecursos);
+            ReportePDF reporte = new ReportePDF(
+                    "Estadísticas de Recursos",
+                    dpRecursosDesde.getValue(),
+                    dpRecursosHasta.getValue(),
+                    tabla,
+                    barChartRecursos
+            );
+            GeneradorPDFS.generar(reporte, "estadisticas_recursos.pdf");
+            mostrarAlertaInfo("PDF generado", "El reporte de recursos fue generado correctamente.");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showResourceError("No se pudo generar el PDF: " + e.getMessage());
+        }
+    }
+
+    private void printActivityReport() {
+        try {
+            if (activityData.isEmpty()) {
+                showActivityError("No hay datos para imprimir. Genere primero las estadísticas.");
+                return;
+            }
+
+            TablePDF tabla = GeneradorPDFS.desdeTableView(tableViewActividades);
+            ReportePDF reporte = new ReportePDF(
+                    "Estadísticas de Actividades",
+                    dpActividadesDesde.getValue(),
+                    dpActividadesHasta.getValue(),
+                    tabla,
+                    barChartActividades
+            );
+            GeneradorPDFS.generar(reporte, "estadisticas_actividades.pdf");
+            mostrarAlertaInfo("PDF generado", "El reporte de actividades fue generado correctamente.");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showActivityError("No se pudo generar el PDF: " + e.getMessage());
+        }
+    }
+
+    private void mostrarAlertaInfo(String titulo, String contenido) {
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle(titulo);
+            alert.setHeaderText(null);
+            alert.setContentText(contenido);
+            alert.showAndWait();
+
+            if (tableViewRecursos != null && tableViewRecursos.getScene() != null) {
+                if (tableViewRecursos.getScene().getRoot() != null) {
+                    tableViewRecursos.getScene().getRoot().requestLayout();
+                }
+            }
+        });
+    }
+}

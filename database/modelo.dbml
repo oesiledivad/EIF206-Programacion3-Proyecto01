@@ -1,0 +1,87 @@
+Project sistema_reserva_recursos {
+  database_type: 'MySQL'
+  Note: '''
+    EIF206 - Proyecto 02. Correspondencia con database/schema.sql.
+    El backend es el unico responsable del acceso a MySQL.
+    Calendarizacion y estadisticas son consultas; actividad es un atributo de reserva.
+    Las alertas son temporales de la sesion del frontend y no se persisten.
+    Las bajas logicas conservan el historial mediante el campo activo.
+  '''
+}
+
+Enum rol_usuario {
+  ADMIN
+  FUNCIONARIO
+}
+
+Enum estado_reserva {
+  ACTIVA
+  CANCELADA
+}
+
+Table usuarios {
+  id_usuario varchar(20) [pk, not null, note: 'Identificacion de acceso: cedula o admin']
+  nombre varchar(150) [not null]
+  clave_hash varchar(255) [not null, note: 'Hash de contrasena, no texto plano']
+  rol rol_usuario [not null]
+  activo boolean [not null, default: true]
+  Note: 'Usuario 1 - Funcionario 0..1. El backend garantiza perfil para rol FUNCIONARIO e impide acceso a inactivos. La clave inicial del funcionario es su identificacion, almacenada como hash.'
+}
+
+Table funcionarios {
+  id_usuario varchar(20) [pk, not null, note: 'PK y FK hacia usuarios']
+  telefono varchar(25) [not null]
+  Note: 'Cada funcionario tiene exactamente un usuario y 0..N reservas. Nombre y estado se guardan en usuarios. La baja desactiva su usuario.'
+}
+
+Table categorias {
+  id_categoria int [pk, not null, increment]
+  descripcion varchar(150) [not null]
+  activo boolean [not null, default: true]
+  Note: 'Categoria 1 - Recurso 0..N. Categorias inactivas no se usan en nuevas reservas.'
+}
+
+Table recursos {
+  id_recurso varchar(30) [pk, not null, note: 'Identificador o numero de activo']
+  id_categoria int [not null, note: 'FK hacia categorias']
+  descripcion varchar(200) [not null]
+  activo boolean [not null, default: true]
+  indexes {
+    id_categoria [name: 'idx_recurso_categoria']
+  }
+  Note: 'Cada recurso tiene exactamente una categoria y 0..N asignaciones. No cambiar la categoria si tiene reservas historicas. Gestionar reservas futuras antes de su baja.'
+}
+
+Table reservas {
+  id_reserva int [pk, not null, increment]
+  id_funcionario varchar(20) [not null, note: 'FK hacia funcionarios']
+  actividad varchar(255) [not null]
+  fecha date [not null]
+  hora_inicio time [not null]
+  hora_fin time [not null]
+  estado estado_reserva [not null, default: 'ACTIVA']
+  indexes {
+    id_funcionario [name: 'idx_reserva_funcionario']
+    fecha [name: 'idx_reserva_fecha']
+  }
+  checks {
+    `hora_inicio < hora_fin` [name: 'chk_reserva_horario']
+  }
+  Note: 'Cada reserva tiene exactamente un funcionario y 1..N asignaciones. El minimo se garantiza en una transaccion del backend. Cancelar conserva asignaciones y libera disponibilidad; solo el propietario puede cancelar sus reservas futuras. Validar fecha y horario futuros. Estadisticas por fecha, semana y categoria; explicitar tratamiento de canceladas.'
+}
+
+Table reserva_recurso {
+  id_reserva int [not null, note: 'PK compuesta y FK hacia reservas']
+  id_recurso varchar(30) [not null, note: 'PK compuesta y FK hacia recursos']
+  indexes {
+    (id_reserva, id_recurso) [pk]
+    id_recurso [name: 'idx_asignacion_recurso']
+  }
+  Note: 'Resuelve Reserva N:M Recurso. Cada asignacion tiene exactamente una reserva y un recurso. Asignar el primer recurso disponible por categoria. Impedir traslapes y guardar todo o nada en una transaccion con bloqueos.'
+}
+
+Ref usuario_funcionario: usuarios.id_usuario -? funcionarios.id_usuario [delete: restrict, update: restrict]
+Ref categoria_recursos: categorias.id_categoria <? recursos.id_categoria [delete: restrict, update: restrict]
+Ref funcionario_reservas: funcionarios.id_usuario <? reservas.id_funcionario [delete: restrict, update: restrict]
+Ref reserva_asignaciones: reservas.id_reserva < reserva_recurso.id_reserva [delete: restrict, update: restrict]
+Ref recurso_asignaciones: recursos.id_recurso <? reserva_recurso.id_recurso [delete: restrict, update: restrict]

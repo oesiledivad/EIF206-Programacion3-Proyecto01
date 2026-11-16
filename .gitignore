@@ -41,5 +41,10 @@ build/
 ### Mac OS ###
 .DS_Store
 
-### Proyecto - Datos XML ###
+### Proyecto - Reportes PDF ###
 pdfs/
+
+###Credenciales BD
+.config/database.env
+.config/docker.env
+.config/admin.env

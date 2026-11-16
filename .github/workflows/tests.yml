@@ -5,23 +5,62 @@ on:
     branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test:
+    name: Unitarias e integración MySQL
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
       - name: Checkout código
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Configurar JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: 'temurin'
           cache: maven
 
-      - name: Correr Unit e Integration tests
-        run: xvfb-run -a mvn verify --batch-mode
-        env:
-          GROQ_API_KEY : ${{ secrets.GROQ_API_KEY }}
+      - name: Preparar pantalla virtual
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes xvfb
+
+      - name: Iniciar MySQL con el esquema del proyecto
+        run: |
+          docker compose -f compose.test.yaml up -d --wait mysql
+
+      - name: Compilar módulos y ejecutar todas las pruebas locales
+        run: xvfb-run -a ./mvnw --batch-mode --no-transfer-progress clean verify
+
+      - name: Guardar reportes de pruebas
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: reportes-pruebas
+          path: |
+            **/target/surefire-reports/
+            **/target/failsafe-reports/
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Mostrar diagnóstico de MySQL
+        if: failure()
+        run: docker compose -f compose.test.yaml logs --no-color mysql
+
+      - name: Apagar MySQL y eliminar los datos de CI
+        if: always()
+        run: |
+          docker compose -f compose.test.yaml down --volumes --remove-orphans
