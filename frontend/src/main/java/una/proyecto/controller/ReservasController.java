@@ -186,34 +186,27 @@ public class ReservasController {
             return;
         }
 
-        // 5. Separar las categorías que tienen recursos de las que no
+        // 5. La reserva solo procede si cada categoría pedida tiene recursos registrados.
+        //    Si alguna no tiene, se indica cuáles y el funcionario puede ajustar la reserva.
         List<Categoria> categoriasSinRecursos;
-        List<Categoria> categoriasConRecursos;
         try {
             categoriasSinRecursos = proxy.categoriasSinRecursos(categoriasSeleccionadas);
-            categoriasConRecursos = proxy.categoriasConRecursos(categoriasSeleccionadas);
         } catch (RuntimeException e) {
             showAlert("Error", e.getMessage());
             return;
         }
-
-        // Caso 1: ninguna categoría seleccionada tiene recursos -> cortar
-        if (categoriasSeleccionadas.size() == categoriasSinRecursos.size()) {
-            showAlert("Error", "Todas las categorías seleccionadas no poseen recursos disponibles.");
-            return;
-        }
-
-        // Caso 2: algunas no tienen recursos -> avisar, pero seguir con las que sí
         if (!categoriasSinRecursos.isEmpty()) {
-            showAlert("Advertencia", "Las siguientes categorías no poseen recursos disponibles y no serán incluidas: "
+            showAlert("Error", "No se pudo realizar la reserva. Estas categorías no tienen recursos disponibles: "
                     + categoriasSinRecursos.stream()
                     .map(Categoria::getDescripcion)
                     .collect(Collectors.joining(", ")));
+            return;
         }
 
-        // 6. Crear la reserva. El servidor valida las horas, asigna los recursos y la guarda.
+        // 6. Crear la reserva. El servidor valida las horas, asigna el primer recurso libre
+        //    de cada categoría y, si alguna está ocupada en ese horario, la rechaza indicando cuál.
         try {
-            Reserva creada = proxy.reservaCrear(actividad, fecha, horaInicio, horaFin, categoriasConRecursos);
+            Reserva creada = proxy.reservaCrear(actividad, fecha, horaInicio, horaFin, categoriasSeleccionadas);
 
             recargarReservas();
             limpiarFormulario();
