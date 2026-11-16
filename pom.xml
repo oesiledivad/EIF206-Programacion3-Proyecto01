@@ -84,6 +84,10 @@
         <version>3.2.5</version>
         <configuration>
           <excludedGroups>${it.excludedGroups}</excludedGroups>
+          <!-- Activa RequiereMySQL: sin la base de pruebas, las integraciones quedan "skipped". -->
+          <systemPropertyVariables>
+            <junit.jupiter.extensions.autodetection.enabled>true</junit.jupiter.extensions.autodetection.enabled>
+          </systemPropertyVariables>
           <environmentVariables>
             <DB_URL>${test.db.url}</DB_URL>
             <DB_USER>${test.db.user}</DB_USER>
