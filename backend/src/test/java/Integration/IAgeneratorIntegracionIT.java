@@ -18,6 +18,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Tag("ia-externa")
+@Tag("sin-mysql")
 public class IAgeneratorIntegracionIT {
 
     private List<Categoria> categorias;

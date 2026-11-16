@@ -535,7 +535,7 @@ docker compose -f compose.test.yaml stop
 | --- | --- |
 | `mvn clean test` | Limpia, compila y ejecuta las pruebas unitarias con Surefire |
 | `mvn clean package` | Añade la generación de los JAR |
-| `mvn clean verify` | Añade las integraciones con Failsafe; requiere MySQL de pruebas |
+| `mvn clean verify` | Añade las integraciones con Failsafe; sin MySQL de pruebas quedan omitidas (*skipped*) |
 | `mvn clean install` | Ejecuta lo anterior e instala los artefactos en el repositorio Maven local |
 | `mvn clean verify -DskipITs` | Ejecuta unitarias y genera los JAR, omitiendo únicamente las integraciones |
 
@@ -548,6 +548,12 @@ base con datos personales.
 Failsafe establece `DB_URL`, `DB_USER` y `DB_PASSWORD` para sus procesos de prueba.
 Para utilizar otra base exclusiva, configura las propiedades Maven
 `-Dtest.db.url=...`, `-Dtest.db.user=...` y `-Dtest.db.password=...`.
+
+Si la base de pruebas no responde (por ejemplo, Docker apagado), las integraciones
+que usan MySQL se marcan como omitidas en lugar de fallar, y el reporte indica cómo
+iniciarla. La condición está en `common/src/test/java/una/proyecto/pruebas/RequiereMySQL.java`.
+En GitHub Actions (`CI=true`) no se omite nada: si MySQL no está disponible, las
+pruebas fallan. Las integraciones que no usan la base se marcan con `@Tag("sin-mysql")`.
 
 Las pruebas unitarias de IA utilizan HTTP simulado. Las llamadas reales a Groq
 están etiquetadas como `ia-externa` y se incluyen solamente con el perfil opcional
